@@ -1,0 +1,33 @@
+# TDD 配置
+# 路径: .claude-flow/tdd-config.yaml（项目级）或 ~/.claude-flow/tdd-config.yaml（全局）
+
+tdd:
+  enabled: true
+  testFramework: "jest"
+  testDir: "src/__tests__"
+  coverageThreshold: 80
+
+  phases:
+    - write-test
+    - run-test-red
+    - write-code
+    - run-test-green
+    - refactor
+    - commit
+
+  commands:
+    test: "npm test"
+    testWatch: "npm test -- --watch"
+    coverage: "npm test -- --coverage"
+    coverageThreshold: "npm test -- --coverage --coverageThreshold={threshold}"
+
+  patterns:
+    testFileSuffix: ".test."
+    testFileExtension: ".ts"
+    sourceFileExtension: ".ts"
+
+  ignore:
+    - "node_modules/**"
+    - "dist/**"
+    - "build/**"
+    - "*.spec.ts"

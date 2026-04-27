@@ -1,0 +1,38 @@
+# ruflo 全局配置
+# 路径: ~/.claude-flow/config.yaml
+
+memory:
+  path: ~/.claude-flow/memory
+  maxSize: 1000
+  ttl: 2592000
+
+agents:
+  default:
+    model: MiniMax-M2.7
+    maxTokens: 4000
+    temperature: 0.7
+
+  research:
+    model: MiniMax-M2.7
+    maxTokens: 8000
+    temperature: 0.5
+
+  review:
+    model: MiniMax-M2.7
+    maxTokens: 6000
+    temperature: 0.3
+
+defaults:
+  autoContext: true
+  contextWindow: 100000
+  retryOnFailure: true
+  maxRetries: 3
+
+hooks:
+  preExecute: []
+  postExecute: []
+  onError: []
+
+logging:
+  level: info
+  file: ~/.claude-flow/logs/app.log
