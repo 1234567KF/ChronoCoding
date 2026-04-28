@@ -477,7 +477,47 @@ claude mcp list
 
 ---
 
-### 步骤 3.3：安装 RTK（Token 节省工具）
+### 步骤 3.3：安装 prd-generator（PRD 生成技能）
+
+> prd-generator 是 SDD Excel 需求采集 → PRD 文档生成的技能，支持多轮需求访谈和结构化文档输出
+
+```powershell
+# 技能文件已随本框架打包在 skills/prd-generator/ 目录
+# AI 使用时直接引用即可，无需额外安装
+# 技能路径: skills/prd-generator/SKILL.md
+
+# 触发方式（在 Claude Code 对话中）：
+# 用户上传 SDD Excel 并说 "开始需求访谈"
+# AI 自动进入 Phase 1 需求收集流程
+
+# 技能功能：
+# 1. 需求访谈（Inversion Phase）：多轮提问确认需求
+# 2. SDD Excel 解析：读取 Sheet 数据填充 PRD 各章节
+# 3. 状态机生成：Mermaid state diagram 输出
+# 4. Gherkin 场景：验收标准 Scenario 输出
+```
+
+#### prd-generator 技能文件
+
+| 文件路径 | 说明 |
+|----------|------|
+| `skills/prd-generator/SKILL.md` | 技能定义（AI 必读） |
+| `skills/prd-generator/assets/prd-template.md` | PRD 模板 |
+| `skills/prd-generator/assets/sdd-excel-parsing-rules.md` | SDD Excel 解析规则 |
+| `skills/prd-generator/SDD需求采集-xxx.xlsx` | SDD 示例文件 |
+
+#### 触发词
+
+| 触发词 | 功能 |
+|--------|------|
+| `开始需求访谈` | 启动 Phase 1 需求收集 |
+| `解析 SDD Excel` | 读取 Excel 生成 PRD 各章节 |
+| `生成状态图` | 输出 Mermaid 状态图 |
+| `生成验收标准` | 输出 Gherkin Scenario |
+
+---
+
+### 步骤 3.6：安装 RTK（Token 节省工具）
 
 > RTK（Rust Token Killer）是一个高性能 CLI 代理，通过过滤和压缩命令输出，可节省 60-90% 的 token 消耗
 
@@ -587,7 +627,7 @@ rtk --version   # 显示 rtk 0.37.2 即为正确（不是 rtk-cli/0.0.1）
 
 ---
 
-### 步骤 3.5：配置 Claude Code 权限模式（Yolo 模式）
+### 步骤 3.6：配置 Claude Code 权限模式（Yolo 模式）
 
 > 开启后，AI 执行命令不再逐个询问权限，全部自动同意
 
