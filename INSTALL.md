@@ -731,6 +731,446 @@ claude
 
 ---
 
+## 四b、新电脑完整安装流程
+
+> **目标**：在新电脑从零安装，只需一次全局安装，之后每个新项目只复制 `.claude` 即可
+
+### 安装流程总览
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│  第一步：全局安装（每台电脑只需一次）                        │
+│    - Claude Code、Node.js、Git                             │
+│    - ruflo (npm install -g)                               │
+│    - RTK (Token 节省工具)                                   │
+│    - gspowers、gstack (复制到 ~/.claude/skills/)           │
+├─────────────────────────────────────────────────────────────┤
+│  第二步：项目安装（每个新项目只需一次）                      │
+│    - 复制 .claude 目录到项目                               │
+│    - 运行 install-local.sh/ps1                             │
+│    - ruflo init --minimal --skip-claude                   │
+├─────────────────────────────────────────────────────────────┤
+│  第三步：正常使用                                           │
+│    - 复制 .claude 到任何新项目                             │
+│    - 无需重新安装全局工具                                   │
+└─────────────────────────────────────────────────────────────┘
+```
+
+### 第一步：全局安装（每台电脑只需一次）
+
+#### 1.1 安装基础工具
+
+```powershell
+# Windows - 使用管理员权限的 PowerShell
+winget install Git.Git
+winget install OpenJS.NodeJS.LTS
+
+# 安装 Claude Code
+irm https://claude.ai/install.ps1 | iex
+```
+
+#### 1.2 安装 ruflo（多 Agent + 记忆）
+
+```powershell
+# 全局安装 ruflo
+npm install -g ruflo
+
+# 添加 ruflo MCP 到 Claude Code
+claude mcp add ruflo -- npx -y ruflo@latest mcp start
+
+# 验证安装
+claude-flow --version
+```
+
+#### 1.3 安装 RTK（Token 节省）
+
+```powershell
+# 下载 RTK
+curl -sL "https://github.com/rtk-ai/rtk/releases/download/v0.37.2/rtk-x86_64-pc-windows-msvc.zip" -o $env:TEMP\rtk.zip
+Expand-Archive -Path $env:TEMP\rtk.zip -DestinationPath $env:TEMP\rtk -Force
+
+# 安装到用户目录
+$binDir = "$env:USERPROFILE\.local\bin"
+New-Item -ItemType Directory -Force -Path $binDir
+Move-Item "$env:TEMP\rtk\rtk.exe" "$binDir\rtk.exe"
+
+# 初始化（会自动修补 settings.json）
+& "$binDir\rtk.exe" init -g --auto-patch
+
+# 验证
+& "$binDir\rtk.exe" gain
+```
+
+#### 1.4 安装全局技能（gspowers、gstack）
+
+```powershell
+# 创建全局技能目录
+$skillsDir = "$env:USERPROFILE\.claude\skills"
+if (!(Test-Path $skillsDir)) { New-Item -ItemType Directory -Force -Path $skillsDir }
+
+# 克隆 gspowers
+if (!(Test-Path "$skillsDir\gspowers")) {
+    git clone https://github.com/fshaan/gspowers.git "$skillsDir\gspowers"
+}
+
+# 克隆 gstack
+if (!(Test-Path "$skillsDir\gstack")) {
+    git clone https://github.com/garrytan/gstack.git "$skillsDir\gstack"
+}
+
+# 复制 Pipeline 扩展
+$patchDir = "D:\path\to\AutoCoding\gspowers-pipeline-patch"
+if (Test-Path $patchDir) {
+    Copy-Item "$patchDir\pipeline.md" "$skillsDir\gspowers\references\" -Force
+    Copy-Item "$patchDir\execute-patch.md" "$skillsDir\gspowers\references\" -Force
+}
+```
+
+#### 1.5 创建全局 ruflo 配置
+
+```powershell
+# 创建全局配置目录
+$globalDir = "$env:USERPROFILE\.claude-flow"
+if (!(Test-Path $globalDir)) { New-Item -ItemType Directory -Force -Path $globalDir }
+if (!(Test-Path "$globalDir\data")) { New-Item -ItemType Directory -Force -Path "$globalDir\data" }
+
+# 创建配置
+@"
+version: "3.0.0"
+
+memory:
+  backend: hybrid
+  enableHNSW: true
+  persistPath: ~/.claude-flow/data
+  cacheSize: 500
+  learningBridge:
+    enabled: true
+    sonaMode: balanced
+  memoryGraph:
+    enabled: true
+    similarityThreshold: 0.75
+
+swarm:
+  topology: hierarchical-mesh
+  maxAgents: 5
+  autoScale: true
+  coordinationStrategy: consensus
+
+hooks:
+  enabled: true
+  autoExecute: true
+
+mcp:
+  autoStart: true
+  port: 3000
+
+agentScopes:
+  enabled: true
+  defaultScope: project
+"@ | Out-File -FilePath "$globalDir\config.yaml" -Encoding UTF8
+```
+
+#### 1.6 配置 Claude Code 全局设置
+
+```powershell
+# 全局 settings.json（Token 配置）
+notepad "$env:USERPROFILE\.claude\settings.json"
+```
+
+添加内容：
+```json
+{
+  "model": "MiniMax-M2.7",
+  "env": {
+    "ANTHROPIC_BASE_URL": "https://api.minimaxi.com/anthropic",
+    "ANTHROPIC_AUTH_TOKEN": "YOUR_TOKEN_HERE"
+  },
+  "permissions": {
+    "defaultMode": "bypassPermissions",
+    "allowPermissions": true
+  }
+}
+```
+
+### 第二步：项目安装（每个新项目只需一次）
+
+#### 2.1 复制 .claude 到项目目录
+
+```powershell
+# 复制整个 .claude 目录
+cp -Recurse "D:\path\to\AutoCoding\.claude" "D:\your-new-project\"
+
+# 或在项目目录内直接复制
+cd D:\your-new-project
+cp -Recurse "D:\path\to\AutoCoding\.claude" .\
+```
+
+#### 2.2 运行项目本地安装
+
+```powershell
+# Windows
+.\.claude\install-local.ps1
+
+# Linux/macOS
+chmod +x ./.claude/install-local.sh
+./.claude/install-local.sh
+```
+
+#### 2.3 项目级 ruflo 初始化
+
+```powershell
+cd D:\your-new-project
+
+# 项目级初始化（创建 .claude-flow/，记忆隔离）
+ruflo init --minimal --skip-claude
+
+# 验证
+dir ".\.claude-flow"
+```
+
+#### 2.4 重启 Claude Code
+
+```powershell
+# 在项目目录启动 Claude Code
+cd D:\your-new-project
+claude
+```
+
+### 第三步：正常使用（只复制 .claude）
+
+以后任何新项目：
+
+```powershell
+# 1. 复制 .claude
+cp -Recurse "D:\existing-project\.claude" "D:\new-project\"
+
+# 2. 初始化 ruflo（如需要）
+cd D:\new-project
+ruflo init --minimal --skip-claude
+
+# 3. 启动 Claude Code
+claude
+```
+
+### AgentDB Vectors 触发生效
+
+AgentDB vectors 为 0 是正常的，需要通过以下方式触发生成：
+
+#### 方式一：Hooks 自动学习（推荐）
+
+Hooks 是 Claude Code 的自动学习机制，配置文件已更新支持自动触发：
+
+```json
+// settings.json.template 中已配置
+{
+  "hooks": {
+    "pre-task": { "enabled": true, "trigger": "auto" },
+    "post-task": { "enabled": true, "trigger": "auto" },
+    "post-edit": { "enabled": true, "trigger": "auto" },
+    "session-end": { "enabled": true, "trigger": "auto" }
+  }
+}
+```
+
+**触发流程：**
+```
+完成任务 → post-task hook 触发 → 自动存储 pattern → 向量化
+
+编辑代码 → post-edit hook 触发 → 记录代码模式 → 向量化
+
+结束会话 → session-end hook 触发 → 汇总学习 → 向量化
+```
+
+**开启方法：**
+- 新项目：使用 `settings.json.template`（已包含 hooks 配置）
+- 已有项目：确保 `settings.json` 中有 `"hooks": { "post-task": { "enabled": true } }`
+
+#### 方式二：手动触发
+
+```powershell
+# 存储一个记忆
+claude-flow mcp exec --tool memory_store --args '{"key":"test-pattern","value":"这是一个测试pattern","tags":["test"]}'
+
+# 搜索记忆
+claude-flow mcp exec --tool memory_search --args '{"query":"测试","limit":5}'
+```
+
+#### 方式三：对话中自然触发
+
+当你在项目中说：
+- "记住这个设计决策"
+- "下次遇到这个问题用这个方案"
+- 完成某个任务后
+
+ruflo 的 hooks 会自动捕获并存储。
+
+### ruflo AgentDB 说明
+
+| 状态 | 含义 |
+|------|------|
+| vectors: 0 | 还没有存储任何记忆 |
+| vectors: 100 | 已存储 100 个向量化的记忆 |
+| 查询返回空 | 记忆没有被正确触发或写入 |
+
+**Vectors 增长方式：**
+- 每完成一个任务（post-task）：+1~5 个向量
+- 每编辑一个文件（post-edit）：+1 个向量
+- 每次会话结束（session-end）：+1 个向量
+- 手动 memory_store：+1 个向量
+
+---
+
+## 四c、项目本地安装流程（推荐）
+
+> **适用场景**：多项目隔离、避免全局污染、便于项目打包分享
+>
+> **原理**：将 gspowers 技能安装到项目自身的 `.claude/skills/` 目录，而非全局 `~/.claude/skills/`
+
+### 两种安装模式对比
+
+| 模式 | gspowers 位置 | settings.json | 适用场景 |
+|------|---------------|---------------|----------|
+| **全局安装** | `~/.claude/skills/gspowers/` | `~/.claude/settings.json` | 所有项目共享一套技能 |
+| **项目本地安装** | `./.claude/skills/gspowers/` | `./.claude/settings.json` | 多项目隔离、便于打包分享 |
+
+### 项目本地安装步骤
+
+#### 1. 复制 AutoCoding 到目标项目
+
+```powershell
+# 复制整个 .claude 目录到你的项目
+cp -Recurse "D:\path\to\AutoCoding\.claude" "D:\your-project\"
+```
+
+#### 2. 运行项目本地安装脚本
+
+**Windows (PowerShell):**
+```powershell
+cd D:\your-project
+
+# 完整安装（包括 gspowers、gstack、Pipeline 扩展）
+.\.claude\install-local.ps1
+
+# 或预览模式（不实际执行）
+.\.claude\install-local.ps1 -DryRun
+```
+
+**Linux / macOS (Bash):**
+```bash
+cd /path/to/your-project
+
+# 添加执行权限
+chmod +x ./.claude/install-local.sh
+
+# 完整安装
+./.claude/install-local.sh
+
+# 预览模式
+./.claude/install-local.sh --dry-run
+```
+
+**Git Bash (Windows):**
+```bash
+cd /d/your-project
+./.claude/install-local.sh
+```
+
+脚本会自动：
+- 从全局 `~/.claude/skills/` 复制 gspowers 和 gstack
+- 安装 Pipeline 扩展到 `.claude/skills/gspowers/references/`
+- 创建 `settings.json`（从模板）
+- 创建 `.claude-flow/config.yaml`（项目级记忆配置）
+
+#### 3. 手动安装 superpowers（需要网络）
+
+```powershell
+# 在 Claude Code 中执行
+/plugin install superpowers@claude-plugins-official
+```
+
+#### 4. 项目内初始化 ruflo（如需要）
+
+```powershell
+cd D:\your-project
+
+# 项目级初始化（记忆隔离）
+ruflo init --minimal --skip-claude
+```
+
+#### 5. 在项目目录启动 Claude Code
+
+```powershell
+cd D:\your-project
+
+# Claude Code 会自动读取 .claude/settings.json
+claude
+```
+
+### 项目本地安装后的目录结构
+
+```
+D:\your-project\
+├── .claude/                      # 项目本地 Claude 配置（复制这个）
+│   ├── skills/                   # 技能（gspowers、gstack）
+│   │   ├── gspowers/           #   SOP 导航
+│   │   │   ├── references/      #   SOP 定义文件
+│   │   │   │   ├── execute.md
+│   │   │   │   └── pipeline.md  #   Pipeline 扩展
+│   │   │   └── ...
+│   │   └── gstack/              #   产品流程框架
+│   ├── settings.json            # 项目级配置
+│   ├── install-local.ps1        # Windows 安装脚本
+│   ├── install-local.sh         # Linux/macOS 安装脚本
+│   └── CLAUDE.md               # 本说明文件
+│
+├── .claude-flow/                # 项目级 ruflo 记忆（自动创建，不复制）
+│   ├── config.yaml
+│   └── data/
+│
+└── ...其他项目文件...
+```
+
+### 记忆隔离说明
+
+**重要**：复制 `.claude` 到新项目时，**不会**带记忆文件。每个项目的记忆存储在各自的 `.claude-flow/` 目录中，实现完全隔离。
+
+| 目录 | 复制时 | 记忆 |
+|------|--------|------|
+| `.claude/` | ✅ 复制 | 不含记忆 |
+| `.claude-flow/` | ❌ 不复制 | 每个项目独立 |
+
+### 验证项目本地安装
+
+在 Claude Code 中执行：
+
+```
+> /gspowers                          # 应该能启动 SOP 导航
+> /pipeline-dev                       # 应该能启动多模块流水线
+> triple [任意任务]                   # 应该能启动三方协作
+```
+
+### 已知限制
+
+| 组件 | 全局必须 | 说明 |
+|------|---------|------|
+| **npm 全局包** | 是 | `npm install -g ruflo` 仍需全局安装 |
+| **RTK** | 是 | `~/.local/bin/rtk.exe` 仍需全局安装 |
+| **Claude Code** | 是 | 仍需全局安装 |
+| **Git/Node.js** | 是 | 仍需全局安装 |
+| **superpowers** | 是 | 需在 Claude Code 中手动安装 plugin |
+
+### 何时使用项目本地 vs 全局
+
+| 场景 | 推荐模式 |
+|------|---------|
+| 单个项目，长期使用 | 全局安装 |
+| 多项目并行，不同配置 | 项目本地 |
+| 项目要打包分享给其他人 | 项目本地 |
+| 临时测试/演示 | 项目本地 |
+| 所有项目用同一套技能 | 全局安装 |
+
+---
+
 ## 五、功能触发速查
 
 | 你说的话                    | 触发的工作                       | 来源     |

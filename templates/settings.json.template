@@ -7,7 +7,24 @@
       "CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC": "1",
       "API_TIMEOUT_MS": "3000000"
   },
-  "hooks": {},
+  "hooks": {
+    "pre-task": {
+      "enabled": true,
+      "trigger": "auto"
+    },
+    "post-task": {
+      "enabled": true,
+      "trigger": "auto"
+    },
+    "post-edit": {
+      "enabled": true,
+      "trigger": "auto"
+    },
+    "session-end": {
+      "enabled": true,
+      "trigger": "auto"
+    }
+  },
   "autoUpdatesChannel": "latest",
   "hasCompletedOnboarding": true,
   "skipDangerousModePermissionPrompt": true,
