@@ -7,7 +7,7 @@ package-lock.json
 yarn.lock
 
 # Claude Code
-.claude/
+# .claude/  # 取消注释以忽略项目本地配置
 .ruflo/
 *.claude.*
 
