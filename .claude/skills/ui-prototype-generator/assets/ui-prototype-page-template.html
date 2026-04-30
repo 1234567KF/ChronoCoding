@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PAGE_TITLE - UI 原型</title>
+
+  <!-- ========== 组件库 CSS CDN ========== -->
+  <!-- 仅引入 CSS 样式文件，MUST NOT 引入任何 JS 运行时 -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/antd@4.24.16/dist/antd.min.css">
+
+  <!-- ========== 共享骨架样式（多页面唯一来源） ========== -->
+  <!-- MUST 引用 assets/shared.css；MUST NOT 在下方 <style> 中重复定义骨架类 -->
+  <!-- 路径规则：本文件位于 prototype/{module}/ 子目录 → 使用 ../assets/shared.css -->
+  <link rel="stylesheet" href="../assets/shared.css">
+
+  <!-- 仅在本页确有特殊样式时才追加（如本页独有的图表容器、特殊布局等） -->
+  <!-- <style> /* page-specific styles only */ </style> -->
+</head>
+<body>
+  <div class="app-layout">
+
+    <!-- ============================================================
+         ⚠️ 标准侧边栏 snippet（菜单单一来源）
+         ⚠️ MUST 从「标准菜单 snippet」原样复制此区块
+         ⚠️ 仅允许的差异：将本页对应的 <li> 类改为 ant-menu-item-selected
+         ⚠️ MUST NOT 增删菜单项、MUST NOT 改菜单项顺序、MUST NOT 改链接 href
+         ============================================================ -->
+    <aside class="sidebar">
+      <div class="sidebar-logo">LOGO_TEXT</div>
+      <ul class="ant-menu ant-menu-dark ant-menu-root ant-menu-inline">
+        <li class="ant-menu-item"><a href="../index.html">首页</a></li>
+
+        <!-- 当前模块 — 高亮 -->
+        <li class="ant-menu-item ant-menu-item-selected">
+          <a href="list.html">CURRENT_MODULE_NAME</a>
+        </li>
+
+        <!-- 其他模块 -->
+        <li class="ant-menu-item"><a href="../OTHER_MODULE_DIR/list.html">OTHER_MODULE_NAME</a></li>
+      </ul>
+    </aside>
+
+    <div class="main-area">
+      <!-- 顶栏 — 面包屑静态定义 -->
+      <nav class="navbar">
+        <div class="ant-breadcrumb">
+          <span class="ant-breadcrumb-link"><a href="../index.html">首页</a></span>
+          <span class="ant-breadcrumb-separator">/</span>
+          <span class="ant-breadcrumb-link"><a href="list.html">CURRENT_MODULE_NAME</a></span>
+          <span class="ant-breadcrumb-separator">/</span>
+          <span class="ant-breadcrumb-link">PAGE_TITLE</span>
+        </div>
+        <div class="navbar-actions">
+          <span>ADMIN_USER</span>
+        </div>
+      </nav>
+
+      <!-- ========== 页面内容区 ========== -->
+      <!-- 以下为列表页模板，根据页面类型（列表/详情/表单/仪表盘）替换内容 -->
+
+      <main class="page-content">
+        <!-- PRD章节: X.X PAGE_TITLE -->
+
+        <!-- 搜索/筛选区域 -->
+        <div class="filter-area">
+          <div class="filter-form">
+            <div class="filter-item">
+              <label>筛选条件1</label>
+              <select class="ant-select" style="width: 200px;">
+                <option value="">全部</option>
+                <option value="1">选项1</option>
+              </select>
+            </div>
+            <div class="filter-item">
+              <label>关键词</label>
+              <input class="ant-input" placeholder="请输入" style="width: 200px;" />
+            </div>
+            <div class="filter-item">
+              <button class="ant-btn ant-btn-primary">查询</button>
+              <button class="ant-btn ant-btn-default">重置</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- 表格区域 -->
+        <div class="table-wrapper">
+          <div class="card-toolbar">
+            <span style="font-size: 16px; font-weight: 600;">TABLE_TITLE</span>
+            <button class="ant-btn ant-btn-primary">+ 新增</button>
+          </div>
+          <table>
+            <thead>
+              <tr>
+                <th>COL_HEADER_1</th>
+                <th>COL_HEADER_2</th>
+                <th>状态</th>
+                <th>操作</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>SAMPLE_DATA_1</td>
+                <td>SAMPLE_DATA_2</td>
+                <td><span class="ant-tag ant-tag-green">正常</span></td>
+                <td>
+                  <a class="action-link" href="detail.html">详情</a>
+                  <a class="action-link" href="form.html">编辑</a>
+                </td>
+              </tr>
+              <tr>
+                <td>SAMPLE_DATA_3</td>
+                <td>SAMPLE_DATA_4</td>
+                <td><span class="ant-tag ant-tag-orange">待审核</span></td>
+                <td>
+                  <a class="action-link" href="detail.html">详情</a>
+                  <a class="action-link" href="form.html">编辑</a>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+          <ul class="ant-pagination" style="margin-top: var(--spacing-md); justify-content: flex-end; display: flex;">
+            <li class="ant-pagination-prev"><button class="ant-pagination-item-link">上一页</button></li>
+            <li class="ant-pagination-item ant-pagination-item-active"><a>1</a></li>
+            <li class="ant-pagination-item"><a>2</a></li>
+            <li class="ant-pagination-item"><a>3</a></li>
+            <li class="ant-pagination-next"><button class="ant-pagination-item-link">下一页</button></li>
+          </ul>
+        </div>
+      </main>
+
+      <!-- ========== 其他页面类型模板（按需替换 main 内容区） ========== -->
+
+      <!--
+      ==================== 详情页模板 ====================
+      <main class="page-content">
+        <div class="page-actions">
+          <a class="ant-btn ant-btn-default" href="list.html">← 返回列表</a>
+        </div>
+        <div class="detail-card">
+          <div class="detail-card-title">基本信息</div>
+          <div class="detail-grid">
+            <div class="detail-item">
+              <span class="detail-label">字段1：</span>
+              <span class="detail-value">值1</span>
+            </div>
+            <div class="detail-item">
+              <span class="detail-label">字段2：</span>
+              <span class="detail-value">值2</span>
+            </div>
+          </div>
+        </div>
+        <div class="page-actions">
+          <a class="ant-btn ant-btn-primary" href="form.html">编辑</a>
+          <a class="ant-btn ant-btn-default" href="list.html">返回</a>
+        </div>
+      </main>
+      -->
+
+      <!--
+      ==================== 表单页模板 ====================
+      <main class="page-content">
+        <div class="page-actions">
+          <a class="ant-btn ant-btn-default" href="list.html">← 返回列表</a>
+        </div>
+        <div class="detail-card">
+          <div class="detail-card-title">表单标题</div>
+          <form>
+            <div class="ant-form-item" style="margin-bottom: 16px;">
+              <label style="display: block; margin-bottom: 8px;">字段1 <span style="color: red;">*</span></label>
+              <input class="ant-input" placeholder="请输入" style="width: 100%;">
+            </div>
+            <div class="ant-form-item" style="margin-bottom: 16px;">
+              <label style="display: block; margin-bottom: 8px;">字段2 <span style="color: red;">*</span></label>
+              <select class="ant-select" style="width: 100%;">
+                <option value="">请选择</option>
+              </select>
+            </div>
+          </form>
+        </div>
+        <div class="page-actions">
+          <button class="ant-btn ant-btn-primary">保存</button>
+          <a class="ant-btn ant-btn-default" href="list.html">取消</a>
+        </div>
+      </main>
+      -->
+
+    </div>
+  </div>
+</body>
+</html>

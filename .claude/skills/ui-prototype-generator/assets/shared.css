@@ -1,0 +1,221 @@
+/* ============================================================
+ * UI 原型 · 多页面共享样式（shared.css）
+ * 用途：作为多页面导航模式下所有 HTML 页面的唯一骨架样式来源
+ * 引用方式：
+ *   - prototype/index.html      →  <link rel="stylesheet" href="assets/shared.css">
+ *   - prototype/{module}/*.html →  <link rel="stylesheet" href="../assets/shared.css">
+ * 强制规则：
+ *   1. 多页面导航模式下，所有页面 MUST 引用此文件
+ *   2. MUST NOT 在页面 <style> 中重复定义此文件已有的类
+ *   3. 页面级特殊样式可在页面 <style> 内追加（如个别页面独有的图表容器等）
+ * ============================================================ */
+
+/* ========== 设计系统变量 ========== */
+:root {
+  --sidebar-width: 220px;
+  --sidebar-collapsed-width: 64px;
+  --navbar-height: 56px;
+  --color-bg-page: #f5f6fa;
+  --color-bg-sidebar: #001529;
+  --color-text-sidebar: rgba(255, 255, 255, 0.65);
+  --color-text-sidebar-active: #ffffff;
+  --color-primary: #1890ff;
+  --color-success: #52c41a;
+  --color-warning: #faad14;
+  --color-error: #ff4d4f;
+  --color-text-primary: rgba(0, 0, 0, 0.85);
+  --color-text-secondary: rgba(0, 0, 0, 0.65);
+  --color-text-tertiary: rgba(0, 0, 0, 0.45);
+  --color-border: #f0f0f0;
+  --spacing-xs: 4px;
+  --spacing-sm: 8px;
+  --spacing-md: 16px;
+  --spacing-lg: 24px;
+  --spacing-xl: 32px;
+}
+
+/* ========== 全局重置 ========== */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: -apple-system, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+  font-size: 14px;
+  background: var(--color-bg-page);
+  line-height: 1.6;
+  color: var(--color-text-primary);
+}
+
+/* ========== 主布局 ========== */
+.app-layout { display: flex; min-height: 100vh; }
+
+/* 侧边栏 */
+.sidebar {
+  width: var(--sidebar-width);
+  background: var(--color-bg-sidebar);
+  display: flex; flex-direction: column; flex-shrink: 0;
+}
+.sidebar-logo {
+  height: var(--navbar-height);
+  display: flex; align-items: center; justify-content: center;
+  color: #ffffff; font-size: 16px; font-weight: 600;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+.sidebar .ant-menu-dark { border-right: 0; }
+.sidebar .ant-menu-item a { color: var(--color-text-sidebar); text-decoration: none; }
+.sidebar .ant-menu-item a:hover { color: var(--color-text-sidebar-active); }
+.sidebar .ant-menu-item-selected a { color: var(--color-text-sidebar-active); }
+
+/* 主内容区 */
+.main-area { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+
+/* 顶栏 */
+.navbar {
+  height: var(--navbar-height); background: #ffffff;
+  border-bottom: 1px solid var(--color-border);
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 var(--spacing-lg);
+}
+.navbar-title { font-size: 18px; font-weight: 600; }
+.navbar-actions { display: flex; align-items: center; gap: var(--spacing-md); }
+
+/* 面包屑 */
+.ant-breadcrumb { font-size: 14px; }
+.ant-breadcrumb-link a { color: var(--color-text-tertiary); text-decoration: none; }
+.ant-breadcrumb-link a:hover { color: var(--color-primary); }
+.ant-breadcrumb-separator { margin: 0 8px; color: var(--color-text-tertiary); }
+
+/* 页面内容区 */
+.page-content { flex: 1; padding: var(--spacing-lg); overflow-y: auto; }
+
+/* ========== 列表页通用样式 ========== */
+
+/* 搜索/筛选区域 */
+.filter-area {
+  background: #fff; padding: var(--spacing-md) var(--spacing-lg);
+  margin-bottom: var(--spacing-md);
+}
+.filter-form { display: flex; flex-wrap: wrap; gap: var(--spacing-md); }
+.filter-item { display: flex; align-items: center; gap: var(--spacing-sm); }
+.filter-item label { color: var(--color-text-secondary); min-width: 80px; text-align: right; }
+
+/* 表格区域 */
+.table-wrapper { background: #fff; padding: var(--spacing-md); }
+.table-wrapper table { width: 100%; border-collapse: collapse; }
+.table-wrapper th {
+  background: #fafafa; padding: var(--spacing-md);
+  text-align: left; border-bottom: 1px solid var(--color-border);
+}
+.table-wrapper td { padding: var(--spacing-md); border-bottom: 1px solid var(--color-border); }
+.table-wrapper tbody tr:hover { background: #e6f7ff; }
+
+/* 操作链接 */
+.action-link {
+  color: var(--color-primary); text-decoration: none;
+  margin-right: var(--spacing-sm); cursor: pointer;
+}
+.action-link:hover { text-decoration: underline; }
+
+/* ========== 详情页/表单页通用样式 ========== */
+.detail-card {
+  background: #fff; padding: var(--spacing-lg);
+  margin-bottom: var(--spacing-md);
+}
+.detail-card-title {
+  font-size: 16px; font-weight: 500;
+  margin-bottom: var(--spacing-md);
+  padding-bottom: var(--spacing-sm);
+  border-bottom: 1px solid var(--color-border);
+}
+.detail-grid {
+  display: grid; grid-template-columns: repeat(2, 1fr);
+  gap: var(--spacing-md);
+}
+.detail-item { display: flex; }
+.detail-label { color: var(--color-text-tertiary); min-width: 100px; }
+.detail-value { flex: 1; color: var(--color-text-primary); }
+
+/* 通用布局辅助 */
+.card-toolbar {
+  display: flex; justify-content: space-between; align-items: center;
+  margin-bottom: var(--spacing-md);
+}
+.page-actions { display: flex; gap: var(--spacing-sm); margin-bottom: var(--spacing-md); }
+
+/* ========== index.html 专属样式 ========== */
+
+/* 项目标识区 */
+.project-header { margin-bottom: var(--spacing-lg); }
+.project-header h1 {
+  font-size: 24px; font-weight: 600; color: var(--color-text-primary);
+  margin-bottom: var(--spacing-xs);
+}
+.project-header .version {
+  font-size: 14px; font-weight: 400; color: var(--color-text-tertiary);
+  margin-left: var(--spacing-sm);
+}
+.project-header .meta { font-size: 13px; color: var(--color-text-tertiary); }
+
+/* 描述区 */
+.project-desc {
+  background: #ffffff; padding: var(--spacing-lg);
+  margin-bottom: var(--spacing-lg); border-radius: 4px;
+  border: 1px solid var(--color-border);
+}
+.project-desc h2 {
+  font-size: 16px; font-weight: 500; color: var(--color-text-primary);
+  margin-bottom: var(--spacing-sm);
+}
+.project-desc p { color: var(--color-text-secondary); margin-bottom: var(--spacing-sm); }
+.project-desc ul { padding-left: 20px; color: var(--color-text-secondary); }
+.project-desc li { margin-bottom: var(--spacing-xs); }
+
+/* 迭代场景变更列表 */
+.change-list { list-style: none; padding-left: 0; }
+.change-list li { padding: var(--spacing-xs) 0; border-bottom: 1px solid #f5f5f5; }
+.change-list li:last-child { border-bottom: none; }
+.change-added { color: var(--color-success); }
+.change-modified { color: var(--color-warning); }
+.change-fixed { color: var(--color-primary); }
+.change-note {
+  margin-top: var(--spacing-md);
+  font-size: 13px; color: var(--color-text-tertiary);
+  font-style: italic;
+}
+
+/* 快捷入口区 */
+.quick-links {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: var(--spacing-md);
+}
+.link-card {
+  display: block;
+  background: #ffffff;
+  border: 1px solid var(--color-border);
+  border-radius: 4px;
+  padding: var(--spacing-lg);
+  text-decoration: none;
+  transition: all 0.2s;
+}
+.link-card:hover {
+  border-color: var(--color-primary);
+  box-shadow: 0 2px 8px rgba(24, 144, 255, 0.15);
+}
+.link-card .card-title {
+  font-size: 16px; font-weight: 500; color: var(--color-text-primary);
+  margin-bottom: var(--spacing-xs);
+}
+.link-card:hover .card-title { color: var(--color-primary); }
+.link-card .card-desc { font-size: 13px; color: var(--color-text-tertiary); }
+
+/* ========== 响应式断点 ========== */
+@media (max-width: 575.98px) {
+  .sidebar { display: none; }
+  .page-content { padding: var(--spacing-md); }
+  .filter-form { flex-direction: column; }
+  .detail-grid { grid-template-columns: 1fr; }
+  .quick-links { grid-template-columns: 1fr; }
+}
+@media (min-width: 576px) and (max-width: 767.98px) {
+  .sidebar { width: var(--sidebar-collapsed-width); }
+  .sidebar-logo { font-size: 14px; }
+}
