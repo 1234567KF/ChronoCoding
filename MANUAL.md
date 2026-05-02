@@ -94,36 +94,60 @@ AI 执行任务时，遇到缺工具、页面变化、异常情况，**不要中
 
 ---
 
-## 三、新项目使用流程
+## 三、项目开发工作流
 
-> 每个新项目只需执行一次初始化
+> 从需求到代码交付的完整流程
 
-### 方式一：单文件入口（最简单）
+### 准备阶段
+
+```
+1. 整理需求文档（主业务流程表等）
+2. 产出 SDD 需求采集表
+3. /prd-generator → 产出结构化 PRD 文档
+4. /ui-prototype-generator → 产出 UI 原型图
+5. 与客户确认原型，收集修改意见及问题回复
+6. 将修改意见与问题回复让 AI 回写 PRD 及原型
+```
+
+### 路径选择
+
+完成后，根据项目特点选择开发路径：
+
+#### 路径1 — kf 系列（快+夯，推荐 MVP）
+
+```
+6. /kf-spec-coding → 选择 MVP 模式，产出 Spec 规格文档
+7. /kf-multi-team-compete（/夯）→ 红蓝绿三队并发竞争，产出融合版代码
+   （内部集成测试 agent 自动调用 kf-code-review-graph 做代码审查）
+```
+
+特点：AI 自主决策，快速出活，多团队竞争碾压。
+
+#### 路径2 — gspowers 名门正派（稳）
+
+```
+6. /gspowers → 跟着 SOP 流程一步一步走
+   /gspowers → /office-hours → /plan-eng-review → /brainstorm
+   → /subagent-dev → /review → /ship
+```
+
+特点：标准化流程，每步有验收标准，适合大型正式项目。
+
+### 首次安装
+
+> 每个新环境只需执行一次
+
+**方式一：单文件入口（最简单）**
 
 下载仓库中的 `AICoding.md`，放入 AI IDE，对 AI 说"执行安装"即可。
 详见仓库根目录 [AICoding.md](AICoding.md)。
 
-### 方式二：在新项目目录执行
+**方式二：手动初始化**
 
 ```powershell
 cd D:\your-new-project
-
-# 初始化 ruflo（每个新项目做一次）
 ruflo init --minimal --skip-claude
-
-# 打开 Claude Code
 claude
-```
-
-### 验证记忆共享
-
-在 Claude Code 中测试：
-
-```
-> 安全审计
-> 架构评审
-> /gspowers
-> triple [任意任务]
 ```
 
 ---

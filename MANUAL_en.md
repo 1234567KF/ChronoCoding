@@ -153,31 +153,61 @@ When AI executes tasks and encounters missing tools, page changes, or exceptions
 
 ---
 
-## 三、New Project Usage Process
+## 三、Project Development Workflow
 
-> Each new project only needs to be initialized once
+> Complete flow from requirements to code delivery
 
-### Execute in New Project Directory
+### Preparation Phase
+
+```
+1. Organize requirements documents (business flow tables, etc.)
+2. Produce SDD requirements collection sheet
+3. /prd-generator → Generate structured PRD document
+4. /ui-prototype-generator → Generate UI prototype
+5. Confirm prototype with client, collect revision notes and Q&A
+6. Have AI backfill PRD and prototype with revision notes
+```
+
+### Path Selection
+
+After preparation, choose a development path based on project needs:
+
+#### Path 1 — kf Series (Fast + Hammer, recommended for MVP)
+
+```
+6. /kf-spec-coding → Select MVP mode, generate Spec document
+7. /kf-multi-team-compete (/夯) → Red/Blue/Green teams compete concurrently,
+   producing merged optimal code (built-in integration test agent automatically
+   invokes kf-code-review-graph for code review)
+```
+
+Characteristics: AI autonomous decision-making, fast delivery, multi-team competition碾压.
+
+#### Path 2 — gspowers Orthodox School (Stable)
+
+```
+6. /gspowers → Follow SOP process step by step
+   /gspowers → /office-hours → /plan-eng-review → /brainstorm
+   → /subagent-dev → /review → /ship
+```
+
+Characteristics: Standardized process, acceptance criteria at each step, suitable for large formal projects.
+
+### First-Time Installation
+
+> Only needed once per environment
+
+**Option 1: Single File Entry (Simplest)**
+
+Download `AICoding.md` from the repository, drop it into your AI IDE, and say "execute installation".
+See repo root [AICoding.md](AICoding.md) for details.
+
+**Option 2: Manual Initialization**
 
 ```powershell
 cd D:\your-new-project
-
-# Initialize ruflo (once per new project)
 ruflo init --minimal --skip-claude
-
-# Open Claude Code
 claude
-```
-
-### Verify Memory Sharing
-
-Test in Claude Code:
-
-```
-> Security Audit
-> Architecture Review
-> /gspowers
-> triple [any task]
 ```
 
 ---
@@ -188,16 +218,21 @@ Test in Claude Code:
 |---------|----------|--------|
 | `安全审计` (Security Audit) | Multi-agent security vulnerability scan + triple confrontation | ruflo |
 | `架构评审` (Architecture Review) | Multi-agent system architecture evaluation + triple confrontation | ruflo |
-| `QA团队` / `测试评审` (QA Team/Test Review) | Multi-agent test quality review + triple confrontation | ruflo |
-| `三方调研` / `research` | Multi-agent general research task | ruflo |
-| `triple [task]` | Universal triple collaboration (any task) | ruflo |
+| `triple [task]` | Universal triple collaboration (any task) | kf-triple-collaboration |
 | `/gspowers` | Start SOP process navigation | gspowers |
-| `/office-hours` | YC-style product拷问 | gspowers |
+| `/office-hours` | YC-style product inquiry | gspowers |
 | `/brainstorm` | Socratic design refinement | gspowers |
 | `/subagent-dev` | Sub-agent TDD development | gspowers |
 | `/review` | Code review | gspowers |
-| `/qa` | Browser QA | gspowers |
 | `/ship` | Publish PR | gspowers |
+| `/review-graph` | Code review dependency graph | kf-code-review-graph |
+| `/web-search [query]` | Multi-engine smart search | kf-web-search |
+| `/browser-ops` | Browser automation | kf-browser-ops |
+| `/夯 [task]` | Multi-team competition review | kf-multi-team-compete |
+| `/对齐` / `Explain your understanding` | Alignment workflow | kf-alignment |
+| `模型路由` / `Save mode` | Smart model routing | kf-model-router |
+| `spec coding` | Spec-driven development | kf-spec-coding |
+| `/prd-generator` | PRD document generation | kf-prd-generator |
 
 ---
 
@@ -231,6 +266,26 @@ When `agentScopes.defaultScope: project`, all agents started in the same project
 ├── .claude-flow/                 # ruflo Global Configuration
 │   ├── config.yaml             # Global configuration (memory path, agent config)
 │   └── data/                    # Global memory storage (cross-project sharing)
+
+Project Local (AutoCoding/):
+├── .claude/
+│   ├── CLAUDE.md              # Project instructions
+│   ├── settings.json          # Project configuration
+│   └── skills/                # Project-local skills
+│       ├── kf-spec-coding/    # Spec-driven development
+│       ├── kf-code-review-graph/ # Code review dependency graph
+│       ├── kf-web-search/     # Multi-engine search
+│       ├── kf-browser-ops/    # Browser automation
+│       ├── kf-multi-team-compete/ # Multi-team competition
+│       ├── kf-alignment/      # Alignment workflow
+│       ├── kf-model-router/   # Model routing
+│       ├── kf-prd-generator/  # PRD generation
+│       ├── kf-triple-collaboration/ # Triple collaboration
+│       ├── kf-ui-prototype-generator/ # UI prototype
+│       ├── kf-qoder/          # Qoder integration
+│       ├── kf-skill-design-expert/ # Skill design
+│       ├── gspowers/          # SOP navigation (upstream)
+│       └── gstack/            # Product flow (upstream)
 ```
 
 ---

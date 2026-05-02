@@ -56,9 +56,9 @@ fi
 echo ""
 echo -e "${CYAN}╔═══════════════════════════════════════════════════════════╗${NC}"
 echo -e "${CYAN}║  AutoCoding 项目本地安装 (跨平台)                       ║${NC}"
-echo -e "${CYAN}║  - gspowers SOP 导航                                    ║${NC}"
-echo -e "${CYAN}║  - gstack 产品流程框架                                  ║${NC}"
-echo -e "${CYAN}║  - Pipeline 多模块流水线扩展                            ║${NC}"
+echo -e "${CYAN}║  - 12 个 kf- 系列技能（稳省准测的准夯快懂）              ║${NC}"
+echo -e "${CYAN}║  - gspowers SOP 导航（上游）                             ║${NC}"
+echo -e "${CYAN}║  - gstack 产品流程框架（上游）                           ║${NC}"
 echo -e "${CYAN}╚═══════════════════════════════════════════════════════════╝${NC}"
 echo ""
 echo -e "项目目录: ${PROJECT_ROOT}"
@@ -140,8 +140,7 @@ if [ "$SKIP_PIPELINE" = false ]; then
     echo ""
     echo -e "${YELLOW}[4/5] 安装 Pipeline 扩展...${NC}"
 
-    AUTOCODING_ROOT="$(dirname "$PROJECT_ROOT")"
-    PIPELINE_SOURCE="$PROJECT_ROOT/AutoCoding/gspowers-pipeline-patch"
+    PIPELINE_SOURCE="$PROJECT_ROOT/gspowers-pipeline-patch"
     PIPELINE_TARGET="$SCRIPT_DIR/skills/gspowers/references"
 
     if [ -d "$PIPELINE_SOURCE" ]; then
@@ -183,7 +182,7 @@ echo ""
 echo -e "${YELLOW}[5/5] 创建配置文件...${NC}"
 
 # settings.json
-AUTOCODING_TEMPLATES="$PROJECT_ROOT/AutoCoding/templates"
+AUTOCODING_TEMPLATES="$PROJECT_ROOT/templates"
 TARGET_SETTINGS="$SCRIPT_DIR/settings.json"
 
 if [ -f "$AUTOCODING_TEMPLATES/settings.json.template" ] && [ ! -f "$TARGET_SETTINGS" ]; then
@@ -259,8 +258,10 @@ if [ ! -f "$TARGET_SETTINGS" ]; then
 fi
 echo -e "  2. 重启 Claude Code（或在项目目录启动）"
 echo -e "  3. 测试: /gspowers"
-echo -e "  4. 测试: /pipeline-dev"
-echo -e "  5. 测试: triple [任意任务]"
+echo -e "  4. 测试: /夯 [任务]"
+echo -e "  5. 测试: spec coding"
+echo -e "  6. 测试: /review-graph"
+echo -e "  7. 测试: /对齐"
 echo ""
 echo -e "${YELLOW}手动安装（需要网络）：${NC}"
 echo -e "  superpowers: 在 Claude Code 中执行 /plugin install superpowers@claude-plugins-official"

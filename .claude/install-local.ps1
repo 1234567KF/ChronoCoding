@@ -17,9 +17,9 @@ $AUTOCODING_ROOT = Split-Path $PROJECT_ROOT -Parent
 Write-Host ""
 Write-Host "╔═══════════════════════════════════════════════════════════╗" -ForegroundColor Cyan
 Write-Host "║  AutoCoding 项目本地安装                                 ║" -ForegroundColor Cyan
-Write-Host "║  - gspowers SOP 导航                                    ║" -ForegroundColor Cyan
-Write-Host "║  - gstack 产品流程框架                                  ║" -ForegroundColor Cyan
-Write-Host "║  - Pipeline 多模块流水线扩展                           ║" -ForegroundColor Cyan
+Write-Host "║  - 12 个 kf- 系列技能（稳省准测的准夯快懂）              ║" -ForegroundColor Cyan
+Write-Host "║  - gspowers SOP 导航（上游）                             ║" -ForegroundColor Cyan
+Write-Host "║  - gstack 产品流程框架（上游）                           ║" -ForegroundColor Cyan
 Write-Host "╚═══════════════════════════════════════════════════════════╝" -ForegroundColor Cyan
 Write-Host ""
 Write-Host "项目目录: $PROJECT_ROOT" -ForegroundColor White
@@ -99,7 +99,7 @@ if (-not $SkipPipeline) {
     Write-Host ""
     Write-Host "[4/5] 安装 Pipeline 扩展..." -ForegroundColor Yellow
 
-    $pipelineSource = "$PROJECT_ROOT\AutoCoding\gspowers-pipeline-patch"
+    $pipelineSource = "$PROJECT_ROOT\gspowers-pipeline-patch"
     $pipelineTargetGspowers = "$SCRIPT_DIR\skills\gspowers\references"
 
     if (Test-Path $pipelineSource) {
@@ -144,7 +144,7 @@ Write-Host ""
 Write-Host "[5/5] 创建配置文件..." -ForegroundColor Yellow
 
 # settings.json
-$sourceSettings = "$PROJECT_ROOT\AutoCoding\templates\settings.json.template"
+$sourceSettings = "$PROJECT_ROOT\templates\settings.json.template"
 $targetSettings = "$SCRIPT_DIR\settings.json"
 
 if ((Test-Path $sourceSettings) -and -not (Test-Path $targetSettings)) {
@@ -221,8 +221,10 @@ if (-not (Test-Path $targetSettings)) {
 }
 Write-Host "  2. 重启 Claude Code（或在项目目录启动）" -ForegroundColor White
 Write-Host "  3. 测试: /gspowers" -ForegroundColor White
-Write-Host "  4. 测试: /pipeline-dev" -ForegroundColor White
-Write-Host "  5. 测试: triple [任意任务]" -ForegroundColor White
+Write-Host "  4. 测试: /夯 [任务]" -ForegroundColor White
+Write-Host "  5. 测试: spec coding" -ForegroundColor White
+Write-Host "  6. 测试: /review-graph" -ForegroundColor White
+Write-Host "  7. 测试: /对齐" -ForegroundColor White
 Write-Host ""
 Write-Host "手动安装（需要网络）：" -ForegroundColor Yellow
 Write-Host "  superpowers: 在 Claude Code 中执行 /plugin install superpowers@claude-plugins-official" -ForegroundColor Gray
