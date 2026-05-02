@@ -40,6 +40,8 @@ metadata:
     - kf-web-search
     - kf-prd-generator
     - kf-model-router
+    - kf-image-editor
+    - skill-creator
 ---
 
 # 夯 — 多团队竞争评审系统
@@ -179,15 +181,18 @@ Stage0 → Stage1 → Stage2 → Stage3 → Stage4 → Stage5
 
 ### Step 0 — 环境准备
 
-确认 claude-flow MCP 可用后启动 swarm：
+确认 claude-flow MCP 可用，不可用时自动修复：
 
 ```
-1. 检查 claude-flow MCP 在线状态
-2. swarm_init → 创建 hierarchical-mesh 拓扑
-3. 为每队创建 Pipeline 任务 DAG（task_orchestrate）
+1. 执行 `claude mcp list` 检查 ruflo 是否在线
+2. 若未注册（回退模式：swarm 面板 0/15），自动执行：
+   claude mcp add ruflo -- npx -y ruflo@latest mcp start
+3. 验证 ruflo MCP 在线后，swarm_init → 创建 hierarchical-mesh 拓扑
+4. 为每队创建 Pipeline 任务 DAG（task_orchestrate）
+5. 确认 swarm 面板计数 > 0 再进入 Phase 1
 ```
 
-**回退模式**（MCP 不可用时）：单会话顺序模拟三团队视角。
+**回退模式**（MCP 修复失败时）：单会话顺序模拟三团队视角。
 
 ### Step 0.1 — 根据任务类型调整规模
 
@@ -366,6 +371,8 @@ Stage0 → Stage1 → Stage2 → Stage3 → Stage4 → Stage5
 - 裁判评分前必须调用 `kf-alignment` 统一评分尺度，避免三队方案评分标准不一致
 - 回退模式（无 MCP）下流水线改为单会话顺序模拟，每阶段输出后等待确认
 - 快速模式跳过流水线和 swarm，仅做双视角文本对比，不生成中间产物
+- **Harness 门控**：每个 Stage 完成后 MUST 运行 `node .claude/helpers/harness-gate-check.cjs --skill kf-multi-team-compete --stage <N> --required-files <产出文件> --forbidden-patterns TODO 待定`，门控失败则阻断该团队流水线
+- **记忆持久化**：Phase 4 汇总融合完成后 MUST 将最终评分卡和方案摘要写入 `memory/hammer-results.md`，下次 `/夯` 启动时自动加载历史结果作为参考基线
 
 ---
 
@@ -381,5 +388,7 @@ Stage0 → Stage1 → Stage2 → Stage3 → Stage4 → Stage5
 | `kf-ui-prototype-generator` | Stage 2 + Stage 5 | 前端设计师 UI 原型生成 |
 | `kf-browser-ops` | Stage 3 | 集成测试 agent 自动化测试 |
 | `kf-code-review-graph` | Stage 4 | 代码审查依赖图谱 |
+| `kf-image-editor` | Stage 2 + Stage 5（按需） | 前端设计师 AI 自然语言 P 图、方案配图、截图优化 |
+| `skill-creator` | Stage 1 + Stage 2（按需） | agent 按需创建新 Skill 封装重复模式 |
 | `gspowers` Pipeline 引擎 | Step 0 + Phase 2 | 团队内部流水线阶段编排 + 产物交接（融入夯） |
 | `claude-flow` (swarm_init, agent_spawn, task_orchestrate) | Step 0 + Phase 2 | 多 Agent 并发 + Pipeline DAG 编排 |

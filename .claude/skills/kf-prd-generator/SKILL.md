@@ -177,6 +177,20 @@ PRD 文档章节结构如下：
 9. **核心流程 MUST 输出状态图** — 支付/审批/下单等流程必须包含 Mermaid `stateDiagram-v2` + 状态-权限映射表
 10. **验收标准 MUST 使用 Gherkin 格式** — 标准 `Scenario:` 格式，每个 Then/And 标注 `(Frontend)` 或 `(Backend)`，至少 2 Happy Path + 1 Exception Path
 11. **条件章节按需输出** — 第 9 章（资金流分析）仅当需求涉及资金流转时输出，第 10 章（合规流程）仅当需求涉及合规约束时输出，不得无条件输出
+12. **门控机械化（Harness Engineering 铁律 2）** — Gate 1（Phase 1 问题全部确认）和 Gate 1.5（技术约束完整性）MUST 通过 `node .claude/helpers/harness-gate-check.cjs --skill kf-prd-generator --stage gate1 --required-sections "## 目标用户" "## 核心业务目标" "## 技术约束" --forbidden-patterns "未确认" "待定"` 机械化验证，不通过则阻断生成
+
+---
+
+## Harness 门控验证
+
+每个 Gate 通过前 MUST 执行机械化验证（铁律 2 — 约束必须机械化执行）：
+
+| Gate | 验证命令 | 阻断条件 |
+|------|---------|---------|
+| Gate 1 | `harness-gate-check.cjs --skill kf-prd-generator --stage gate1 --required-sections "## 目标用户" "## 核心业务目标" "## 技术约束"` | 任一 section 缺失 |
+| Gate 1.5 | `harness-gate-check.cjs --skill kf-prd-generator --stage gate1_5 --required-sections "## UI 规范约束" "## 技术约束" --forbidden-patterns "未确认" "⚠️"` | 存在未确认项或 ⚠️ 状态 |
+
+门控失败 → 返回对应 Phase 要求用户确认 → 重新验证 → 通过后才进入 Phase 2。
 
 ---
 

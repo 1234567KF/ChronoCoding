@@ -124,3 +124,22 @@ Hook 脚本逻辑：
 - `kf-alignment`：深度对齐 → 自动切 pro
 - `kf-prd-generator`：产出 PRD 后自动切回 flash
 - 其他所有声明 `recommended_model` 的技能
+
+## Harness 反馈统计（铁律 3）
+
+每次模型切换后 MUST 记录路由决策到 `memory/model-routing-stats.md`：
+
+```markdown
+### {timestamp}
+- **触发技能**：{skill name}
+- **切换方向**：{from_model} → {to_model}
+- **切换原因**：{recommended_model 声明 / 阶段判断}
+- **Token 预估节省**：{如 pro→flash，约省 40-60%}
+```
+
+每周汇总统计：
+- 各技能 pro/flash 使用占比
+- Token 节省估算
+- 误切换案例（如果用户事后反馈"应该用 pro"）
+
+路由原则：**计划用 pro（20%），执行用 flash（70%），轻量任务用轻量模型（10%）**。

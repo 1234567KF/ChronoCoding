@@ -409,6 +409,23 @@ All artifacts are output to the spec directory determined in Step 5 (`docs/{vers
 6. **Human reviews every line** — AI assists generation but does not make final decisions; every output round waits for user confirmation
 7. **Gate failure blocks progression** — strictly enforce all phase gates
 8. **技术栈必须确认** — Step 0 必须完成技术栈选择，后续所有技术决策基于此
+9. **反馈闭环（Harness Engineering 铁律 3）** — 每个 Step 产出后 MUST 运行验证：Step 2 产出 Spec 后运行 `node .claude/helpers/harness-gate-check.cjs --skill kf-spec --stage 2 --required-sections "## 数据模型" "## API 契约" "## 组件树" --forbidden-patterns TODO 待定`；Step 4 综合质量门禁需实际执行（不是声明式跳过）
+10. **门控失败阻断（Harness Engineering 铁律 2）** — Step 4 质量门禁任一项不通过 MUST 回退到对应 Step 修复，禁止携带未解决的 warning 进入 Step 5
+
+---
+
+## Harness 反馈闭环
+
+每个 Step 完成后 MUST 执行反馈验证（铁律 3 — 强制自验证闭环）：
+
+| Step | 验证动作 | 失败处理 |
+|------|---------|---------|
+| Step 2 | `harness-gate-check.cjs --required-sections "## 数据模型" "## API 契约" "## 组件树" --forbidden-patterns TODO 待定` | 回退补充缺失章节 |
+| Step 4 | 综合质量门禁全部 7 项逐一验证 | 任一项不通过回退修复 |
+| Step 5 | 确认 artifact 文件实际存在且行数 ≥ 100 | 不满足则不进入 Step 6 |
+| Step 6 | 每个 task 产出后运行 typecheck/lint | 失败则阻断后续 task |
+
+验证原则：**Plan → Build → Verify → Fix** 四步强制循环，不接受主观"我觉得好了"。
 
 ---
 

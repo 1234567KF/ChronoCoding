@@ -35,6 +35,11 @@
             "type": "command",
             "command": "cmd /c node %CLAUDE_PROJECT_DIR%/.claude/helpers/alignment-hook.cjs check",
             "timeout": 5000
+          },
+          {
+            "type": "command",
+            "command": "cmd /c node %CLAUDE_PROJECT_DIR%/.claude/helpers/harness-gate-check.cjs",
+            "timeout": 5000
           }
         ]
       },
