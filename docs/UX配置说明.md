@@ -2,15 +2,43 @@
 
 > 本文档说明 Claude Code 终端交互体验的优化配置，基于 [Claude-Trae-UX对比调研报告](Claude-Trae-UX对比调研报告.md)。
 
+## 配置方式优先级
+
+**重要**：`alwaysThinkingEnabled` 等 JSON 字段可能被 Claude Code 自身重置（beta 特性，不稳定）。推荐使用 **env 变量**，不会被覆盖：
+
+```
+优先级: env 变量 > settings.local.json > settings.json
+```
+
 ## 配置项速查
 
-| 配置项 | 位置 | 作用 | 默认值 | 推荐值 | 风险 |
-|--------|------|------|--------|--------|------|
-| `alwaysThinkingEnabled` | settings.json | Thinking 过程始终可见 | false | **true** | Token 消耗略增 |
-| `verbose` | settings.json | 详细输出模式，显示工具调用 | false | **true** | 终端输出量增加 |
-| `outputStyle` | settings.json | 输出样式 | "default" | "default" | — |
-| `--output-format stream-json` | CLI 参数 | 流式 JSON 输出 | (非流式) | **启用** | 需配合解析器 |
-| `--include-partial-messages` | CLI 参数 | 边生成边展示 | (关闭) | **启用** | 输出可能碎片化 |
+| 配置项 | 位置 | 作用 | 推荐值 | 稳定性 |
+|--------|------|------|--------|--------|
+| `CLAUDE_CODE_ALWAYS_THINKING` | env 变量 | Thinking 过程始终可见 | `1` | 稳定 |
+| `CLAUDE_CODE_VERBOSE` | env 变量 | 详细输出模式 | `1` | 稳定 |
+| `verbose` | settings.json | 详细输出（JSON 字段版） | `true` | 较稳定 |
+| `--output-format stream-json` | CLI 参数 | 流式 JSON 输出 | 启用 | 稳定 |
+| `--include-partial-messages` | CLI 参数 | 边生成边展示 | 启用 | 稳定 |
+
+### 推荐配置（settings.json 的 env 段）
+
+```json
+"env": {
+  "CLAUDE_CODE_ALWAYS_THINKING": "1",
+  "CLAUDE_CODE_VERBOSE": "1"
+}
+```
+
+### 本地覆盖（settings.local.json，不提交 git）
+
+```json
+{
+  "env": {
+    "CLAUDE_CODE_ALWAYS_THINKING": "1",
+    "CLAUDE_CODE_VERBOSE": "1"
+  }
+}
+```
 
 ## Wrapper 脚本
 
