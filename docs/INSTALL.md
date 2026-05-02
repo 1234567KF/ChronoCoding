@@ -819,7 +819,7 @@ if (!(Test-Path "$skillsDir\gstack")) {
 }
 
 # 复制 Pipeline 扩展
-$patchDir = "D:\path\to\AutoCoding\gspowers-pipeline-patch"
+$patchDir = "D:\path\to\AICoding\gspowers-pipeline-patch"
 if (Test-Path $patchDir) {
     Copy-Item "$patchDir\pipeline.md" "$skillsDir\gspowers\references\" -Force
     Copy-Item "$patchDir\execute-patch.md" "$skillsDir\gspowers\references\" -Force
@@ -898,11 +898,11 @@ notepad "$env:USERPROFILE\.claude\settings.json"
 
 ```powershell
 # 复制整个 .claude 目录
-cp -Recurse "D:\path\to\AutoCoding\.claude" "D:\your-new-project\"
+cp -Recurse "D:\path\to\AICoding\.claude" "D:\your-new-project\"
 
 # 或在项目目录内直接复制
 cd D:\your-new-project
-cp -Recurse "D:\path\to\AutoCoding\.claude" .\
+cp -Recurse "D:\path\to\AICoding\.claude" .\
 ```
 
 #### 2.2 运行项目本地安装
@@ -1035,11 +1035,11 @@ ruflo 的 hooks 会自动捕获并存储。
 
 ### 项目本地安装步骤
 
-#### 1. 复制 AutoCoding 到目标项目
+#### 1. 复制 AICoding 到目标项目
 
 ```powershell
 # 复制整个 .claude 目录到你的项目
-cp -Recurse "D:\path\to\AutoCoding\.claude" "D:\your-project\"
+cp -Recurse "D:\path\to\AICoding\.claude" "D:\your-project\"
 ```
 
 #### 2. 运行项目本地安装脚本

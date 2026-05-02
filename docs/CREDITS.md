@@ -1,6 +1,6 @@
 # 第三方开源项目致谢
 
-本项目 **AI编程智驾 (AutoCoding)** 集成了以下开源项目，感谢他们的贡献：
+本项目 **AI编程智驾 (AICoding)** 集成了以下开源项目，感谢他们的贡献：
 
 ## 核心集成
 
@@ -14,7 +14,7 @@
 ## 项目结构致谢
 
 ```
-AutoCoding/
+AICoding/
 ├── .claude/skills/
 │   ├── kf-prd-generator/       # PRD 生成器（自研）
 │   ├── gspowers/               # 基于 fshaan/gspowers
@@ -83,7 +83,7 @@ SOFTWARE.
 
 ## 知识产权说明
 
-1. **本项目的 MIT License** 适用于 AutoCoding 主项目及其自研部分
+1. **本项目的 MIT License** 适用于 AICoding 主项目及其自研部分
 2. **第三方项目的 License** 保留各自原作者的版权声明
 3. **集成使用** 均遵循各项目对应的 MIT License 条款
 4. 如需将本项目用于商业用途，请确保同时遵守各第三方项目的 License

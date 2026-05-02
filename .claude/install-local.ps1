@@ -1,6 +1,6 @@
-# AutoCoding 项目本地完整安装脚本
+# AICoding 项目本地完整安装脚本
 # 将所有技能和配置安装到项目本地的 .claude/ 目录
-# 支持离线安装：从 AutoCoding 项目复制，无需网络下载
+# 支持离线安装：从 AICoding 项目复制，无需网络下载
 
 param(
     [switch]$DryRun,           # 预览模式
@@ -16,7 +16,7 @@ $AUTOCODING_ROOT = Split-Path $PROJECT_ROOT -Parent
 
 Write-Host ""
 Write-Host "╔═══════════════════════════════════════════════════════════╗" -ForegroundColor Cyan
-Write-Host "║  AutoCoding 项目本地安装                                 ║" -ForegroundColor Cyan
+Write-Host "║  AICoding 项目本地安装                                 ║" -ForegroundColor Cyan
 Write-Host "║  - 12 个 kf- 系列技能（稳省准测的准夯快懂）              ║" -ForegroundColor Cyan
 Write-Host "║  - gspowers SOP 导航（上游）                             ║" -ForegroundColor Cyan
 Write-Host "║  - gstack 产品流程框架（上游）                           ║" -ForegroundColor Cyan
@@ -133,7 +133,7 @@ if (-not $SkipPipeline) {
         }
     } else {
         Write-Host "  ⚠ Pipeline 源目录不存在，跳过" -ForegroundColor Yellow
-        Write-Host "    请确保 AutoCoding 目录完整" -ForegroundColor Gray
+        Write-Host "    请确保 AICoding 目录完整" -ForegroundColor Gray
     }
 }
 

@@ -59,14 +59,14 @@ Write-Host "检测到平台: $PLATFORM"
 
 ```powershell
 # 主源（GitHub）
-git clone https://github.com/1234567KF/AutoCoding.git $env:TEMP\AutoCoding
+git clone https://github.com/1234567KF/AutoCoding.git $env:TEMP\AICoding
 
 # 备选（中国区镜像，自动切换）
-# git clone https://ghproxy.com/https://github.com/1234567KF/AutoCoding.git $env:TEMP\AutoCoding
+# git clone https://ghproxy.com/https://github.com/1234567KF/AutoCoding.git $env:TEMP\AICoding
 ```
 
 **下载后，你(AI)必须**：
-1. 进入项目目录：`cd $env:TEMP\AutoCoding` (Windows) / `cd /tmp/AutoCoding` (Linux/macOS)
+1. 进入项目目录：`cd $env:TEMP\AICoding` (Windows) / `cd /tmp/AICoding` (Linux/macOS)
 2. 读取 `docs/INSTALL.md` 文件
 3. **严格按照 docs/INSTALL.md 的指令完成所有安装步骤**
 
@@ -121,10 +121,10 @@ ls ~/.claude/skills/                                         # Linux/macOS
 ```
 ✅ AI编程智驾 安装完成！
 
-下一步：
-  1. 在新项目目录运行: ruflo init --minimal --skip-claude
-  2. 启动 AI IDE 开始编程
-  3. 常用触发词: /gspowers | 安全审计 | TDD | triple [任务]
+快速开始：
+  1. 输入 /go 查看完整开发工作流，AI 会引导你一步步走
+  2. 或者直接开始：整理需求 → /prd-generator → /kf-spec → 出代码
+  3. 常用触发词: /go | /gspowers | /夯 | /对齐
 ```
 
 ---

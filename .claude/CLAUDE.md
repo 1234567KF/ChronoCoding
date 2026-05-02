@@ -10,6 +10,7 @@
 
 | 技能 | 原则 | 说明 |
 |------|------|------|
+| `kf-go` | 快 | 工作流导航：/go 查看全局路径和当前进度 |
 | `kf-spec` | 快 | Spec 驱动开发：需求 → Spec → 分步实施 |
 | `kf-code-review-graph` | 省 | 代码审查依赖图谱，轻装上阵快速提取 |
 | `kf-web-search` | 准 | 多引擎智能搜索，避免通用大模型哄骗 |
@@ -73,6 +74,7 @@ claude
 
 | 触发词 | 技能 | 原则 |
 |--------|------|------|
+| `/go` / `/导航` / `/开始` | kf-go | 快 |
 | `spec coding` / `写spec文档` | kf-spec | 快 |
 | `/对齐` / `说下你的理解` | kf-alignment | 懂 |
 | `/review-graph` | kf-code-review-graph | 省 |

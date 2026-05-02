@@ -42,5 +42,11 @@ temp/
 *.png.png
 *.log.png
 
+# Local settings (API keys, etc.)
+.claude/settings.local.json
+
+# kf-go state directory
+.kf/
+
 # md2docx 工具箱（不提交）
 md2docx工具箱/

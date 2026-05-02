@@ -1,8 +1,8 @@
-# AutoCoding - Framework Features
+# AICoding - Framework Features
 
 ## One-Line Positioning
 
-**AutoCoding** — Let AI autonomously drive the entire programming process, from environment setup to code delivery, with zero manual intervention.
+**AICoding** — Let AI autonomously drive the entire programming process, from environment setup to code delivery, with zero manual intervention.
 
 ---
 

@@ -1,8 +1,8 @@
-# AutoCoding - Complete User Manual
+# AICoding - Complete User Manual
 
 > **Version**: v1.3
 >
-> This manual is for users to read and understand AutoCoding's complete features and usage methods.
+> This manual is for users to read and understand AICoding's complete features and usage methods.
 > To let AI auto-install, please read [INSTALL.md](INSTALL.md)
 
 ---
@@ -11,7 +11,7 @@
 
 ### One-Line Positioning
 
-**AutoCoding** — Let AI autonomously drive the entire programming process, from environment setup to code delivery, with zero manual intervention. You don't even need programming experience — just understand the general process, what each phase produces, and what the goals are.
+**AICoding** — Let AI autonomously drive the entire programming process, from environment setup to code delivery, with zero manual intervention. You don't even need programming experience — just understand the general process, what each phase produces, and what the goals are.
 
 ### Core Features
 
@@ -233,7 +233,7 @@ When `agentScopes.defaultScope: project`, all agents started in the same project
 │   ├── config.yaml             # Global configuration (memory path, agent config)
 │   └── data/                    # Global memory storage (cross-project sharing)
 
-Project Local (AutoCoding/):
+Project Local (AICoding/):
 ├── .claude/
 │   ├── CLAUDE.md              # Project instructions
 │   ├── settings.json          # Project configuration

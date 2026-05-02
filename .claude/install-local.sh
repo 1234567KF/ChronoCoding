@@ -1,5 +1,5 @@
 #!/bin/bash
-# AutoCoding 项目本地完整安装脚本
+# AICoding 项目本地完整安装脚本
 # 跨平台支持：Linux、macOS、Windows (Git Bash/WSL)
 # 用法: ./install-local.sh [--dry-run] [--skip-gspowers] [--skip-gstack] [--skip-pipeline]
 
@@ -55,7 +55,7 @@ fi
 
 echo ""
 echo -e "${CYAN}╔═══════════════════════════════════════════════════════════╗${NC}"
-echo -e "${CYAN}║  AutoCoding 项目本地安装 (跨平台)                       ║${NC}"
+echo -e "${CYAN}║  AICoding 项目本地安装 (跨平台)                       ║${NC}"
 echo -e "${CYAN}║  - 12 个 kf- 系列技能（稳省准测的准夯快懂）              ║${NC}"
 echo -e "${CYAN}║  - gspowers SOP 导航（上游）                             ║${NC}"
 echo -e "${CYAN}║  - gstack 产品流程框架（上游）                           ║${NC}"
@@ -171,7 +171,7 @@ if [ "$SKIP_PIPELINE" = false ]; then
         fi
     else
         echo -e "  ⚠ Pipeline 源目录不存在，跳过"
-        echo -e "    请确保 AutoCoding 目录完整"
+        echo -e "    请确保 AICoding 目录完整"
     fi
 fi
 

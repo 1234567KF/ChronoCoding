@@ -129,7 +129,7 @@ Agent 共享（在同一个项目内的 agents 共享记忆）
 │   ├── config.yaml             # 全局配置（记忆路径、agent 配置）
 │   └── data/                    # 全局记忆存储（跨项目共享）
 
-项目本地（AutoCoding/）：
+项目本地（AICoding/）：
 ├── .claude/
 │   ├── CLAUDE.md              # 项目指令
 │   ├── settings.json          # 项目配置

@@ -1,10 +1,10 @@
-# AutoCoding - AI Programming Autopilot
+# AICoding - AI Programming Autopilot
 
 > Let AI autonomously drive the entire programming process, from environment setup to code delivery, with zero manual intervention.
 
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
-**AutoCoding** is a comprehensive AI programming workstation that integrates Claude Code, gspowers SOP navigation, ruflo multi-agent parallel execution, and other tools, enabling AI to autonomously complete the entire process from environment setup to code delivery.
+**AICoding** is a comprehensive AI programming workstation that integrates Claude Code, gspowers SOP navigation, ruflo multi-agent parallel execution, and other tools, enabling AI to autonomously complete the entire process from environment setup to code delivery.
 
 ---
 
@@ -88,7 +88,7 @@ See [INSTALL.md](docs/INSTALL.md) for details
 ## Directory Structure
 
 ```
-AutoCoding/
+AICoding/
 ├── README.md              # Project entry
 ├── README_en.md           # English entry
 ├── AICoding.md            # Single-file entry
