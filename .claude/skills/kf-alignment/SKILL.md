@@ -85,9 +85,46 @@ metadata:
 
 ---
 
+## 文档产出自动对齐（Hook 技术）
+
+以下技能**产出文档后**，必须自动触发 kf-alignment 做动后复盘：
+
+| 技能 | 产出文档类型 | 对齐时机 |
+|------|-------------|---------|
+| `kf-prd-generator` | PRD.md | 文档写入后 → 输出"与需求的对齐 diff" |
+| `kf-spec` | Spec 规格文档 | 文档写入后 → 输出"与 PRD 的对齐 diff" |
+| `kf-ui-prototype-generator` | HTML 原型 | 原型生成后 → 输出"与 PRD/设计稿的对齐 diff" |
+| `kf-code-review-graph` | 审查报告 | 报告生成后 → 输出"变更范围对齐 diff" |
+
+### Hook 机制
+
+通过 `settings.json` 的 `PostToolUse` Hook 监听文件写入事件。
+当匹配到产出文档路径时，自动注入对齐提醒到会话上下文：
+
+```json
+{
+  "matcher": "Write|Edit",
+  "hooks": [{
+    "type": "command",
+    "command": "node .claude/helpers/alignment-hook.cjs check"
+  }]
+}
+```
+
+Hook 脚本检测到文档产出后，输出 `system-reminder` 格式的提醒，
+促使 AI 在下一轮对话中主动执行动后对齐。
+
+### 无 Hook 环境下的手动触发
+
+如果 Hook 未配置，用户可在文档产出后手动触发：
+```
+说下 diff    # AI 复盘刚才产出的文档与原始需求的差异
+```
+
 ## 集成
 
 本 Skill 与以下 Skill 配合使用：
-- `kf-spec`：Step 1 澄清阶段本质就是对齐
+- `kf-spec`：Step 1 澄清阶段本质就是对齐；产出 Spec 后自动对齐
+- `kf-prd-generator`：产出 PRD 后自动对齐
 - `kf-multi-team-compete`：裁判和汇总师的评分融合
 - `kf-code-review-graph`：审查前后对齐改动范围

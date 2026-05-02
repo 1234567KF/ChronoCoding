@@ -15,6 +15,8 @@ allowed-tools:
   - Grep
   - Glob
   - SearchCodebase
+integrated-skills:
+  - kf-alignment  # 产出审查报告后自动动后对齐
 ---
 
 # 代码审查依赖图谱
