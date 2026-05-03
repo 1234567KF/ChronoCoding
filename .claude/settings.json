@@ -20,6 +20,16 @@
             "timeout": 5000
           }
         ]
+      },
+      {
+        "matcher": "Skill",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "cmd /c node %CLAUDE_PROJECT_DIR%/.claude/helpers/model-router-hook.cjs",
+            "timeout": 5000
+          }
+        ]
       }
     ],
     "PostToolUse": [

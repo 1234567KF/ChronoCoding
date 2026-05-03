@@ -178,7 +178,6 @@ git clone https://github.com/fshaan/gspowers.git ~/.claude/skills/gspowers
 ```
 AI编程智驾/
 ├── README.md              # 项目入口
-├── README_en.md           # 英文入口
 ├── AICoding.md            # 单文件入口（给 AI 看）
 ├── CHANGELOG.md           # 版本记录
 ├── CONTRIBUTING.md        # 贡献指南
@@ -186,7 +185,6 @@ AI编程智驾/
 │
 ├── docs/                  # 文档目录
 │   ├── MANUAL.md          # 完整手册
-│   ├── MANUAL_en.md       # 英文手册
 │   ├── INSTALL.md         # AI 安装指南
 │   ├── FEATURES.md        # 功能特性
 │   ├── CREDITS.md         # 第三方致谢

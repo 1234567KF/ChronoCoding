@@ -2468,6 +2468,7 @@ Frontend: shared → pages
 | `多模块开发`              | 同上                       | gspowers-pipeline |
 | `流水线开发`              | 同上                       | gspowers-pipeline |
 | `热榜` / `平台抓取` / `CLI数据` / `opencli` | 100+ 平台数据 CLI 直取 | kf-opencli |
+| `P图` / `改图` / `修图` / `去水印` | AI 自然语言 P 图，无需打开编辑器 | kf-image-editor |
 
 ---
 

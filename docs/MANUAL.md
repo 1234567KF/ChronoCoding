@@ -96,6 +96,7 @@ claude
 | `/对齐` / `说下你的理解`  | 🆕 对齐工作流                     | kf-alignment         |
 | `模型路由` / `省模式`     | 🆕 模型智能路由                   | kf-model-router      |
 | `spec coding`             | 🆕 Spec 驱动开发                   | kf-spec       |
+| `P图` / `改图` / `修图` / `去水印` | 🆕 AI 自然语言 P 图，无需打开编辑器  | kf-image-editor |
 | `ctx_stats` / `ctx_doctor` | 🆕 上下文压缩统计 / 诊断           | context-mode |
 | `会话恢复` / `压缩存活`   | 🆕 `/compact` 后自动恢复工作状态   | context-mode |
 
@@ -148,6 +149,7 @@ Agent 共享（在同一个项目内的 agents 共享记忆）
 │       ├── kf-prd-generator/  # PRD 生成
 │       ├── kf-triple-collaboration/ # 三方协作
 │       ├── kf-ui-prototype-generator/ # UI 原型
+│       ├── kf-image-editor/      # AI 自然语言 P 图
 │       ├── kf-skill-design-expert/ # Skill 设计
 │       ├── gspowers/          # SOP 导航（上游）
 │       └── gstack/            # 产品流程（上游）

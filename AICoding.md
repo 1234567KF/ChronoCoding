@@ -280,6 +280,7 @@ git log --oneline -3
 | `kf-prd-generator` | `/prd-generator` | 快 | **自动调用** | kf-alignment（产出 PRD 后 Hook 触发对齐） | 用户手动、**kf-multi-team-compete Pre-Stage 自动调用** | flash |
 | `kf-triple-collaboration` | triple | 夯 | 内部 spawn | 同 kf-multi-team-compete（轻量版） | 用户手动 | pro+flash |
 | `kf-ui-prototype-generator` | — | 快 | 独立（被动技能） | 无 | kf-multi-team-compete Stage 2/5 自动调用 | flash |
+| `kf-image-editor` | — | 快 | 独立（被动技能） | 无 | kf-multi-team-compete Stage 2/5 自动调用 | flash |
 | `kf-skill-design-expert` | — | 稳 | 独立 | 无 | 用户手动 | pro |
 | `kf-add-skill` | — | 稳 | Pipeline + Inversion | kf-model-router、kf-skill-design-expert | 用户手动 | pro |
 | `kf-grant-research` | — | 准 | Pipeline + Inversion + Generator | asta-skill、kf-scrapling、kf-web-search、kf-alignment、kf-add-skill、kf-model-router | 用户手动 | pro |
@@ -311,10 +312,10 @@ git log --oneline -3
   │   ├─ 红队 Pipeline（gspowers Pipeline 引擎）
   │   │   ├─ Stage 0: kf-alignment + kf-spec（需求对齐）
   │   │   ├─ Stage 1: 架构设计
-  │   │   ├─ Stage 2: kf-ui-prototype-generator（UI）+ kf-web-search（查资料）+ kf-opencli（平台数据直取）
+  │   │   ├─ Stage 2: kf-ui-prototype-generator（UI）+ kf-image-editor（P图）+ kf-web-search（查资料）+ kf-opencli（平台数据直取）
   │   │   ├─ Stage 3: kf-browser-ops（自动化测试）+ kf-opencli（平台数据验证）
   │   │   ├─ Stage 4: kf-code-review-graph（代码审查）
-  │   │   └─ Stage 5: 方案汇总
+  │   │   └─ Stage 5: kf-image-editor（方案配图）+ 方案汇总
   │   ├─ 蓝队 Pipeline（同上，稳健工程视角）
   │   └─ 绿队 Pipeline（同上，安全保守视角）
   │
