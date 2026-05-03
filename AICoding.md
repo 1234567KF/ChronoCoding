@@ -96,6 +96,7 @@ docs/INSTALL.md 包含以下步骤（你逐项执行）：
 | 配置 MCP | `claude mcp add ruflo -- npx -y ruflo@latest mcp start` | ✓ |
 | 安装 markitdown | `npm install -g @digipair/skill-markitdown` | ✓ |
 | 安装 RTK | 从 GitHub 下载 RTK 二进制 | ✓ |
+| 安装 context-mode | `npm install -g context-mode` | ✓ |
 | 安装 gspowers/gstack | 克隆到 `~/.claude/skills/` | ✓ |
 | 配置 ruflo 全局配置 | 创建 `~/.claude-flow/config.yaml` | ✓ |
 | 配置 API Token | 在 `~/.claude/settings.json` 中设置 | **需用户提供** |
@@ -271,6 +272,7 @@ git log --oneline -3
 | `kf-spec` | spec coding | 快 | **自动调用** | kf-alignment（Step 1 对齐 + 产出后复盘）、kf-model-router（Step 0 切换 pro） | 用户手动、kf-multi-team-compete Stage 0 | pro→flash |
 | `kf-code-review-graph` | `/review-graph` | 省 | 独立 | 无 | kf-multi-team-compete Stage 4（自动） | flash |
 | `kf-web-search` | `/web-search` | 准 | 独立（被动技能） | 无 | **kf-multi-team-compete agent 按需自动调用**、kf-spec 资料收集、用户手动 | flash |
+| `kf-opencli` | — | 准 | 独立（被动技能） | 无 | kf-multi-team-compete Stage 1/2/3 按需自动调用、用户手动 | flash |
 | `kf-browser-ops` | `/browser-ops` | 测的准 | 独立（被动技能） | 无 | **kf-multi-team-compete Stage 3 自动调用**、用户手动 | flash |
 | `kf-multi-team-compete` | **`/夯`** | 夯 | **内部 spawn + 自动调用** | kf-prd-generator（Pre-Stage）、kf-alignment、kf-spec、kf-browser-ops、kf-code-review-graph、**kf-web-search**、kf-ui-prototype-generator、gspowers Pipeline | **主入口**，用户手动 `/夯` | pro（裁判+汇总）+ flash（各队 agent） |
 | `kf-alignment` | `/对齐` | 懂 | 独立（被动技能） | 无 | **kf-spec 自动调用**、**kf-multi-team-compete Stage 0/Phase 3 自动调用**、kf-prd-generator Hook 自动调用 | pro |
@@ -279,6 +281,8 @@ git log --oneline -3
 | `kf-triple-collaboration` | triple | 夯 | 内部 spawn | 同 kf-multi-team-compete（轻量版） | 用户手动 | pro+flash |
 | `kf-ui-prototype-generator` | — | 快 | 独立（被动技能） | 无 | kf-multi-team-compete Stage 2/5 自动调用 | flash |
 | `kf-skill-design-expert` | — | 稳 | 独立 | 无 | 用户手动 | pro |
+| `kf-add-skill` | — | 稳 | Pipeline + Inversion | kf-model-router、kf-skill-design-expert | 用户手动 | pro |
+| `kf-grant-research` | — | 准 | Pipeline + Inversion + Generator | asta-skill、kf-scrapling、kf-web-search、kf-alignment、kf-add-skill、kf-model-router | 用户手动 | pro |
 | `kf-markdown-to-docx-skill` | — | — | 独立 | 无 | 用户手动 | flash |
 
 ### 上游技能（gstack / gspowers）
@@ -288,6 +292,7 @@ git log --oneline -3
 | `gspowers` | fshaan | 独立 | 无（但其 Pipeline 扩展被 kf-multi-team-compete 集成） | SOP 流程导航 |
 | `gspowers` Pipeline 扩展 | fshaan | **被集成** | **被 kf-multi-team-compete 融入**作为团队内部流水线引擎 | 阶段编排 + 产物交接 |
 | `gstack` 系列 | garrytan | 独立（内部有自身技能链） | 与 kf- 系列隔离 | 产品流程框架（office-hours/plan/review/ship/qa） |
+| `asta-skill` | Agents365-ai | 独立（纯指令包） | 无 | 学术论文搜索 — Semantic Scholar via Ai2 Asta MCP |
 
 ### 主入口 `/夯` 的完整调用链
 
@@ -306,8 +311,8 @@ git log --oneline -3
   │   ├─ 红队 Pipeline（gspowers Pipeline 引擎）
   │   │   ├─ Stage 0: kf-alignment + kf-spec（需求对齐）
   │   │   ├─ Stage 1: 架构设计
-  │   │   ├─ Stage 2: kf-ui-prototype-generator（UI）+ kf-web-search（查资料）
-  │   │   ├─ Stage 3: kf-browser-ops（自动化测试）
+  │   │   ├─ Stage 2: kf-ui-prototype-generator（UI）+ kf-web-search（查资料）+ kf-opencli（平台数据直取）
+  │   │   ├─ Stage 3: kf-browser-ops（自动化测试）+ kf-opencli（平台数据验证）
   │   │   ├─ Stage 4: kf-code-review-graph（代码审查）
   │   │   └─ Stage 5: 方案汇总
   │   ├─ 蓝队 Pipeline（同上，稳健工程视角）
@@ -327,6 +332,7 @@ git log --oneline -3
 | kf-model-router 是否被其他技能自动调用？ | **是。** 所有声明 `recommended_model` 的技能启动时自动调用 |
 | kf-web-search 是否可被自动调用？ | **是。** kf-multi-team-compete agent 按需自动调用搜索资料 |
 | kf-browser-ops 是否可被自动调用？ | **是。** kf-multi-team-compete Stage 3 自动调用做 UI 测试 |
+| kf-opencli 是否可被自动调用？ | **是。** kf-multi-team-compete Stage 1/2/3 按需自动调用，直取 100+ 平台结构化数据 |
 | kf-alignment 是否可被自动调用？ | **是。** kf-spec、kf-multi-team-compete、kf-prd-generator 均自动调用 |
 | gspowers Pipeline 与 `/夯` 的关系？ | Pipeline 引擎被融入 `/夯` 作为团队内部流水线编排引擎 |
 | kf-prd-generator 是否可被自动调用？ | **是。** `/夯` 输入 SDD Excel 时 Pre-Stage 自动调用生成 PRD.md |

@@ -90,11 +90,14 @@ claude
 | `/ship`                   | 发布 PR                          | gspowers |
 | `/review-graph`           | 🆕 代码审查依赖图谱               | kf-code-review-graph |
 | `/web-search [问题]`      | 🆕 多引擎智能搜索                 | kf-web-search        |
+| `/opencli [平台] [命令]`    | 🆕 100+ 平台 CLI 数据直取        | kf-opencli           |
 | `/browser-ops`            | 🆕 浏览器自动化操作               | kf-browser-ops       |
 | `/夯 [任务]`              | 🆕 多团队竞争评审                 | kf-multi-team-compete |
 | `/对齐` / `说下你的理解`  | 🆕 对齐工作流                     | kf-alignment         |
 | `模型路由` / `省模式`     | 🆕 模型智能路由                   | kf-model-router      |
 | `spec coding`             | 🆕 Spec 驱动开发                   | kf-spec       |
+| `ctx_stats` / `ctx_doctor` | 🆕 上下文压缩统计 / 诊断           | context-mode |
+| `会话恢复` / `压缩存活`   | 🆕 `/compact` 后自动恢复工作状态   | context-mode |
 
 ---
 
@@ -137,6 +140,7 @@ Agent 共享（在同一个项目内的 agents 共享记忆）
 │       ├── kf-spec/    # Spec 驱动开发
 │       ├── kf-code-review-graph/ # 代码审查图谱
 │       ├── kf-web-search/     # 多引擎搜索
+│       ├── kf-opencli/       # OpenCLI — 100+ 平台 CLI 数据直取
 │       ├── kf-browser-ops/    # 浏览器自动化
 │       ├── kf-multi-team-compete/ # 多团队竞争
 │       ├── kf-alignment/      # 对齐工作流

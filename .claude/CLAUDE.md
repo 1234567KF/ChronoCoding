@@ -16,7 +16,9 @@
 | `kf-web-search` | `/web-search` | 准 | 被 `/夯` agent 按需自动调用 | 多引擎智能搜索，agent 自动搜索技术方案 |
 | `kf-browser-ops` | `/browser-ops` | 测的准 | 被 `/夯` Stage 3 自动调用 | 浏览器自动化测试，Playwright 复现 bug |
 | `kf-scrapling` | — | 准 | 被 `/夯` Stage 1/2/3 按需自动调用 | Web 爬虫+反反爬，深度数据采集，替代/补充 web-search |
-| `kf-multi-team-compete` | **`/夯`** | 夯 | **主入口**，自动调用 10 个技能 + Pipeline 引擎 | 红蓝绿队多 Agent 并发竞争评审 |
+| `kf-opencli` | — | 准 | 被 `/夯` Stage 1/2/3 按需自动调用 | OpenCLI — 100+ 平台 CLI 数据直取（知乎/B站/微博/GitHub/Reddit/HN/arXiv），补充 web-search 和 scrapling 中间地带 |
+| `kf-grant-research` | — | 准 | Pipeline + Inversion + Generator，调用 asta-skill + kf-scrapling + kf-web-search | 课题申报研究助手：顶刊搜索→论文分析→研究空白→申报材料 |
+| `kf-multi-team-compete` | **`/夯`** | 夯 | **主入口**，自动调用 11 个技能 + Pipeline 引擎 | 红蓝绿队多 Agent 并发竞争评审 |
 | `kf-alignment` | `/对齐` | 懂 | 被 kf-spec、`/夯`、kf-prd-generator 自动调用 | 对齐工作流：动前谈理解，动后谈 diff |
 | `kf-model-router` | 模型路由 | 省 | **自动触发**：所有技能启动时自动检查并切换模型 | 模型智能路由：计划 pro，执行 flash，用户无感 |
 | `kf-prd-generator` | `/prd-generator` | 快 | 自动调用 kf-alignment（产出后 Hook 对齐）；被 `/夯` Pre-Stage 自动调用 | SDD Excel → PRD 生成器 |
@@ -24,6 +26,7 @@
 | `kf-ui-prototype-generator` | — | 快 | 被 `/夯` Stage 2/5 自动调用 | UI 原型 HTML 生成 |
 | `kf-image-editor` | — | 快 | 被 `/夯` Stage 2/5 自动调用 | AI 自然语言 P 图，Nano Banana MCP |
 | `kf-skill-design-expert` | — | 稳 | 独立，包含 Harness Engineering 评审体系 | Skill 设计专家 + 五根铁律审计 |
+| `kf-add-skill` | — | 稳 | 关键词搜索→下载安装→同步 .claude/.trae 文档+SKILL.md | 技能安装管家：搜索安装+文档全自动同步 |
 | `kf-markdown-to-docx-skill` | — | — | 独立 | Markdown → DOCX 转换 |
 
 ### 上游技能（非自建，不加 kf- 前缀）
@@ -32,6 +35,7 @@
 |------|------|------|
 | `gspowers` | fshaan | SOP 流程导航 |
 | `gstack` | garrytan | 产品流程框架 |
+| `asta-skill` | Agents365-ai | Academic paper search — Semantic Scholar via Ai2 Asta MCP |
 
 ## 目录结构
 
@@ -59,8 +63,12 @@
     ├── kf-triple-collaboration/ # 三方协作
     ├── kf-ui-prototype-generator/ # UI 原型
     ├── kf-skill-design-expert/ # Skill 设计
+    ├── kf-add-skill/         # 技能安装管家
     ├── kf-markdown-to-docx-skill/ # MD→DOCX
     ├── kf-scrapling/          # Web 爬虫 + 反反爬
+    ├── kf-opencli/            # OpenCLI — 100+ 平台 CLI 数据直取
+    ├── kf-grant-research/    # 课题申报研究助手
+    ├── asta-skill/           # 学术论文搜索（Semantic Scholar / Ai2 Asta MCP）
     ├── gspowers/              # SOP 导航（上游）
     └── gstack/               # 产品流程（上游）
 ```
@@ -80,7 +88,7 @@ claude
 | 触发词 | 技能 | 原则 | 自动调用 |
 |--------|------|------|---------|
 | `/go` / `/导航` / `/开始` | kf-go | 快 | — |
-| `/夯 [任务]` | kf-multi-team-compete | 夯 | 自动调用 10 个子技能 |
+| `/夯 [任务]` | kf-multi-team-compete | 夯 | 自动调用 11 个子技能 |
 | `spec coding` / `写spec文档` | kf-spec | 快 | 自动调用 kf-alignment + kf-model-router |
 | `/对齐` / `说下你的理解` | kf-alignment | 懂 | 被多个技能自动调用 |
 | `/review-graph` | kf-code-review-graph | 省 | 被 `/夯` 自动调用 |
@@ -93,7 +101,11 @@ claude
 | `Harness 评审` / `五根铁律审计` | kf-skill-design-expert | 稳 | 全路径扫描，评分矩阵 + 缺陷分级 |
 | `P图` / `改图` / `修图` / `去水印` | kf-image-editor | 快 | AI 自然语言 P 图，被 `/夯` Stage 2/5 调用 |
 | `转docx` / `markdown转word` | kf-markdown-to-docx-skill | — | Markdown → DOCX 转换 |
+| `装技能` / `安装技能` / `添加技能` / `搜索技能` | kf-add-skill | 稳 | 技能安装管家：搜索→安装→文档全同步 |
 | `爬虫` / `抓取` / `scrape` / `反反爬` | kf-scrapling | 准 | Web 爬虫，被 `/夯` Stage 1/2/3 按需调用 |
+| `热榜` / `平台抓取` / `CLI数据` / `opencli` | kf-opencli | 准 | 100+ 平台 CLI 数据直取，被 `/夯` Stage 1/2/3 按需调用 |
+| `论文` / `查论文` / `学术搜索` / `文献` | asta-skill | 准 | Semantic Scholar 学术论文搜索，需配置 ASTA_API_KEY |
+| `课题申报` / `科研项目` / `国自然` / `研究计划` | kf-grant-research | 准 | 课题申报研究助手：论文搜索→分析→gap→申报材料 |
 
 ## 自动调用链速览
 
@@ -109,6 +121,7 @@ claude
        ├─ kf-spec        ← 需求基线（Stage 0）
        ├─ kf-web-search  ← 技术资料搜索（Stage 1/2/3 按需）
        ├─ kf-scrapling  ← 深度网页抓取（Stage 1/2/3 按需，反反爬）
+       ├─ kf-opencli    ← 平台数据 CLI 直取（Stage 1/2/3 按需，100+ 平台）
        ├─ kf-ui-prototype-generator ← UI 原型（Stage 2/5）
        ├─ kf-image-editor ← AI P 图（Stage 2/5）
        ├─ kf-browser-ops ← 自动化测试（Stage 3）
@@ -123,6 +136,8 @@ claude
 | Node.js | `winget install OpenJS.NodeJS.LTS` | 运行环境 |
 | ruflo | `npm install -g ruflo` | 多 Agent + 记忆 |
 | RTK | 见 INSTALL.md | Token 节省 |
+| OpenCLI | `npm install -g @jackwener/opencli` | 100+ 平台 CLI 数据提取 |
+| context-mode | `npm install -g context-mode` | 会话连续性 + 压缩存活（MCP + hooks） |
 
 ## 项目隔离
 

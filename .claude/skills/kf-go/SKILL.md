@@ -29,9 +29,13 @@ metadata:
     # 工具技能
     - kf-web-search
     - kf-scrapling
+    - kf-opencli
     - kf-browser-ops
     - kf-image-editor
     - kf-markdown-to-docx-skill
+    - kf-grant-research
+    - asta-skill
+    - kf-add-skill
     # 质量/协作
     - kf-triple-collaboration
     - kf-skill-design-expert

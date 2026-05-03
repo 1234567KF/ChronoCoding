@@ -95,6 +95,7 @@ $npmSource = Invoke-WithCircuitBreaker -operation "npm install" `
 | Node.js     | `node --version`                 | `node --version`                 | 运行 ruflo       |
 | npm         | `npm --version`                  | `npm --version`                  | 安装全局包       |
 | ruflo       | `claude-flow --version`          | `claude-flow --version`          | 多 Agent + 记忆  |
+| OpenCLI     | `opencli --version`              | `opencli --version`              | 100+ 平台 CLI 数据直取 |
 | gspowers    | 检查 `~/.claude/skills/gspowers` | 检查 `~/.claude/skills/gspowers` | SOP 流程         |
 
 ---
@@ -424,6 +425,32 @@ rtk --version   # 显示 rtk 0.37.2 即为正确（不是 rtk-cli/0.0.1）
 - **名称冲突**：npm 上的 `rtk-cli` (ssg) 与 `rtk-ai/rtk` 重名但功能完全不同
 - **Windows**：使用 Windows Terminal 或 PowerShell 运行，不要直接双击 .exe
 - **重启 Claude Code**：初始化后需要重启才能加载 hook
+
+---
+
+### 步骤 3.x：安装 context-mode（会话连续性 + 压缩存活）
+
+> Context Mode 是 MCP 服务器 + hooks 系统，解决两个问题：
+> 1. **压缩存活**：`/compact` 后自动恢复工作状态，不会失忆
+> 2. **会话追踪**：文件编辑、git 操作、错误、任务全记录到 SQLite
+
+```powershell
+# 全局安装
+npm install -g context-mode
+
+# 验证安装
+npm ls -g context-mode
+
+# 重启 Claude Code 后自动生效
+# （MCP 服务器和 hooks 已预配置在 settings.json 中）
+```
+
+**效果**：
+| 场景 | 之前 | 之后 |
+|------|------|------|
+| `/compact` 后 | 忘记前文，从头问"我们在干什么" | 自动恢复工作状态 |
+| 长会话（>2 小时） | token 溢出，被迫中断 | 事件追踪 + BM25 检索 |
+| 跨会话续传 | 完全失忆 | `--continue` 恢复上次上下文 |
 
 ---
 
@@ -1187,6 +1214,8 @@ D:\your-project\
 | `/review`                 | 代码审查                         | gspowers |
 | `/qa`                     | 浏览器 QA                        | gspowers |
 | `/ship`                   | 发布 PR                          | gspowers |
+| `热榜` / `平台抓取` / `CLI数据` | 100+ 平台数据 CLI 直取     | kf-opencli |
+| `装个技能` / `安装技能` / `添加技能` | 技能安装管理               | kf-add-skill |
 
 ---
 
@@ -1449,6 +1478,7 @@ Write-Host "  - 说 '安全审计' 启动三方协作评审"
 | Wiki 生成 | gspowers/wiki-helper.ps1 | 上下文压缩 |
 | Pipeline 开发 | gspowers/references/pipeline.md | 多模块流水线 |
 | RTK Token 节省 | .local/bin/rtk.exe | 节省 60-90% token |
+| context-mode | MCP + hooks | 会话连续性 + 压缩存活 |
 | markitdown | MCP | Markdown 转换 |
 
 ---
@@ -1488,10 +1518,9 @@ ruflo init --minimal --skip-claude
 claude
 
 # 常用触发词
-安全审计                          # ruflo 三方协作
-架构评审                          # ruflo 三方协作
+/kf-go
 /gspowers                        # gspowers SOP
-/triple [任务]                   # 通用三方协作
+
 ```
 
 ---
@@ -2438,6 +2467,7 @@ Frontend: shared → pages
 | `/pipeline-dev`          | 多模块流水线开发           | gspowers-pipeline |
 | `多模块开发`              | 同上                       | gspowers-pipeline |
 | `流水线开发`              | 同上                       | gspowers-pipeline |
+| `热榜` / `平台抓取` / `CLI数据` / `opencli` | 100+ 平台数据 CLI 直取 | kf-opencli |
 
 ---
 

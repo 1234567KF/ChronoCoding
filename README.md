@@ -17,7 +17,7 @@
   <img src="assets/posters/宣传海报_浅色.png" alt="AI编程智驾 宣传海报" width="900">
 </p>
 
-**AI编程智驾** 是一套完整的 AI 编程工作台，遵循七大原则，集成 Claude Code、gspowers SOP 导航、claude-flow 多 Agent 并行执行，15 个自建 kf- 系列技能覆盖从 PRD 到 Spec 到编码到审查的全链路。
+**AI编程智驾** 是一套完整的 AI 编程工作台，遵循七大原则，集成 Claude Code、gspowers SOP 导航、claude-flow 多 Agent 并行执行，16 个自建 kf- 系列技能覆盖从 PRD 到 Spec 到编码到审查的全链路。
 
 ---
 
@@ -52,7 +52,7 @@
 |------|------|---------|
 | **稳** | 好用不贵，长期维护 | gspowers、gstack、kf-skill-design-expert |
 | **省** | 模型搭配，稳固 ROI | kf-model-router、kf-code-review-graph、RTK |
-| **准** | 多源搜索 + 反反爬，精准调研 | kf-web-search、kf-scrapling |
+| **准** | 多源搜索 + 反反爬 + 平台直取，精准调研 | kf-web-search、kf-scrapling、kf-opencli |
 | **夯** | 多 Agent 并发竞争碾压 | kf-multi-team-compete、kf-triple-collaboration |
 | **快** | MVP 快速验证，多工具速出原型 | kf-spec、kf-prd-generator、kf-ui-prototype-generator、kf-image-editor、kf-markdown-to-docx-skill |
 | **懂** | 动前对齐，动后 diff | kf-alignment |
@@ -72,6 +72,8 @@
 | [frontend-slides](https://github.com/zarazhangrui/frontend-slides) | zarazhangrui | MIT | 演示文稿生成 |
 | [ruflo](https://github.com/ruvnet/ruflo) | ruvnet | MIT | 多 Agent 编排 |
 | [RTK](https://github.com/rafaelkallis/rtk) | rafaelkallis | MIT | Token 优化 |
+| [context-mode](https://github.com/mksglu/context-mode) | mksglu | Elastic-2.0 | 会话连续性 + 压缩存活 |
+| [OpenCLI](https://github.com/jackwener/OpenCLI) | jackwener | MIT | 100+ 平台 CLI 数据直取，AI 原生浏览器自动化 |
 
 详见 [CREDITS.md](docs/CREDITS.md) 完整致谢。
 
@@ -148,6 +150,7 @@ git clone https://github.com/fshaan/gspowers.git ~/.claude/skills/gspowers
 | `/review-graph` | 代码审查依赖图谱 | kf-code-review-graph |
 | `/web-search [问题]` | 多引擎智能搜索 | kf-web-search |
 | `爬虫` / `抓取` / `scrape` | Web 爬虫 + 反反爬 | kf-scrapling |
+| `热榜` / `平台抓取` / `CLI数据` / `opencli` | 100+ 平台 CLI 数据直取 | kf-opencli |
 | `/browser-ops` | 浏览器自动化测试 | kf-browser-ops |
 | `P图` / `改图` / `修图` / `去水印` | AI 自然语言 P 图 | kf-image-editor |
 | `转docx` / `markdown转word` | Markdown → DOCX 转换 | kf-markdown-to-docx-skill |

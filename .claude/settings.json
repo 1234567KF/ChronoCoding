@@ -52,12 +52,28 @@
             "timeout": 5000
           }
         ]
+      },
+      {
+        "matcher": "Bash|Read|Write|Edit|NotebookEdit|Glob|Grep|TodoWrite|TaskCreate|TaskUpdate|EnterPlanMode|ExitPlanMode|Skill|Agent|AskUserQuestion|EnterWorktree|mcp__",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node C:/Users/KF/AppData/Roaming/npm/node_modules/context-mode/hooks/posttooluse.mjs",
+            "timeout": 10000
+          }
+        ]
       }
     ],
     "UserPromptSubmit": [
       {
         "matcher": "",
-        "hooks": []
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node C:/Users/KF/AppData/Roaming/npm/node_modules/context-mode/hooks/userpromptsubmit.mjs",
+            "timeout": 10000
+          }
+        ]
       }
     ],
     "SessionStart": [
@@ -72,8 +88,14 @@
             "type": "command",
             "command": "cmd /c node %CLAUDE_PROJECT_DIR%/.claude/helpers/auto-memory-hook.mjs import",
             "timeout": 8000
+          },
+          {
+            "type": "command",
+            "command": "node C:/Users/KF/AppData/Roaming/npm/node_modules/context-mode/hooks/sessionstart.mjs",
+            "timeout": 15000
           }
         ]
+      }
     ],
     "SessionEnd": [
       {
@@ -125,6 +147,17 @@
             "timeout": 6000
           }
         ]
+      },
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node C:/Users/KF/AppData/Roaming/npm/node_modules/context-mode/hooks/precompact.mjs",
+            "timeout": 10000
+          }
+        ]
+      }
     ],
     "SubagentStart": [
       {
@@ -192,7 +225,7 @@
     "CLAUDE_CODE_ENABLE_THINKING": "0",
     "CLAUDE_CODE_STREAM_DELAY": "0"
   },
-  "model": "deepseek-v4-pro",
+  "model": "deepseek-v4-flash",
   "claudeFlow": {
     "version": "3.0.0",
     "enabled": true,
@@ -295,6 +328,14 @@
       "scanOnEdit": true,
       "cveCheck": true,
       "threatModel": true
+    }
+  },
+  "mcpServers": {
+    "context-mode": {
+      "command": "node",
+      "args": [
+        "C:/Users/KF/AppData/Roaming/npm/node_modules/context-mode/start.mjs"
+      ]
     }
   }
 }
