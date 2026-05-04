@@ -188,7 +188,7 @@
     margin: 0 auto;
     padding: 20px 20px 12px;
     border-radius: 14px;
-    background: rgba(14,165,233,0.02);
+    background: #f9fafb;
     border: 1px solid rgba(14,165,233,0.08);
   }
 
@@ -313,7 +313,7 @@
   .gigo-bar .gigo-label {
     font-size: 13px;
     font-weight: 800;
-    color: #ef4444;
+    color: #dc2626;
     letter-spacing: 3px;
     padding: 2px 10px;
     border-radius: 4px;
@@ -347,201 +347,23 @@
     .layer-arrow-down { font-size: 12px; }
   }
 
-  .agents-section {
-    text-align: center;
-  }
-
-  .agents-section .section-label {
-    color: var(--text-muted);
-    font-size: 13px;
-    letter-spacing: 4px;
-    text-transform: uppercase;
-    margin-bottom: 20px;
-  }
-
-  .hex-container {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 0;
-    position: relative;
-  }
-
-  .hex-row {
-    display: flex;
-    gap: 0;
-  }
-
-  .hex-row.offset {
-    padding-left: 35px;
-  }
-
-  .hex-cell {
-    width: 62px;
-    height: 52px;
-    position: relative;
-    margin: 0 -1px;
-    margin-bottom: -10px;
-  }
-
-  .hex-cell .hex {
-    width: 100%;
-    height: 100%;
-    clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
-    background: rgba(14,165,233,0.06);
-    transition: all 0.4s ease;
-  }
-
-  .hex-cell .hex.filled {
-    background: linear-gradient(135deg, rgba(14,165,233,0.25), rgba(139,92,246,0.18));
-    animation: hexBreathe 2.5s ease-in-out infinite;
-  }
-
-  .hex-cell:nth-child(odd) .hex.filled  { animation-delay: 0s; }
-  .hex-cell:nth-child(even) .hex.filled { animation-delay: 0.6s; }
-  .hex-cell:nth-child(3n) .hex.filled  { animation-delay: 1.2s; }
-  .hex-cell:nth-child(5n+2) .hex.filled { animation-delay: 1.8s; }
-
-  @keyframes hexBreathe {
-    0%, 100% { opacity: 0.40; }
-    50% { opacity: 0.80; }
-  }
-
-  .hex-cell .hex:hover {
-    background: linear-gradient(135deg, rgba(14,165,233,0.55), rgba(139,92,246,0.35));
-    transform: scale(1.15);
-    z-index: 2;
-    transition: all 0.2s ease;
-  }
-
-  .agents-number-overlay {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    pointer-events: none;
-    z-index: 5;
-  }
-
-  .agents-number-overlay .num {
-    font-size: 42px;
-    font-weight: 800;
-    color: var(--text-primary);
-    letter-spacing: 2px;
-    text-shadow: 0 0 40px rgba(14,165,233,0.15);
-  }
-
-  .agents-desc {
-    color: var(--text-secondary);
-    font-size: 14px;
-    margin-top: 16px;
-    letter-spacing: 1px;
-  }
-
-  .highlights {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 20px;
-  }
-
-  .highlight-card {
-    background: var(--bg-card);
-    backdrop-filter: blur(12px);
-    border: 1px solid var(--border-subtle);
-    border-radius: 12px;
-    padding: 28px;
-    position: relative;
-    box-shadow: var(--card-shadow);
-  }
-
-  .highlight-card .phase-tag {
-    display: inline-block;
-    padding: 3px 12px;
-    border-radius: 6px;
-    font-size: 11px;
-    font-weight: 600;
-    letter-spacing: 1px;
-    margin-bottom: 14px;
-  }
-
-  .highlight-card .phase-tag.design {
-    background: rgba(139,92,246,0.08);
-    color: var(--accent-violet);
-    border: 1px solid rgba(139,92,246,0.15);
-  }
-
-  .highlight-card .phase-tag.dev {
-    background: rgba(14,165,233,0.08);
-    color: var(--accent);
-    border: 1px solid rgba(14,165,233,0.15);
-  }
-
-  .highlight-card h3 {
-    color: var(--text-primary);
-    font-size: 20px;
-    font-weight: 700;
-    margin-bottom: 14px;
-  }
-
-  .highlight-card .feature-list {
-    list-style: none;
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-  }
-
-  .highlight-card .feature-list li {
-    color: var(--text-secondary);
-    font-size: 14px;
-    padding-left: 18px;
-    position: relative;
-    line-height: 1.6;
-  }
-
-  .highlight-card .feature-list li::before {
-    content: '';
-    position: absolute;
-    left: 0; top: 7px;
-    width: 5px; height: 5px;
-    border-radius: 50%;
-    background: var(--accent);
-  }
-
-  .pipeline {
-    margin-top: 16px;
-    display: flex;
-    align-items: center;
-    gap: 3px;
-  }
-
-  .pipeline .step {
-    flex: 1;
-    text-align: center;
-    padding: 7px 2px;
-    background: rgba(14,165,233,0.03);
-    border-radius: 6px;
-    border: 1px solid rgba(14,165,233,0.08);
-    font-size: 11px;
-    color: var(--text-muted);
-    white-space: nowrap;
-  }
-
-  .pipeline .arrow {
-    color: var(--text-muted);
-    font-size: 12px;
-    flex-shrink: 0;
-  }
-
   /* ===== 研发双路线 ===== */
   .routes-section {
     text-align: center;
   }
 
   .routes-section .section-label {
-    color: var(--text-muted);
-    font-size: 13px;
+    color: #ffffff;
+    font-size: 16px;
+    font-weight: 700;
     letter-spacing: 4px;
-    margin-bottom: 18px;
+    margin-bottom: 20px;
+    display: inline-block;
+    padding: 8px 28px;
+    border-radius: 22px;
+    background: var(--gradient-brand);
+    border: none;
+    box-shadow: 0 2px 12px rgba(14,165,233,0.18);
   }
 
   .routes-dual {
@@ -588,7 +410,7 @@
 
   .route-card.gspowers .route-badge {
     background: rgba(14,165,233,0.08);
-    color: #0ea5e9;
+    color: #0369a1;
     border: 1px solid rgba(14,165,233,0.18);
   }
 
@@ -689,6 +511,133 @@
     .routes-vs .vs-line { width: 40px; height: 1px; min-height: 0; flex: none; }
   }
 
+  /* ===== 技能总览表 ===== */
+  .skills-table-section {
+    text-align: center;
+    margin-top: 60px;
+  }
+
+  .skills-table-section .section-label {
+    color: #ffffff;
+    font-size: 16px;
+    font-weight: 700;
+    letter-spacing: 4px;
+    margin-bottom: 20px;
+    display: inline-block;
+    padding: 8px 28px;
+    border-radius: 22px;
+    background: var(--gradient-brand);
+    border: none;
+    box-shadow: 0 2px 12px rgba(14,165,233,0.18);
+  }
+
+  .skills-table-wrap {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    border-radius: 12px;
+    border: 2px solid #d1d5db;
+    background: #ffffff;
+    box-shadow: 0 2px 16px rgba(0,0,0,0.06), 0 1px 4px rgba(0,0,0,0.04);
+  }
+
+  .skills-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+    min-width: 800px;
+  }
+
+  .skills-table thead th {
+    padding: 12px 14px;
+    font-weight: 800;
+    font-size: 12px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: #374151;
+    border-bottom: 2px solid #d1d5db;
+    border-right: 1px solid #e5e7eb;
+    background: #f3f4f6;
+    position: sticky;
+    top: 0;
+  }
+
+  .skills-table thead th:first-child { text-align: left; padding-left: 18px; }
+  .skills-table thead th:last-child { border-right: none; }
+
+  .skills-table tbody td {
+    padding: 10px 14px;
+    border-bottom: 1px solid #e5e7eb;
+    border-right: 1px solid #f3f4f6;
+    color: #374151;
+    line-height: 1.5;
+    vertical-align: middle;
+  }
+
+  .skills-table tbody td:last-child { border-right: none; }
+  .skills-table tbody td:first-child { font-weight: 700; color: #111827; white-space: nowrap; padding-left: 18px; font-size: 13px; }
+  .skills-table tbody td:nth-child(2) { white-space: nowrap; text-align: center; }
+  .skills-table tbody td:nth-child(3) { font-size: 13px; font-weight: 500; color: #111827; min-width: 180px; }
+  .skills-table .skill-effect { font-size: 13px; font-weight: 500; color: #111827; line-height: 1.6; }
+  .skills-table tbody td:nth-child(4) { font-size: 12px; color: #6b7280; min-width: 200px; }
+  .skills-table .skill-mech { font-size: 12px; color: #6b7280; line-height: 1.6; }
+
+  .skills-table .skill-mech code { font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace; font-size: 11px; padding: 2px 6px; border-radius: 4px; background: #eff6ff; color: #1d4ed8; border: 1px solid #bfdbfe; white-space: nowrap; }
+  .skills-table .skill-effect code { font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace; font-size: 12px; padding: 2px 6px; border-radius: 4px; background: #f5f3ff; color: #7c3aed; border: 1px solid #ddd6fe; white-space: nowrap; }
+
+  .skills-table .principle-tag { display: inline-flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 8px; font-size: 16px; font-weight: 800; }
+  .skills-table .principle-tag.tag-稳 { color: #15803d; border: 2px solid #bbf7d0; background: #f0fdf4; }
+  .skills-table .principle-tag.tag-省 { color: #0369a1; border: 2px solid #bae6fd; background: #f0f9ff; }
+  .skills-table .principle-tag.tag-准 { color: #7c3aed; border: 2px solid #ddd6fe; background: #f5f3ff; }
+  .skills-table .principle-tag.tag-夯 { color: #dc2626; border: 2px solid #fecaca; background: #fef2f2; }
+  .skills-table .principle-tag.tag-快 { color: #0891b2; border: 2px solid #a5f3fc; background: #ecfeff; }
+  .skills-table .principle-tag.tag-懂 { color: #db2777; border: 2px solid #fbcfe8; background: #fdf2f8; }
+
+  .skills-table tbody tr:hover td { background: #f9fafb; }
+  .skills-table tbody tr:last-child td { border-bottom: none; }
+
+  @media (max-width: 768px) {
+    .skills-table { font-size: 12px; min-width: 600px; }
+    .skills-table thead th { font-size: 11px; padding: 8px 8px; }
+    .skills-table tbody td { padding: 8px; }
+    .skills-table tbody td:first-child { font-size: 12px; }
+    .skills-table tbody td:nth-child(3) { font-size: 12px; min-width: 120px; }
+    .skills-table tbody td:nth-child(4) { font-size: 11px; min-width: 120px; }
+    .skills-table .principle-tag { width: 28px; height: 28px; font-size: 14px; }
+  }
+
+  /* ===== 常见问题 FAQ ===== */
+  .faq-section {
+    text-align: center;
+  }
+
+  .faq-section .section-label {
+    color: #ffffff;
+    font-size: 16px;
+    font-weight: 700;
+    letter-spacing: 4px;
+    margin-bottom: 20px;
+    display: inline-block;
+    padding: 8px 28px;
+    border-radius: 22px;
+    background: var(--gradient-brand);
+    border: none;
+    box-shadow: 0 2px 12px rgba(14,165,233,0.18);
+  }
+
+  .faq-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; max-width: 960px; margin: 0 auto; }
+  .faq-card { background: var(--bg-card); backdrop-filter: blur(12px); border: 1px solid var(--border-subtle); border-radius: 12px; padding: 20px 22px; text-align: left; position: relative; overflow: hidden; box-shadow: var(--card-shadow); transition: all 0.3s ease; cursor: default; }
+  .faq-card:hover { border-color: var(--border-active); transform: translateY(-2px); box-shadow: var(--card-shadow-hover); }
+  .faq-card .faq-q { display: flex; align-items: flex-start; gap: 10px; margin-bottom: 10px; }
+  .faq-card .faq-q .q-icon { flex-shrink: 0; width: 22px; height: 22px; border-radius: 50%; background: rgba(239,68,68,0.10); border: 1px solid rgba(239,68,68,0.20); display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 800; color: #ef4444; margin-top: 1px; }
+  .faq-card .faq-q .q-text { font-size: 15px; font-weight: 700; color: var(--text-primary); line-height: 1.5; }
+  .faq-card .faq-a { display: flex; align-items: flex-start; gap: 10px; padding-left: 32px; }
+  .faq-card .faq-a .a-icon { flex-shrink: 0; width: 18px; height: 18px; border-radius: 50%; background: rgba(14,165,233,0.10); border: 1px solid rgba(14,165,233,0.20); display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 800; color: var(--accent); margin-top: 2px; }
+  .faq-card .faq-a .a-text { font-size: 13px; color: var(--text-secondary); line-height: 1.7; }
+  .faq-card .faq-a .a-text strong { color: var(--accent); font-weight: 600; }
+  .faq-card .faq-tag { display: inline-flex; align-items: center; gap: 4px; padding: 2px 10px; border-radius: 4px; font-size: 11px; font-weight: 600; margin-left: 32px; margin-top: 8px; }
+  .faq-card .faq-tag.solution { background: rgba(14,165,233,0.07); color: var(--accent); border: 1px solid rgba(14,165,233,0.14); }
+  @media (max-width: 768px) { .faq-grid { grid-template-columns: 1fr; } .faq-card .faq-a { padding-left: 0; } .faq-card .faq-tag { margin-left: 0; } }
+
   .cta-section {
     text-align: center;
     padding: 12px 0 0;
@@ -764,12 +713,8 @@
     .poster { width: 100%; padding: 32px 20px; gap: 28px; }
     .header h1 { font-size: 36px; letter-spacing: 2px; }
     .six-principles { grid-template-columns: repeat(2, 1fr); gap: 10px; }
-    .highlights { grid-template-columns: 1fr; }
     .principle-card { padding: 16px 12px; }
     .principle-card .char { font-size: 32px; }
-    .hex-cell { width: 42px; height: 36px; margin-bottom: -7px; }
-    .hex-row.offset { padding-left: 24px; }
-    .agents-number-overlay .num { font-size: 28px; }
     .footer { flex-direction: column; gap: 12px; }
     .trust-badges { flex-wrap: wrap; }
   }
@@ -826,7 +771,7 @@
 
   <!-- ===== AI产出本质要素 层级图 ===== -->
   <div class="quality-layers-section">
-    <div class="section-label">· AI 产出效果的本质要素 ·</div>
+    <div class="section-label">· 一图看懂AI输出质量的本质要素 ·</div>
     <div class="layers-stack">
       <div class="layer-row">
         <div class="layer-block layer-prompt">
@@ -879,87 +824,12 @@
     </div>
   </div>
 
-  <div class="divider"></div>
-
-  <div class="agents-section">
-    <div class="section-label">· 智能协作引擎 ·</div>
-    <div class="hex-container" id="hexContainer" style="position:relative;">
-      <div class="agents-number-overlay">
-        <div class="num">33</div>
-      </div>
-    </div>
-    <div class="agents-desc">个 Agent 协作 · 确保交付质量与速度</div>
-  </div>
-
-  <div class="highlights">
-    <div class="highlight-card">
-      <span class="phase-tag design">需求设计</span>
-      <h3>简易模板 · 快速生成</h3>
-      <ul class="feature-list">
-        <li>智能对齐表格 — 结构清晰，团队对齐零偏差</li>
-        <li>一键生成 PRD — 产品需求文档自动输出</li>
-        <li>原型即所见 — UI 原型与设计稿无缝转换</li>
-      </ul>
-      <div class="pipeline">
-        <span class="step">需求输入</span><span class="arrow">→</span>
-        <span class="step">对齐表格</span><span class="arrow">→</span>
-        <span class="step">PRD文档</span><span class="arrow">→</span>
-        <span class="step">UI原型</span><span class="arrow">→</span>
-        <span class="step">任务拆解</span>
-      </div>
-    </div>
-
-    <div class="highlight-card">
-      <span class="phase-tag dev">编码测试</span>
-      <h3>33 Agent · 并发协作</h3>
-      <ul class="feature-list">
-        <li>全栈并行开发 — 前后端 + 测试 三线并发推进</li>
-        <li>智能质量门控 — 每阶段自动验证，不达标不通过</li>
-        <li>多视角审查 — 安全/性能/架构三方评审覆盖</li>
-      </ul>
-      <div class="pipeline">
-        <span class="step">代码生成</span><span class="arrow">→</span>
-        <span class="step">安全扫描</span><span class="arrow">→</span>
-        <span class="step">测试验证</span><span class="arrow">→</span>
-        <span class="step">审查评审</span><span class="arrow">→</span>
-        <span class="step">交付部署</span>
-      </div>
-    </div>
-  </div>
-
   <!-- ===== 研发双路线 ===== -->
   <div class="routes-section">
-    <div class="section-label">· 两种研发路线 ·</div>
+    <div class="section-label">· 鱼和熊掌任你选择 ·</div>
     <div class="routes-dual">
-      <div class="route-card kf">
-        <div class="route-badge">⚡ 邪 修</div>
-        <h3>kf 系列 — 快+夯</h3>
-        <div class="route-flow">
-          <span class="step">kf-go 启动</span>
-          <span class="arrow">→</span>
-          <span class="step">需求表</span>
-          <span class="arrow">→</span>
-          <span class="step">PRD</span>
-          <span class="arrow">→</span>
-          <span class="step">Spec</span>
-          <span class="arrow">→</span>
-          <span class="step">开发</span>
-        </div>
-        <div class="route-desc">
-          <strong>一键启动</strong>，需求表→PRD→Spec 全自动。<br>
-          红蓝绿<strong>三队并发竞争</strong>，裁判择优融合，力大碾压。<br>
-          推荐<strong>MVP 快速迭代</strong>场景，用魔法打败魔法。
-        </div>
-      </div>
-
-      <div class="routes-vs">
-        <div class="vs-line"></div>
-        <div class="vs-circle">VS</div>
-        <div class="vs-line"></div>
-      </div>
-
       <div class="route-card gspowers">
-        <div class="route-badge">🛡️ 名门正派</div>
+        <div class="route-badge">🛡️ 主流框架gspowers</div>
         <h3>gspowers — 稳</h3>
         <div class="route-flow">
           <span class="step">/gspowers</span>
@@ -980,6 +850,77 @@
           适合<strong>大型正式项目</strong>，稳扎稳打不翻车。
         </div>
       </div>
+      <div class="routes-vs">
+        <div class="vs-line"></div>
+        <div class="vs-circle">VS</div>
+        <div class="vs-line"></div>
+      </div>
+      <div class="route-card kf">
+        <div class="route-badge">⚡ kf（快发）系列</div>
+        <h3>kf 系列 — 贯彻六字真言</h3>
+        <div class="route-flow">
+          <span class="step">kf-go 启动</span>
+          <span class="arrow">→</span>
+          <span class="step">需求表</span>
+          <span class="arrow">→</span>
+          <span class="step">PRD</span>
+          <span class="arrow">→</span>
+          <span class="step">Spec</span>
+          <span class="arrow">→</span>
+          <span class="step">开发</span>
+        </div>
+        <div class="route-desc">
+          <strong>一键启动</strong>，需求表→PRD→Spec 全自动。<br>
+          红蓝绿<strong>三队并发竞争</strong>，经评比、博采众长，<strong>力大碾压</strong>。<br>
+          <strong>通过技能连招实现百分百空手接白刃，百分百极限搓大招。</strong><br>
+          推荐<strong>MVP 快速迭代</strong>场景，用魔法打败魔法。
+        </div>
+      </div>
+    </div>
+
+  <!-- ===== 技能总览表 ===== -->
+  <div class="skills-table-section">
+    <div class="section-label">· 本体系技能图鉴 ·</div>
+    <div class="skills-table-wrap">
+      <table class="skills-table">
+        <thead>
+          <tr><th>技能</th><th>原则</th><th>效果</th><th>核心原理</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>kf-skill-design-expert</td><td><span class="principle-tag tag-稳">稳</span></td><td class="skill-effect">创建/审查/优化 Skill，固化团队经验</td><td class="skill-mech">5 大设计模式（Tool Wrapper/Generator/Reviewer/Inversion/Pipeline）+ 渐进披露</td></tr>
+          <tr><td>kf-doc-consistency</td><td><span class="principle-tag tag-稳">稳</span></td><td class="skill-effect">全项目文档一致性自检</td><td class="skill-mech">扫描 SKILL.md→对比 CLAUDE.md/AICoding.md/INSTALL.md/MANUAL.md→输出报告</td></tr>
+          <tr><td>gspowers</td><td><span class="principle-tag tag-稳">稳</span></td><td class="skill-effect">SOP 标准化流程导航，每步有验收标准</td><td class="skill-mech">office-hours→plan→design→dev→review→ship 六步流水线 + state.json 驱动</td></tr>
+          <tr><td>gstack（上游）</td><td><span class="principle-tag tag-稳">稳</span></td><td class="skill-effect">46 个子技能覆盖产品全流程</td><td class="skill-mech">从设计咨询 → 浏览器 QA → 代码审查 → 部署交付，闭环能力</td></tr>
+          <tr><td>kf-model-router</td><td><span class="principle-tag tag-省">省</span></td><td class="skill-effect">Token 综合节省约 80%，费用降至 1/5</td><td class="skill-mech">三层叠加：pro/flash 自动切换+RTK 过滤 CLI 输出+context-mode 压缩存活</td></tr>
+          <tr><td>kf-code-review-graph</td><td><span class="principle-tag tag-省">省</span></td><td class="skill-effect">变更影响全景图 + 审查优先级排序</td><td class="skill-mech"><code>git diff</code> → 文件依赖图谱 → 涟漪效应分析 → 测试覆盖检查</td></tr>
+          <tr><td>kf-prd-generator</td><td><span class="principle-tag tag-准">准</span></td><td class="skill-effect">口述/Excel/文档→结构化 PRD 文档</td><td class="skill-mech">Inversion 式需求问询 → SDD Excel 分流 → 结构化模板填充</td></tr>
+          <tr><td>kf-ui-prototype-generator</td><td><span class="principle-tag tag-准">准</span></td><td class="skill-effect">PRD→高保真 HTML 原型，浏览器直接预览</td><td class="skill-mech">设计系统变量注入 + 页面组件自动布局，支持单页/多页导航模式</td></tr>
+          <tr><td>kf-web-search</td><td><span class="principle-tag tag-准">准</span></td><td class="skill-effect">最相关搜索结果，杜绝 AI 幻觉</td><td class="skill-mech">按场景自动选引擎（国内/技术/国际）+ 关键词组合优化 + 站点限定</td></tr>
+          <tr><td>kf-scrapling</td><td><span class="principle-tag tag-准">准</span></td><td class="skill-effect">深度数据采集，反反爬绕过</td><td class="skill-mech">Python 隐身浏览器 + 自适应元素追踪 + Spider 并发框架 + JS 渲染</td></tr>
+          <tr><td>kf-opencli</td><td><span class="principle-tag tag-准">准</span></td><td class="skill-effect">100+ 平台结构化数据 CLI 直取</td><td class="skill-mech">Chrome Extension 复用已登录会话 + AI 原生浏览器自动化，零凭证存储</td></tr>
+          <tr><td>kf-reverse-spec</td><td><span class="principle-tag tag-准">准</span></td><td class="skill-effect">存量代码逆向生成 Spec 和 Wiki 文档</td><td class="skill-mech">Scout 代码扫描→依赖图→复杂度指标→分层 Spec→API 契约→Wiki</td></tr>
+          <tr><td>kf-browser-ops</td><td><span class="principle-tag tag-准">准</span></td><td class="skill-effect">页面操作 + 截图 + 表单验证 + Bug 复现</td><td class="skill-mech">Playwright / gstack browse 双引擎，可录制回放，验证状态自动断言</td></tr>
+          <tr><td>kf-image-editor</td><td><span class="principle-tag tag-准">准</span></td><td class="skill-effect">中文描述即可 P 图改图生图</td><td class="skill-mech">Nano Banana (Gemini) MCP 驱动，风格迁移/老照片修复/抠图</td></tr>
+          <tr><td>markdown-to-docx</td><td><span class="principle-tag tag-准">准</span></td><td class="skill-effect"><code>.md</code> → <code>.docx</code> 含图片图表转换</td><td class="skill-mech">pandoc + 自动化脚本，保留 Obsidian 嵌入/Mermaid</td></tr>
+          <tr><td>kf-go</td><td><span class="principle-tag tag-快">快</span></td><td class="skill-effect">一键查看开发路径、当前进度、下一步操作</td><td class="skill-mech">工作流导航引擎，整合全部子技能路径，读取 <code>state.json</code> 恢复进度</td></tr>
+          <tr><td>kf-add-skill</td><td><span class="principle-tag tag-快">快</span></td><td class="skill-effect">搜索/安装新技能，自动更新全项目文档</td><td class="skill-mech">7 步流水线：搜索→下载→适配→同步 .claude/.trae→更新 6 份文档</td></tr>
+          <tr><td>kf-spec</td><td><span class="principle-tag tag-快">快</span></td><td class="skill-effect">模糊需求→结构化 Spec→可执行任务拆解</td><td class="skill-mech">6 步严格流水线，每步 Gate 验收，不可跳过，产出物可追溯</td></tr>
+          <tr><td>kf-multi-team-compete<br><span style="font-size:11px;color:var(--text-muted)">/夯</span></td><td><span class="principle-tag tag-夯">夯</span></td><td class="skill-effect">红蓝绿三队竞争，裁判择优融合</td><td class="skill-mech">三队串行按 Pipeline 开发→统一裁判评分→汇总师融合最佳方案</td></tr>
+          <tr><td>kf-triple-collaboration</td><td><span class="principle-tag tag-夯">夯</span></td><td class="skill-effect">红队攻击 + 蓝队防御 + 裁判汇总</td><td class="skill-mech">三角色独立视角评审，评分卡排名 + 融合方案输出</td></tr>
+          <tr><td>kf-alignment</td><td><span class="principle-tag tag-懂">懂</span></td><td class="skill-effect">动前对齐零偏差，动后 Diff 复盘确认</td><td class="skill-mech">双阶段对齐：recording 模式自动记录假设不打扰，interactive 模式逐轮确认</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ===== 常见问题 ===== -->
+  <div class="faq-section">
+    <div class="section-label">· 常见问题 ·</div>
+    <div class="faq-grid">
+      <div class="faq-card"><div class="faq-q"><span class="q-icon">Q</span><span class="q-text">AI 编程智驾的 token 消耗会不会很贵？</span></div><div class="faq-a"><span class="a-icon">A</span><span class="a-text">三层省 token 机制叠加：①<strong>模型路由</strong>（省原则）自动切换 pro/flash 模型匹配场景；②<strong>RTK（Rust Token Killer）</strong>拦截 CLI 命令输出，智能过滤压缩，终端操作综合<strong>节省约 80%</strong>；③<strong>context-mode</strong>会话压缩存活，压缩后自动恢复上下文，避免重复重建。三层叠加实际<strong>费用降到 1/5</strong>（省 5 倍的钱），长期 ROI 稳固。</span></div><span class="faq-tag solution">✓ 成本可控</span></div>
+      <div class="faq-card"><div class="faq-q"><span class="q-icon">Q</span><span class="q-text">AI 调研不准导致结果不准，怎么办？</span></div><div class="faq-a"><span class="a-icon">A</span><span class="a-text">根因在于<strong>没有实时查询</strong>，查不到也查不全。我们采用<strong>多源验证机制</strong>（准原则）：web-search + scrapling 双引擎交叉确认，实时联网查证。从根源杜绝大模型<strong>"幻觉"</strong>，确保信息全面准确。</span></div><span class="faq-tag solution">✓ 实时联网</span></div>
+      <div class="faq-card"><div class="faq-q"><span class="q-icon">Q</span><span class="q-text">单一 Agent 串行做事，不够专业且效率低？</span></div><div class="faq-a"><span class="a-icon">A</span><span class="a-text"><strong>33 个 Agent 并发协作</strong>（夯原则），红蓝绿三队竞争评审，裁判择优融合。每个 Agent 专精特定领域（前端/后端/测试/安全/架构），并行推进需求、设计、编码、测试、审查全流程，<strong>博采众长、力大碾压</strong>。</span></div><span class="faq-tag solution">✓ 多路并行</span></div>
+      <div class="faq-card"><div class="faq-q"><span class="q-icon">Q</span><span class="q-text">复杂任务很难跟 AI 交流清楚，怎么办？</span></div><div class="faq-a"><span class="a-icon">A</span><span class="a-text">通过<strong>动前对齐</strong>（懂原则）先复述理解再执行，动后 Diff 确认偏差。<strong>Spec 驱动开发</strong>将模糊需求转化为结构化文档，智能拆解为可执行的子任务。全程可追溯、可确认，确保复杂任务<strong>零偏差传递</strong>。</span></div><span class="faq-tag solution">✓ 对齐保障</span></div>
     </div>
   </div>
 
@@ -1002,30 +943,8 @@
 
 <script>
 (function() {
-  // ===== 1. 蜂巢生成 =====
-  var container = document.getElementById('hexContainer');
-  var hexRows = [5, 6, 6, 5, 6, 5];
-  var agentIndex = 1;
 
-  for (var r = 0; r < hexRows.length; r++) {
-    var rowDiv = document.createElement('div');
-    rowDiv.className = 'hex-row';
-    if (r % 2 === 0) rowDiv.classList.add('offset');
-
-    for (var c = 0; c < hexRows[r]; c++) {
-      var cell = document.createElement('div');
-      cell.className = 'hex-cell';
-      var hex = document.createElement('div');
-      hex.className = 'hex filled';
-      hex.title = 'Agent #' + agentIndex;
-      cell.appendChild(hex);
-      rowDiv.appendChild(cell);
-      agentIndex++;
-    }
-    container.appendChild(rowDiv);
-  }
-
-  // ===== 2. Antigravity 粒子系统 (浅色版) =====
+  // ===== Antigravity 粒子系统 (浅色版) =====
   var canvas = document.getElementById('particleCanvas');
   var ctx = canvas.getContext('2d');
   var particles = [];

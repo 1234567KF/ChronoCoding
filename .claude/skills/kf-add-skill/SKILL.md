@@ -19,6 +19,7 @@ metadata:
   integrated-skills:
     - kf-model-router
     - kf-skill-design-expert
+    - kf-doc-consistency
   recommended_model: pro
 ---
 
@@ -255,7 +256,21 @@ Run the harness gate check to verify no forbidden patterns were introduced:
 node .claude/helpers/harness-gate-check.cjs --forbidden-patterns "TODO" "待定" "FIXME"
 ```
 
-### 7c. Summary
+### 7c. Post-install consistency check
+
+After all documentation updates are complete, trigger the document consistency check:
+
+Say **"now do a doc consistency check"** to invoke `kf-doc-consistency`.
+
+This verifies all updated files (CLAUDE.md, AICoding.md, INSTALL.md, MANUAL.md) are internally consistent with:
+- Every skill on disk has a row in every relevant table
+- No stale entries for deleted skills
+- Trigger words are consistent across all docs
+- Directory structure trees match the actual filesystem
+
+If `kf-doc-consistency` reports any ERROR items, fix them before proceeding.
+
+### 7d. Summary
 
 Output a structured summary:
 

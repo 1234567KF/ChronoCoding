@@ -18,15 +18,18 @@
 | `kf-scrapling` | — | 准 | 被 `/夯` Stage 1/2/3 按需自动调用 | Web 爬虫+反反爬，深度数据采集，替代/补充 web-search |
 | `kf-opencli` | — | 准 | 被 `/夯` Stage 1/2/3 按需自动调用 | OpenCLI — 100+ 平台 CLI 数据直取（知乎/B站/微博/GitHub/Reddit/HN/arXiv），补充 web-search 和 scrapling 中间地带 |
 | `kf-grant-research` | — | 准 | Pipeline + Inversion + Generator，调用 asta-skill + kf-scrapling + kf-web-search | 课题申报研究助手：顶刊搜索→论文分析→研究空白→申报材料 |
+| `kf-reverse-spec` | — | 准/省 | Pipeline，调用 kf-alignment + kf-web-search + kf-code-review-graph | 存量代码→Spec/文档 逆向流水线 |
 | `kf-multi-team-compete` | **`/夯`** | 夯 | **主入口**，自动调用 11 个技能 + Pipeline 引擎 | 红蓝绿队多 Agent 并发竞争评审 |
 | `kf-alignment` | `/对齐` | 懂 | 被 kf-spec、`/夯`、kf-prd-generator 自动调用 | 对齐工作流：动前谈理解，动后谈 diff |
+| `kf-autoresearch` | — | 准 | Pipeline + Loop，自动调用 kf-model-router | Karpathy 自主 ML 实验：改 train.py→5分钟训练→验证val_bpb→循环 |
 | `kf-model-router` | 模型路由 | 省 | **自动触发**：所有技能启动时自动检查并切换模型 | 模型智能路由：计划 pro，执行 flash，用户无感 |
 | `kf-prd-generator` | `/prd-generator` | 快 | 自动调用 kf-alignment（产出后 Hook 对齐）；被 `/夯` Pre-Stage 自动调用 | SDD Excel → PRD 生成器 |
 | `kf-triple-collaboration` | triple | 夯 | 内部 spawn（轻量版 `/夯`） | 三方协作评审 |
 | `kf-ui-prototype-generator` | — | 快 | 被 `/夯` Stage 2/5 自动调用 | UI 原型 HTML 生成 |
 | `kf-image-editor` | — | 快 | 被 `/夯` Stage 2/5 自动调用 | AI 自然语言 P 图，Nano Banana MCP |
 | `kf-skill-design-expert` | — | 稳 | 独立，包含 Harness Engineering 评审体系 | Skill 设计专家 + 五根铁律审计 |
-| `kf-add-skill` | — | 稳 | 关键词搜索→下载安装→同步 .claude/.trae 文档+SKILL.md | 技能安装管家：搜索安装+文档全自动同步 |
+| `kf-doc-consistency` | — | 准/省 | Pipeline + Reviewer，被 kf-add-skill 自动调用 | 文档全局一致性自检 |
+| `kf-add-skill` | — | 稳 | 关键词搜索→下载安装→同步所有文档+SKILL.md，自动触发一致性检查 | 技能安装管家：搜索安装+文档全自动同步 |
 | `kf-markdown-to-docx-skill` | — | — | 独立 | Markdown → DOCX 转换 |
 
 ### 上游技能（非自建，不加 kf- 前缀）
@@ -58,12 +61,16 @@
     ├── kf-browser-ops/        # 浏览器自动化
     ├── kf-multi-team-compete/ # 多团队竞争
     ├── kf-alignment/          # 对齐工作流
+    ├── kf-autoresearch/       # AI 自主 ML 实验
     ├── kf-model-router/       # 模型路由
     ├── kf-prd-generator/      # PRD 生成器
     ├── kf-triple-collaboration/ # 三方协作
     ├── kf-ui-prototype-generator/ # UI 原型
+    ├── kf-image-editor/   # AI 自然语言 P 图
+    ├── kf-reverse-spec/   # 存量代码→Spec 逆向
     ├── kf-skill-design-expert/ # Skill 设计
     ├── kf-add-skill/         # 技能安装管家
+    ├── kf-doc-consistency/   # 文档一致性自检
     ├── kf-markdown-to-docx-skill/ # MD→DOCX
     ├── kf-scrapling/          # Web 爬虫 + 反反爬
     ├── kf-opencli/            # OpenCLI — 100+ 平台 CLI 数据直取
@@ -100,11 +107,14 @@ claude
 | `模型路由` / `省模式` | kf-model-router | 省 | **全自动**，用户无感 |
 | `Harness 评审` / `五根铁律审计` | kf-skill-design-expert | 稳 | 全路径扫描，评分矩阵 + 缺陷分级 |
 | `P图` / `改图` / `修图` / `去水印` | kf-image-editor | 快 | AI 自然语言 P 图，被 `/夯` Stage 2/5 调用 |
+| `自动实验` / `ai实验` / `实验跑一夜` / `autoresearch` | kf-autoresearch | 准 | Karpathy 自主 ML 实验：改代码→训练→验证→循环 |
 | `转docx` / `markdown转word` | kf-markdown-to-docx-skill | — | Markdown → DOCX 转换 |
-| `装技能` / `安装技能` / `添加技能` / `搜索技能` | kf-add-skill | 稳 | 技能安装管家：搜索→安装→文档全同步 |
+| `装技能` / `安装技能` / `添加技能` / `搜索技能` | kf-add-skill | 稳 | 技能安装管家：搜索→安装→文档全同步→一致性检查 |
+| `一致性` / `文档自检` / `doc consistency` | kf-doc-consistency | 准/省 | 文档全局一致性自检，被 kf-add-skill 自动调用 |
 | `爬虫` / `抓取` / `scrape` / `反反爬` | kf-scrapling | 准 | Web 爬虫，被 `/夯` Stage 1/2/3 按需调用 |
 | `热榜` / `平台抓取` / `CLI数据` / `opencli` | kf-opencli | 准 | 100+ 平台 CLI 数据直取，被 `/夯` Stage 1/2/3 按需调用 |
 | `论文` / `查论文` / `学术搜索` / `文献` | asta-skill | 准 | Semantic Scholar 学术论文搜索，需配置 ASTA_API_KEY |
+| `逆向` / `存量代码` / `代码扫描` / `逆向工程` | kf-reverse-spec | 准/省 | 存量代码→Spec/文档 逆向流水线 |
 | `课题申报` / `科研项目` / `国自然` / `研究计划` | kf-grant-research | 准 | 课题申报研究助手：论文搜索→分析→gap→申报材料 |
 
 ## 自动调用链速览
@@ -138,6 +148,7 @@ claude
 | RTK | 见 INSTALL.md | Token 节省 |
 | OpenCLI | `npm install -g @jackwener/opencli` | 100+ 平台 CLI 数据提取 |
 | context-mode | `npm install -g context-mode` | 会话连续性 + 压缩存活（MCP + hooks） |
+| uv | `npm install -g uv` 或 `curl -LsSf https://astral.sh/uv/install.sh | sh` | Python 包管理器（kf-autoresearch 依赖） |
 
 ## 项目隔离
 

@@ -97,6 +97,9 @@ claude
 | `模型路由` / `省模式`     | 🆕 模型智能路由                   | kf-model-router      |
 | `spec coding`             | 🆕 Spec 驱动开发                   | kf-spec       |
 | `P图` / `改图` / `修图` / `去水印` | 🆕 AI 自然语言 P 图，无需打开编辑器  | kf-image-editor |
+| `一致性` / `文档自检` / `doc consistency` | 🆕 文档全局一致性自检，新增技能后自动触发 | kf-doc-consistency |
+| `逆向` / `存量代码` / `代码扫描` / `逆向工程` | 🆕 存量代码→Spec/文档 逆向流水线 | kf-reverse-spec |
+| `自动实验` / `ai实验` / `实验跑一夜` / `autoresearch` | 🆕 Karpathy 自主 ML 实验：AI 整夜跑实验 | kf-autoresearch |
 | `ctx_stats` / `ctx_doctor` | 🆕 上下文压缩统计 / 诊断           | context-mode |
 | `会话恢复` / `压缩存活`   | 🆕 `/compact` 后自动恢复工作状态   | context-mode |
 
@@ -145,12 +148,19 @@ Agent 共享（在同一个项目内的 agents 共享记忆）
 │       ├── kf-browser-ops/    # 浏览器自动化
 │       ├── kf-multi-team-compete/ # 多团队竞争
 │       ├── kf-alignment/      # 对齐工作流
+│       ├── kf-autoresearch/   # AI 自主 ML 实验
 │       ├── kf-model-router/   # 模型路由
 │       ├── kf-prd-generator/  # PRD 生成
 │       ├── kf-triple-collaboration/ # 三方协作
+    │       ├── kf-reverse-spec/  # 存量代码→Spec 逆向
 │       ├── kf-ui-prototype-generator/ # UI 原型
 │       ├── kf-image-editor/      # AI 自然语言 P 图
+    │       ├── kf-add-skill/      # 技能安装管家
+│       ├── kf-doc-consistency/   # 文档一致性自检
 │       ├── kf-skill-design-expert/ # Skill 设计
+    │       ├── kf-scrapling/      # Web 爬虫 + 反反爬
+    │       ├── kf-grant-research/ # 课题申报研究助手
+    │       ├── kf-markdown-to-docx-skill/ # MD→DOCX
 │       ├── gspowers/          # SOP 导航（上游）
 │       └── gstack/            # 产品流程（上游）
 ```

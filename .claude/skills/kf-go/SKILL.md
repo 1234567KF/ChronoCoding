@@ -34,6 +34,7 @@ metadata:
     - kf-image-editor
     - kf-markdown-to-docx-skill
     - kf-grant-research
+    - kf-doc-consistency
     - asta-skill
     - kf-add-skill
     # 质量/协作

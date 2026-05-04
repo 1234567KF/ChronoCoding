@@ -3,6 +3,7 @@ name: kf-spec
 description: 协调 Spec Coding 全流程，从原始需求到结构化 Spec 文档再到分步实施。触发词："spec coding"、"写spec文档"、"规范编程"。适用于中等及以上复杂度的新功能开发（预估工时≥1天）。
 metadata:
   pattern: pipeline + inversion
+  recommended_model: pro→flash
   steps: "6"
   interaction: multi-turn
 integrated-skills:

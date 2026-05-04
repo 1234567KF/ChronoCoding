@@ -1216,6 +1216,10 @@ D:\your-project\
 | `/ship`                   | 发布 PR                          | gspowers |
 | `热榜` / `平台抓取` / `CLI数据` | 100+ 平台数据 CLI 直取     | kf-opencli |
 | `装个技能` / `安装技能` / `添加技能` | 技能安装管理               | kf-add-skill |
+| `逆向` / `存量代码` / `代码扫描` / `逆向工程` | 存量代码→Spec/文档 逆向流水线 | kf-reverse-spec |
+| `一致性` / `文档自检` / `doc consistency` | 文档全局一致性自检 | kf-doc-consistency |
+| `P图` / `改图` / `修图` / `去水印` | AI 自然语言 P 图 | kf-image-editor |
+| `自动实验` / `ai实验` / `实验跑一夜` / `autoresearch` | Karpathy 自主 ML 实验：改模型→训练→验证→循环 | kf-autoresearch |
 
 ---
 
@@ -2469,6 +2473,8 @@ Frontend: shared → pages
 | `流水线开发`              | 同上                       | gspowers-pipeline |
 | `热榜` / `平台抓取` / `CLI数据` / `opencli` | 100+ 平台数据 CLI 直取 | kf-opencli |
 | `P图` / `改图` / `修图` / `去水印` | AI 自然语言 P 图，无需打开编辑器 | kf-image-editor |
+| `一致性` / `文档自检` / `doc consistency` | 文档全局一致性自检，新增技能后自动触发 | kf-doc-consistency |
+| `自动实验` / `ai实验` / `实验跑一夜` / `autoresearch` | Karpathy 自主 ML 实验：AI 整夜跑实验 | kf-autoresearch |
 
 ---
 

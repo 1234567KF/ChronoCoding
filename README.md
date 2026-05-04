@@ -17,7 +17,7 @@
   <img src="assets/posters/宣传海报_浅色.png" alt="AI编程智驾 宣传海报" width="900">
 </p>
 
-**AI编程智驾** 是一套完整的 AI 编程工作台，遵循七大原则，集成 Claude Code、gspowers SOP 导航、claude-flow 多 Agent 并行执行，16 个自建 kf- 系列技能覆盖从 PRD 到 Spec 到编码到审查的全链路。
+**AI编程智驾** 是一套完整的 AI 编程工作台，遵循七大原则，集成 Claude Code、gspowers SOP 导航、claude-flow 多 Agent 并行执行，21 个自建 kf- 系列技能覆盖从 PRD 到 Spec 到编码到审查的全链路。
 
 ---
 
@@ -46,17 +46,17 @@
 
 ---
 
-## 七大原则
+## 六字真言
 
 | 原则 | 含义 | 对应技能 |
 |------|------|---------|
-| **稳** | 好用不贵，长期维护 | gspowers、gstack、kf-skill-design-expert |
+| **稳** | 好用不贵，长期维护 | gspowers、gstack、kf-skill-design-expert、kf-add-skill、kf-reverse-skill、kf-doc-consistency |
 | **省** | 模型搭配，稳固 ROI | kf-model-router、kf-code-review-graph、RTK |
-| **准** | 多源搜索 + 反反爬 + 平台直取，精准调研 | kf-web-search、kf-scrapling、kf-opencli |
+| **准** | 多源搜索 + 反反爬 + 平台直取，精准调研 | kf-web-search、kf-scrapling、kf-opencli、markdown-to-docx、kf-go、bili-extract、harness-code-dev、observability-designer、performance-profiler |
 | **夯** | 多 Agent 并发竞争碾压 | kf-multi-team-compete、kf-triple-collaboration |
-| **快** | MVP 快速验证，多工具速出原型 | kf-spec、kf-prd-generator、kf-ui-prototype-generator、kf-image-editor、kf-markdown-to-docx-skill |
+| **快** | MVP 快速验证，多工具速出原型 | kf-prd-generator、kf-ui-prototype-generator、kf-spec、kf-image-editor、markdown-to-docx |
 | **懂** | 动前对齐，动后 diff | kf-alignment |
-| **测的准** | 自动化测试验证 | kf-browser-ops |
+
 
 ---
 
@@ -74,6 +74,7 @@
 | [RTK](https://github.com/rafaelkallis/rtk) | rafaelkallis | MIT | Token 优化 |
 | [context-mode](https://github.com/mksglu/context-mode) | mksglu | Elastic-2.0 | 会话连续性 + 压缩存活 |
 | [OpenCLI](https://github.com/jackwener/OpenCLI) | jackwener | MIT | 100+ 平台 CLI 数据直取，AI 原生浏览器自动化 |
+| [autoresearch](https://github.com/karpathy/autoresearch) | karpathy | MIT | 自主 ML 实验：AI 整夜改模型→训练→验证→循环 |
 
 详见 [CREDITS.md](docs/CREDITS.md) 完整致谢。
 
@@ -156,6 +157,7 @@ git clone https://github.com/fshaan/gspowers.git ~/.claude/skills/gspowers
 | `转docx` / `markdown转word` | Markdown → DOCX 转换 | kf-markdown-to-docx-skill |
 | `Harness 评审` / `五根铁律审计` | Skill 质量审计 | kf-skill-design-expert |
 | `模型路由` / `省模式` | 模型智能路由（全自动） | kf-model-router |
+| `自动实验` / `ai实验` / `实验跑一夜` / `autoresearch` | Karpathy 自主 ML 实验 | kf-autoresearch |
 
 ---
 
@@ -208,6 +210,7 @@ AI编程智驾/
 │       ├── kf-browser-ops/         # 浏览器自动化
 │       ├── kf-multi-team-compete/  # 多团队竞争评审
 │       ├── kf-alignment/           # 对齐工作流
+│       ├── kf-autoresearch/        # AI 自主 ML 实验
 │       ├── kf-model-router/        # 模型路由
 │       ├── kf-prd-generator/       # PRD 生成器
 │       ├── kf-triple-collaboration/# 三方协作

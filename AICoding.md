@@ -276,13 +276,16 @@ git log --oneline -3
 | `kf-browser-ops` | `/browser-ops` | 测的准 | 独立（被动技能） | 无 | **kf-multi-team-compete Stage 3 自动调用**、用户手动 | flash |
 | `kf-multi-team-compete` | **`/夯`** | 夯 | **内部 spawn + 自动调用** | kf-prd-generator（Pre-Stage）、kf-alignment、kf-spec、kf-browser-ops、kf-code-review-graph、**kf-web-search**、kf-ui-prototype-generator、gspowers Pipeline | **主入口**，用户手动 `/夯` | pro（裁判+汇总）+ flash（各队 agent） |
 | `kf-alignment` | `/对齐` | 懂 | 独立（被动技能） | 无 | **kf-spec 自动调用**、**kf-multi-team-compete Stage 0/Phase 3 自动调用**、kf-prd-generator Hook 自动调用 | pro |
+| `kf-autoresearch` | — | 准 | Pipeline + Loop | kf-model-router | 用户手动 | flash |
 | `kf-model-router` | 模型路由 | 省 | **自动触发**（Hook） | 无 | **所有声明 recommended_model 的技能启动时自动调用** | —（路由器本身） |
 | `kf-prd-generator` | `/prd-generator` | 快 | **自动调用** | kf-alignment（产出 PRD 后 Hook 触发对齐） | 用户手动、**kf-multi-team-compete Pre-Stage 自动调用** | flash |
+| `kf-reverse-spec` | — | 准/省 | Pipeline | kf-alignment、kf-web-search、kf-code-review-graph、kf-model-router | 用户手动 | flash |
 | `kf-triple-collaboration` | triple | 夯 | 内部 spawn | 同 kf-multi-team-compete（轻量版） | 用户手动 | pro+flash |
 | `kf-ui-prototype-generator` | — | 快 | 独立（被动技能） | 无 | kf-multi-team-compete Stage 2/5 自动调用 | flash |
 | `kf-image-editor` | — | 快 | 独立（被动技能） | 无 | kf-multi-team-compete Stage 2/5 自动调用 | flash |
 | `kf-skill-design-expert` | — | 稳 | 独立 | 无 | 用户手动 | pro |
-| `kf-add-skill` | — | 稳 | Pipeline + Inversion | kf-model-router、kf-skill-design-expert | 用户手动 | pro |
+| `kf-doc-consistency` | — | 准/省 | Pipeline + Reviewer | kf-model-router | kf-add-skill（自动）、用户手动 | flash |
+| `kf-add-skill` | — | 稳 | Pipeline + Inversion | kf-model-router、kf-skill-design-expert、kf-doc-consistency | kf-grant-research（自动调用）、用户手动 | pro |
 | `kf-grant-research` | — | 准 | Pipeline + Inversion + Generator | asta-skill、kf-scrapling、kf-web-search、kf-alignment、kf-add-skill、kf-model-router | 用户手动 | pro |
 | `kf-markdown-to-docx-skill` | — | — | 独立 | 无 | 用户手动 | flash |
 
