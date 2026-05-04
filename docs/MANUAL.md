@@ -100,6 +100,14 @@ claude
 | `一致性` / `文档自检` / `doc consistency` | 🆕 文档全局一致性自检，新增技能后自动触发 | kf-doc-consistency |
 | `逆向` / `存量代码` / `代码扫描` / `逆向工程` | 🆕 存量代码→Spec/文档 逆向流水线 | kf-reverse-spec |
 | `自动实验` / `ai实验` / `实验跑一夜` / `autoresearch` | 🆕 Karpathy 自主 ML 实验：AI 整夜跑实验 | kf-autoresearch |
+| `/go` / `/导航` / `/开始` | 🆕 工作流导航 | kf-go |
+| `/prd-generator` | 🆕 PRD 文档生成 | kf-prd-generator |
+| `爬虫` / `抓取` / `scrape` / `反反爬` | 🆕 Web 爬虫 + 反反爬 | kf-scrapling |
+| `Harness 评审` / `五根铁律审计` | 🆕 Skill 质量审计 | kf-skill-design-expert |
+| `生成UI原型` / `UI原型` / `页面原型` | 🆕 UI 原型 HTML 生成 | kf-ui-prototype-generator |
+| `课题申报` / `科研项目` / `国自然` / `研究计划` | 🆕 课题申报研究助手 | kf-grant-research |
+| `装技能` / `安装技能` / `添加技能` / `搜索技能` | 🆕 技能安装管家 | kf-add-skill |
+| `转docx` / `markdown转word` | 🆕 Markdown → DOCX 转换 | kf-markdown-to-docx-skill |
 | `ctx_stats` / `ctx_doctor` | 🆕 上下文压缩统计 / 诊断           | context-mode |
 | `会话恢复` / `压缩存活`   | 🆕 `/compact` 后自动恢复工作状态   | context-mode |
 
@@ -157,10 +165,12 @@ Agent 共享（在同一个项目内的 agents 共享记忆）
 │       ├── kf-image-editor/      # AI 自然语言 P 图
     │       ├── kf-add-skill/      # 技能安装管家
 │       ├── kf-doc-consistency/   # 文档一致性自检
+│       ├── kf-go/                # 工作流导航
 │       ├── kf-skill-design-expert/ # Skill 设计
     │       ├── kf-scrapling/      # Web 爬虫 + 反反爬
     │       ├── kf-grant-research/ # 课题申报研究助手
     │       ├── kf-markdown-to-docx-skill/ # MD→DOCX
+│       ├── asta-skill/           # 学术论文搜索
 │       ├── gspowers/          # SOP 导航（上游）
 │       └── gstack/            # 产品流程（上游）
 ```

@@ -1220,6 +1220,21 @@ D:\your-project\
 | `一致性` / `文档自检` / `doc consistency` | 文档全局一致性自检 | kf-doc-consistency |
 | `P图` / `改图` / `修图` / `去水印` | AI 自然语言 P 图 | kf-image-editor |
 | `自动实验` / `ai实验` / `实验跑一夜` / `autoresearch` | Karpathy 自主 ML 实验：改模型→训练→验证→循环 | kf-autoresearch |
+| `spec coding` / `写spec文档` | Spec 驱动开发 | kf-spec |
+| `/go` / `/导航` / `/开始` | 工作流导航 | kf-go |
+| `/夯 [任务]` | 多团队竞争评审（主入口） | kf-multi-team-compete |
+| `/对齐` / `说下你的理解` | 对齐工作流 | kf-alignment |
+| `/review-graph` | 代码审查依赖图谱 | kf-code-review-graph |
+| `/web-search [问题]` | 多引擎智能搜索 | kf-web-search |
+| `/browser-ops` | 浏览器自动化测试 | kf-browser-ops |
+| `/prd-generator` | PRD 文档生成 | kf-prd-generator |
+| `triple [任务]` | 通用三方协作 | kf-triple-collaboration |
+| `模型路由` / `省模式` | 模型智能路由（全自动） | kf-model-router |
+| `Harness 评审` / `五根铁律审计` | Skill 质量审计 | kf-skill-design-expert |
+| `爬虫` / `抓取` / `scrape` / `反反爬` | Web 爬虫 + 反反爬 | kf-scrapling |
+| `生成UI原型` / `UI原型` / `页面原型` | UI 原型 HTML 生成 | kf-ui-prototype-generator |
+| `转docx` / `markdown转word` | Markdown → DOCX 转换 | kf-markdown-to-docx-skill |
+| `课题申报` / `科研项目` / `国自然` / `研究计划` | 课题申报研究助手 | kf-grant-research |
 
 ---
 

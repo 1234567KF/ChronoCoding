@@ -6,7 +6,7 @@ description: |
 metadata:
   pattern: pipeline + reviewer
   principle: 稳
-  steps: "5"
+  steps: "6"
   integrated-skills:
     - kf-model-router
   recommended_model: flash
@@ -24,10 +24,11 @@ metadata:
 
 ```
 Stage 0 ─── Scout ─── 扫描磁盘技能目录，提取 SKILL.md frontmatter 元数据
-Stage 1 ─── CLAUDE.md ─── 对比技能表 + 触发词表 + 目录树 + 调用链
-Stage 2 ─── AICoding.md ─── 对比详细技能表 + 调用链 + FAQ
-Stage 3 ─── INSTALL.md + MANUAL.md ─── 对比触发词映射 + 目录树
-Stage 4 ─── Report ─── 输出结构化一致性报告
+Stage 1 ─── Check CLAUDE.md ─── 对比技能表 + 触发词表 + 目录树 + 调用链
+Stage 2 ─── Check AICoding.md ─── 对比详细技能表 + 调用链 + FAQ
+Stage 3 ─── Check INSTALL.md + MANUAL.md ─── 对比触发词映射 + 目录树
+Stage 4 ─── Auto-Fix ─── 按优先级自动修复所有 ERROR/WARNING
+Stage 5 ─── Push ─── git add → commit → push，推完报告
 ```
 
 ---
@@ -195,57 +196,100 @@ Gate: 3a~3c 均完成后进入 Stage 4。
 
 ---
 
-## Stage 4 — Report（报告）
+## Stage 4 — Auto-Fix（自动修复）
 
-汇总所有 stages 发现的 findings，按严重程度分组输出：
+汇总所有 stages 发现的 findings，按优先级逐条自动修复。
+
+### 4a. 修复优先级
+
+1. **P0 — ERROR**：所有 MUST 级问题（MISSING、STALE），逐条修复
+2. **P1 — WARNING**：所有 SHOULD 级问题（DESCRIPTION_DRIFT、TRIGGER_DRIFT、MODEL_DRIFT、ORDER_DRIFT），逐条修复
+3. **跳过 INFO**：记录但不动
+
+### 4b. 修复规则
+
+每个 finding 按类型执行对应修复：
+
+| 类型 | 文档 | 修复动作 |
+|------|------|----------|
+| MISSING | 技能表/触发词表 | 用 Edit 在对应表格末尾追加行 |
+| STALE | 任意文档 | 用 Edit 删除对应行/引用 |
+| DESCRIPTION_DRIFT | 说明列与 SKILL.md 不一致 | 用 Edit 更新说明文字 |
+| TRIGGER_DRIFT | 触发词文字不匹配 | 用 Edit 更新触发词 |
+| MODEL_DRIFT | 模型列与 recommended_model 不符 | 用 Edit 更新模型列 |
+| ORDER_DRIFT | MANUAL 目录树顺序 | 用 Edit 重排序节点 |
+| MISSING_DIRTREE | README 目录树 | 用 Edit 在目录树中追加 |
+| MISSING_CREDIT | README 第三方集成表 | 用 Edit 在表末尾追加 |
+
+对每个 finding 顺序执行：
+1. 用 Edit 修复
+2. 输出 `[FIXED] {severity} | {doc} | {section} | {skill} → {action_taken}`
+3. 继续下一条
+
+所有 P0+P1 修复完成后，输出一份简短汇总：
 
 ```
-╔══════════════════════════════════════════════════╗
-║  kf-doc-consistency — 文档一致性检查报告         ║
-╚══════════════════════════════════════════════════╝
-
-## 概要
-- 扫描技能数：{N}
-- 检查文档数：5（CLAUDE.md / AICoding.md / INSTALL.md / MANUAL.md / README.md）
-- ERROR：{count} | WARNING：{count} | INFO：{count}
-
-## ERROR（必须修复）
-| # | 文档 | 章节 | 技能 | 问题 |
-|---|------|------|------|------|
-| 1 | CLAUDE.md | 技能表 | kf-xxx | 磁盘存在但表中无行 |
-
-## WARNING（建议修复）
-...
-
-## INFO（可优化）
-...
+───────────────── Auto-Fix Summary ─────────────────
+P0 ERROR fixed: {count}
+P1 WARNING fixed: {count}
+INFO (skipped):  {count}
+Unfixable:        {count}（如下）
+  - {reason} | {finding}
+─────────────────────────────────────────────────
 ```
 
-### 自动修复建议
+### 4c. Unfixable 情况
 
-对每个 ERROR/WARNING，附带修复建议：
+以下情况无法自动修复，输出到汇总中请用户手动处理：
+- PNG 海报需重截（始终提示）
+- 需要人工判断的描述性内容（如技能描述措辞用户可能有偏好的）
+
+### 4d. PNG 海报提醒
+
+文档修复不覆盖 PNG 图片。如果本次修复涉及技能增删，完成后提醒：
+
+> 技能有增减，请手动重截海报：打开 `assets/posters/宣传海报_浅色.html` → 截图 → 覆盖 `宣传海报_浅色.png`
+
+---
+
+## Stage 5 — Push（提交推库）
+
+如果有任何文件被修改（通过 Edit 工具），执行：
+
+### 5a. 暂存所有变更
+
+```bash
+git add -A
+```
+
+### 5b. 提交
+
+```bash
+git commit -m "docs: 文档一致性自动修复"
+```
+
+### 5c. 推送
+
+```bash
+git push origin main
+```
+
+### 5d. 输出结果
+
+推送完成后输出：
 
 ```
-ER01 | CLAUDE.md 技能表 | kf-new-skill | 缺少行
-→ 修复: 在 CLAUDE.md `### kf- 系列` 表末尾添加:
-  | `kf-new-skill` | — | 准 | 独立 | 简洁说明 |
+✅ 文档一致性自动修复完成
+- 修复文件数：{N}
+- 修复项：{P0 个 ERROR + P1 个 WARNING}
+- 已推送到 origin/main
 ```
 
-### 退出规则
+如果没有任何变更（全部干净），跳过 Stage 5，输出：
 
-- ERROR > 0：提示"存在 N 个必须修复的一致性问题"，列出每个 ERROR 的修复命令
-- ERROR = 0 且 WARNING > 0：提示"建议修复 N 个警告"
-- 全部干净：输出 ✅ 全绿通过
-
-### ⚠️ PNG 海报需手动重截
-
-文档检查不覆盖 PNG 图片。如果新增/删除了技能，`assets/posters/宣传海报_浅色.html` 已更新但同名 PNG 是静态图片。完成所有文档修复后：
-
-1. 在浏览器打开 `assets/posters/宣传海报_浅色.html`
-2. 截图保存覆盖 `assets/posters/宣传海报_浅色.png`
-3. 如果架构图变了，同样重截 `assets/posters/架构图.png`
-
-这是 README 首屏展示图，过时了影响观感。
+```
+✅ 全绿通过，无需修复
+```
 
 ---
 

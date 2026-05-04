@@ -75,6 +75,7 @@
 | [context-mode](https://github.com/mksglu/context-mode) | mksglu | Elastic-2.0 | 会话连续性 + 压缩存活 |
 | [OpenCLI](https://github.com/jackwener/OpenCLI) | jackwener | MIT | 100+ 平台 CLI 数据直取，AI 原生浏览器自动化 |
 | [autoresearch](https://github.com/karpathy/autoresearch) | karpathy | MIT | 自主 ML 实验：AI 整夜改模型→训练→验证→循环 |
+| [asta-skill](https://github.com/Agents365-ai/asta-skill) | Agents365-ai | MIT | 学术论文搜索 — Semantic Scholar via Ai2 Asta MCP |
 
 详见 [CREDITS.md](docs/CREDITS.md) 完整致谢。
 
@@ -158,6 +159,11 @@ git clone https://github.com/fshaan/gspowers.git ~/.claude/skills/gspowers
 | `Harness 评审` / `五根铁律审计` | Skill 质量审计 | kf-skill-design-expert |
 | `模型路由` / `省模式` | 模型智能路由（全自动） | kf-model-router |
 | `自动实验` / `ai实验` / `实验跑一夜` / `autoresearch` | Karpathy 自主 ML 实验 | kf-autoresearch |
+| `一致性` / `文档自检` / `doc consistency` | 文档全局一致性自检 | kf-doc-consistency |
+| `逆向` / `存量代码` / `代码扫描` / `逆向工程` | 存量代码→Spec/文档 逆向流水线 | kf-reverse-spec |
+| `装技能` / `安装技能` / `添加技能` / `搜索技能` | 技能安装管家 | kf-add-skill |
+| `课题申报` / `科研项目` / `国自然` / `研究计划` | 课题申报研究助手 | kf-grant-research |
+| `论文` / `查论文` / `学术搜索` / `文献` | Semantic Scholar 学术论文搜索 | asta-skill |
 
 ---
 
@@ -204,7 +210,7 @@ AI编程智驾/
 │   ├── agents/            # Agent 定义
 │   ├── commands/          # 自定义命令
 │   └── skills/            # 技能（kf- 系列 + 上游）
-│       ├── kf-spec/         # Spec 驱动开发
+│       ├── kf-spec/                # Spec 驱动开发
 │       ├── kf-code-review-graph/   # 代码审查图谱
 │       ├── kf-web-search/          # 多引擎搜索
 │       ├── kf-browser-ops/         # 浏览器自动化
@@ -217,8 +223,15 @@ AI编程智驾/
 │       ├── kf-ui-prototype-generator/ # UI 原型
 │       ├── kf-skill-design-expert/ # Skill 设计
 │       ├── kf-markdown-to-docx-skill/ # MD→DOCX
-│       ├── kf-scrapling/          # Web 爬虫 + 反反爬
-│       ├── kf-image-editor/       # AI 自然语言 P 图
+│       ├── kf-add-skill/           # 技能安装管家
+│       ├── kf-doc-consistency/     # 文档一致性自检
+│       ├── kf-go/                  # 工作流导航
+│       ├── kf-grant-research/      # 课题申报研究助手
+│       ├── kf-image-editor/        # AI 自然语言 P 图
+│       ├── kf-opencli/             # OpenCLI — 100+ 平台 CLI 数据直取
+│       ├── kf-reverse-spec/        # 存量代码→Spec 逆向
+│       ├── kf-scrapling/           # Web 爬虫 + 反反爬
+│       ├── asta-skill/             # 学术论文搜索
 │       ├── gspowers/               # SOP 导航（上游）
 │       └── gstack/                 # 产品流程（上游）
 │
