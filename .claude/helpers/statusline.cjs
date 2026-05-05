@@ -573,6 +573,63 @@ function getIntegrationStatus() {
   return { mcpServers, hasDatabase, hasApi };
 }
 
+// Session cost: auto-refresh from lean-ctx, calculate with model-specific pricing
+const DEEPSEEK_CACHE_TTL = 15000; // 15s refresh
+let _costCache = { data: null, ts: 0 };
+
+function getSessionCost() {
+  const now = Date.now();
+  if (now - _costCache.ts < DEEPSEEK_CACHE_TTL && _costCache.data) return _costCache.data;
+
+  // Try lean-ctx gain --json for token counts
+  const leanCtxBin = process.platform === 'win32' ? 'lean-ctx.exe' : 'lean-ctx';
+  try {
+    const raw = execSync(leanCtxBin + ' gain --json', {
+      encoding: 'utf-8', timeout: 3000, stdio: ['pipe', 'pipe', 'pipe'],
+    });
+    if (raw) {
+      const gain = JSON.parse(raw);
+      const input = gain.summary?.input_tokens || 0;
+      const output = gain.summary?.output_tokens || 0;
+      if (input > 0 || output > 0) {
+        // Detect model & pricing ($/MTok)
+        const model = (getSettings()?.model || '').toLowerCase();
+        const p = model.includes('deepseek')
+          ? { label: 'DS-V4', input: 0.14, output: 0.28 }
+          : { label: 'Claude', input: 3.00, output: 15.00 };
+        const cost = ((input * p.input) + (output * p.output)) / 1_000_000;
+
+        _costCache.data = {
+          cost_usd: cost, pricing: p, tool_input: input, tool_output: output,
+          raw_spend: gain.summary?.tool_spend_usd || 0, model,
+        };
+        _costCache.ts = now;
+
+        // Persist for other tools
+        try {
+          const cf = path.join(CWD, '.claude', 'session-cost.json');
+          fs.mkdirSync(path.dirname(cf), { recursive: true });
+          fs.writeFileSync(cf, JSON.stringify(_costCache.data, null, 2));
+        } catch { /* best-effort persist */ }
+
+        return _costCache.data;
+      }
+    }
+  } catch { /* lean-ctx not available, fall through */ }
+
+  // Fallback: read cached file
+  if (!_costCache.data) {
+    try {
+      const p = path.join(CWD, '.claude', 'session-cost.json');
+      if (fs.existsSync(p)) {
+        _costCache.data = JSON.parse(fs.readFileSync(p, 'utf-8'));
+        _costCache.ts = now;
+      }
+    } catch { /* ignore */ }
+  }
+  return _costCache.data;
+}
+
 // Session stats (pure file reads)
 function getSessionStats() {
   var sessionPaths = ['.claude-flow/session.json', '.claude/session.json'];
@@ -658,6 +715,12 @@ function generateStatusline() {
   // Show cost from Claude Code stdin if available
   if (costInfo && costInfo.costUsd > 0) {
     header += '  ' + c.dim + '\u2502' + c.reset + '  ' + c.brightYellow + '$' + costInfo.costUsd.toFixed(2) + c.reset;
+  }
+  // Show DeepSeek-adjusted cost from cost-tracker
+  const sessCost = getSessionCost();
+  if (sessCost && sessCost.cost_usd > 0 && sessCost.pricing) {
+    const dsLabel = sessCost.pricing.label || '';
+    header += '  ' + c.dim + '\u2502' + c.reset + '  ' + c.brightCyan + '\u2248$' + sessCost.cost_usd.toFixed(4) + ' ' + dsLabel + c.reset;
   }
   lines.push(header);
 
