@@ -108,8 +108,8 @@ function update() {
   costData.model = modelName;
   costData.pricing = pricing;
   costData.tool_tokens = { input: tokens.input, output: tokens.output };
-  costData.cost_usd = parseFloat(total.toFixed(8));
-  costData.api_cost_est = tokens.raw_cost; // from lean-ctx tracking
+  costData.token_est = parseFloat(total.toFixed(8)); // token-based DS-V4 estimate
+  costData.cost_usd = tokens.raw_cost > 0 ? tokens.raw_cost : costData.token_est; // real API spend
   costData.updated_at = new Date().toISOString();
   writeCostFile(costData);
   return costData;
@@ -130,9 +130,9 @@ function display(format) {
   console.log(`Model:   ${data.model || 'unknown'}`);
   console.log(`Pricing: ${p.label}  input=$${p.input}/MTok  output=$${p.output}/MTok`);
   console.log(`Tokens:  ${ti.toLocaleString()} in  ${to.toLocaleString()} out`);
-  console.log(`Cost:    $${data.cost_usd?.toFixed(6) || '0'} (tool-activity est.)`);
-  if (data.api_cost_est) {
-    console.log(`API est: $${data.api_cost_est?.toFixed(4)} (lean-ctx tool_spend)`);
+  console.log(`Cost:    $${data.cost_usd?.toFixed(6) || '0'} (real API spend)`);
+  if (data.token_est) {
+    console.log(`Token:   ~$${data.token_est?.toFixed(6)} (DS-V4 token-based est.)`);
   }
 }
 

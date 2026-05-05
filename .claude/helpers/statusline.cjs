@@ -581,7 +581,8 @@ function getSessionCost() {
   const now = Date.now();
   if (now - _costCache.ts < DEEPSEEK_CACHE_TTL && _costCache.data) return _costCache.data;
 
-  // Try lean-ctx gain --json for token counts
+  // Use lean-ctx tool_spend_usd (actual API spend tracked by lean-ctx)
+  // as primary cost, and also calculate DS-V4 token-based estimate.
   const leanCtxBin = process.platform === 'win32' ? 'lean-ctx.exe' : 'lean-ctx';
   try {
     const raw = execSync(leanCtxBin + ' gain --json', {
@@ -591,29 +592,34 @@ function getSessionCost() {
       const gain = JSON.parse(raw);
       const input = gain.summary?.input_tokens || 0;
       const output = gain.summary?.output_tokens || 0;
-      if (input > 0 || output > 0) {
-        // Detect model & pricing ($/MTok)
-        const model = (getSettings()?.model || '').toLowerCase();
-        const p = model.includes('deepseek')
-          ? { label: 'DS-V4', input: 0.14, output: 0.28 }
-          : { label: 'Claude', input: 3.00, output: 15.00 };
-        const cost = ((input * p.input) + (output * p.output)) / 1_000_000;
+      const rawSpend = gain.summary?.tool_spend_usd || 0;
 
-        _costCache.data = {
-          cost_usd: cost, pricing: p, tool_input: input, tool_output: output,
-          raw_spend: gain.summary?.tool_spend_usd || 0, model,
-        };
-        _costCache.ts = now;
+      // Detect model & pricing ($/MTok)
+      const model = (getSettings()?.model || '').toLowerCase();
+      const isDS = model.includes('deepseek');
+      const p = isDS
+        ? { label: 'DS-V4', input: 0.14, output: 0.28 }
+        : { label: 'Claude', input: 3.00, output: 15.00 };
+      const tokenCost = ((input * p.input) + (output * p.output)) / 1_000_000;
 
-        // Persist for other tools
-        try {
-          const cf = path.join(CWD, '.claude', 'session-cost.json');
-          fs.mkdirSync(path.dirname(cf), { recursive: true });
-          fs.writeFileSync(cf, JSON.stringify(_costCache.data, null, 2));
-        } catch { /* best-effort persist */ }
+      // Primary cost: tool_spend_usd (real API spend). If lean-ctx has no
+      // spend data, fall back to DS-V4 token estimate.
+      const cost_usd = rawSpend > 0 ? rawSpend : tokenCost;
 
-        return _costCache.data;
-      }
+      _costCache.data = {
+        cost_usd, pricing: p, tool_input: input, tool_output: output,
+        token_est: tokenCost, raw_spend: rawSpend, model, isDS,
+      };
+      _costCache.ts = now;
+
+      // Persist for other tools
+      try {
+        const cf = path.join(CWD, '.claude', 'session-cost.json');
+        fs.mkdirSync(path.dirname(cf), { recursive: true });
+        fs.writeFileSync(cf, JSON.stringify(_costCache.data, null, 2));
+      } catch { /* best-effort persist */ }
+
+      return _costCache.data;
     }
   } catch { /* lean-ctx not available, fall through */ }
 
@@ -712,15 +718,12 @@ function generateStatusline() {
     const ctxColor = ctxInfo.usedPct >= 90 ? c.brightRed : ctxInfo.usedPct >= 70 ? c.brightYellow : c.brightGreen;
     header += '  ' + c.dim + '\u2502' + c.reset + '  ' + ctxColor + '\u25CF ' + ctxInfo.usedPct + '% ctx' + c.reset;
   }
-  // Show cost from Claude Code stdin if available
-  if (costInfo && costInfo.costUsd > 0) {
-    header += '  ' + c.dim + '\u2502' + c.reset + '  ' + c.brightYellow + '$' + costInfo.costUsd.toFixed(2) + c.reset;
-  }
-  // Show DeepSeek-adjusted cost from cost-tracker
+  // Show cost from cost-tracker (DS-V4 pricing + real API spend)
   const sessCost = getSessionCost();
   if (sessCost && sessCost.cost_usd > 0 && sessCost.pricing) {
-    const dsLabel = sessCost.pricing.label || '';
-    header += '  ' + c.dim + '\u2502' + c.reset + '  ' + c.brightCyan + '\u2248$' + sessCost.cost_usd.toFixed(4) + ' ' + dsLabel + c.reset;
+    const label = sessCost.pricing.label || '';
+    const precise = sessCost.cost_usd < 1;
+    header += '  ' + c.dim + '\u2502' + c.reset + '  ' + c.brightCyan + '$' + (precise ? sessCost.cost_usd.toFixed(4) : sessCost.cost_usd.toFixed(2)) + ' ' + label + c.reset;
   }
   lines.push(header);
 
