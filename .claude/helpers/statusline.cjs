@@ -573,47 +573,51 @@ function getIntegrationStatus() {
   return { mcpServers, hasDatabase, hasApi };
 }
 
-// Session cost: use cost-tracker's baseline-subtracted data
-const DEEPSEEK_CACHE_TTL = 15000; // 15s refresh
+// Session cost: lean-ctx tool_spend_usd (real MCP API cost) + DS-V4 token estimate
+const COST_CACHE_TTL = 15000; // 15s refresh
 let _costCache = { data: null, ts: 0 };
+const FX_RATE = 7.2; // CNY per USD
 
 function getSessionCost() {
   const now = Date.now();
-  if (now - _costCache.ts < DEEPSEEK_CACHE_TTL && _costCache.data) return _costCache.data;
-
-  const costFile = path.join(CWD, '.claude', 'session-cost.json');
-  const tracker = path.join(CWD, '.claude', 'helpers', 'cost-tracker.cjs');
-
-  // Refresh via cost-tracker (computes delta from baseline)
-  if (fs.existsSync(tracker)) {
-    try {
-      execSync('node ' + JSON.stringify(tracker) + ' --update', {
-        encoding: 'utf-8', timeout: 5000, stdio: ['pipe', 'pipe', 'pipe'],
-      });
-    } catch { /* fall through to file read */ }
-  }
-
-  // Read baseline-adjusted cost file
-  try {
-    if (fs.existsSync(costFile)) {
-      const d = JSON.parse(fs.readFileSync(costFile, 'utf-8'));
-      if (d && d.cost_usd > 0) {
-        _costCache.data = {
-          cost_usd: d.cost_usd,
-          pricing: d.pricing || { label: '?', input: 0, output: 0 },
-          token_est: d.token_est || 0,
-          model: d.model || '',
-          isDS: (d.model || '').toLowerCase().includes('deepseek'),
-        };
-        _costCache.ts = now;
-        return _costCache.data;
-      }
-    }
-  } catch { /* ignore */ }
-
-  _costCache.data = null;
+  if (now - _costCache.ts < COST_CACHE_TTL && _costCache.data) return _costCache.data;
   _costCache.ts = now;
-  return null;
+
+  const DSV4_IN = 0.14, DSV4_OUT = 0.28;
+
+  // Read lean-ctx gain data
+  try {
+    const raw = execSync('lean-ctx.exe gain --json', {
+      encoding: 'utf-8', timeout: 3000, stdio: ['pipe', 'pipe', 'pipe'],
+    });
+    const g = JSON.parse(raw);
+    const input = g.summary?.input_tokens || 0;
+    const output = g.summary?.output_tokens || 0;
+    const toolSpend = g.summary?.tool_spend_usd || 0;
+
+    if (input === 0 && output === 0 && toolSpend === 0) {
+      _costCache.data = null; return null;
+    }
+
+    // DS-V4 token estimate for lean-ctx compressed tokens
+    const tokenEst = ((input * DSV4_IN) + (output * DSV4_OUT)) / 1_000_000;
+
+    // Total: real MCP API spend + DS-V4 chat estimate
+    const costUsd = toolSpend + tokenEst;
+
+    _costCache.data = {
+      cost_usd: costUsd,
+      cost_rmb: costUsd * FX_RATE,
+      pricing: { label: 'DS-V4', input: DSV4_IN, output: DSV4_OUT },
+      tool_spend_usd: toolSpend,
+      token_est_dsv4: tokenEst,
+      tokens: { input, output },
+    };
+    return _costCache.data;
+  } catch {
+    _costCache.data = null;
+    return null;
+  }
 }
 
 // Session stats (pure file reads)
@@ -698,12 +702,11 @@ function generateStatusline() {
     const ctxColor = ctxInfo.usedPct >= 90 ? c.brightRed : ctxInfo.usedPct >= 70 ? c.brightYellow : c.brightGreen;
     header += '  ' + c.dim + '\u2502' + c.reset + '  ' + ctxColor + '\u25CF ' + ctxInfo.usedPct + '% ctx' + c.reset;
   }
-  // Show cost from cost-tracker (DS-V4 pricing + real API spend)
+  // Show DS-V4 cost in RMB (derived from Claude Code stdin cost data)
   const sessCost = getSessionCost();
-  if (sessCost && sessCost.cost_usd > 0 && sessCost.pricing) {
+  if (sessCost && sessCost.cost_rmb > 0 && sessCost.pricing) {
     const label = sessCost.pricing.label || '';
-    const precise = sessCost.cost_usd < 1;
-    header += '  ' + c.dim + '\u2502' + c.reset + '  ' + c.brightCyan + '$' + (precise ? sessCost.cost_usd.toFixed(4) : sessCost.cost_usd.toFixed(2)) + ' ' + label + c.reset;
+    header += '  ' + c.dim + '\u2502' + c.reset + '  ' + c.brightCyan + '\u00a5' + sessCost.cost_rmb.toFixed(3) + ' ' + label + c.reset;
   }
   lines.push(header);
 
