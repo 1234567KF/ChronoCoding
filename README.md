@@ -29,6 +29,72 @@
 
 ---
 
+## 工程流水线
+
+本项目实现了完整的**逆向工程**与**正向工程**双流水线，覆盖从非结构化信息到交付物的全链路自动化。
+
+```mermaid
+flowchart LR
+    subgraph REV[逆向工程]
+        direction TB
+        A1[存量代码] -- kf-reverse-spec --> A2[Spec 文档]
+        A1 -- kf-reverse-spec --> A3[Wiki 文档]
+        A4[现有文档] -- kf-reverse-spec --> A3
+    end
+
+    subgraph FWD[正向流水线]
+        direction TB
+        B1[自然语言<br/>口述/日志/文章] -- kf-langextract --> B2[结构化数据<br/>JSON/CSV/YAML]
+        B3[模板表格<br/>SDD Excel] -- kf-prd-generator --> B4[PRD 文档]
+        B4 -- kf-spec Step 1-5 --> B5[Spec 文档<br/>架构/API/数据模型]
+        B5 -- kf-spec Step 6 --> B6[可执行代码]
+        B5 -- 质量门禁 --> B7[测试文档<br/>验收场景]
+    end
+
+    REV --> FWD
+```
+
+### 逆向工程 — 已有资产 → 结构化知识
+
+从存量代码和现有文档中提取架构、数据模型、API 契约、业务逻辑，生成可维护的知识资产。
+
+| 方向 | 输入 | 流程 | 输出 | 执行技能 |
+|------|------|------|------|---------|
+| **代码→Wiki** | 存量代码目录 / Git 仓库 | St0 对齐 → St1 侦察 → St2 制图 → St3 成文 → St4 审查 | Spec 11 节 + Wiki 多页文档 + 架构图 | kf-reverse-spec |
+| **代码→Spec** | 存量代码目录 / Git 仓库 | 同上，Stage 2 直接输出 | Spec 文档（11 节标准框架） | kf-reverse-spec |
+| **文档→Wiki** | 存量文档 / 设计文档 / README | kf-reverse-spec Stage 3 Format A | GitHub Wiki 风格多页文档（Home/Architecture/Modules/API/FAQ） | kf-reverse-spec |
+
+### 正向流水线 — 模糊需求 → 交付物
+
+从非结构化信息出发，逐层结构化，最终产出可执行代码与测试文档。
+
+| 阶段 | 输入 | 流程 | 输出 | 执行技能 | 原则 |
+|------|------|------|------|---------|:----:|
+| **自然语言→结构化** | 非结构化文本（日志/报告/合同/病历） | Schema 定义 → few-shot 构建 → `lx.extract()` 执行 | JSON / CSV / YAML（每个值可溯源到原文位置） | kf-langextract | 准 |
+| **模板表格→PRD** | SDD 需求采集 Excel（.xlsx） | Sheet 映射 → 需求问询 → 交叉验证 → 生成 | PRD.md（结构化业务需求文档） | kf-prd-generator | 快 |
+| **PRD→Spec** | PRD.md | 需求澄清 → v0.1 生成 → 人工审查 → 质量门禁 → v1.0 定稿 | Spec.md + 可选：API契约/数据模型/状态图 | kf-spec（Step 1-5） | 快 |
+| **Spec→代码** | Spec 文档 + 任务清单 | 任务分解 DAG → 分步执行（逐步/全量/手动）→ 逐任务验收 | 可运行代码（分阶段交付） | kf-spec（Step 6） | 夯 |
+| **Spec→测试文档** | Spec 验收标准 + 质量门禁 | 门禁逐项检查 → 验收场景提取 → 测试计划生成 | 测试计划 / Gherkin 验收场景 / 质量报告 | kf-spec（质量门禁）+ kf-browser-ops | 测的准 |
+
+### 流水线衔接示例
+
+```
+原始需求 "做个用户管理系统"
+  │
+  ├─ 口述 / 笔记 ──→ kf-langextract ──→ 结构化需求清单
+  │
+  ├─ SDD Excel ────→ kf-prd-generator ──→ PRD.md
+  │
+  ├─ PRD.md ───────→ kf-spec ──────────→ Spec.md + tasks.md
+  │                                         │
+  │                                         ├→ 分步编码 → 可运行代码
+  │                                         └→ 质量门禁 → 测试文档
+  │
+  └─ 存量系统改造 ──→ kf-reverse-spec ──→ Wiki 文档 + 架构图
+```
+
+---
+
 ## 分享给朋友（一键复制）
 
 **把下面这段话复制发给朋友，他丢给任意 AI（Claude Code / ChatGPT / Trae / Cursor）即可自动完成全部安装配置：**
