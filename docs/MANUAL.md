@@ -172,7 +172,8 @@ Agent 共享（在同一个项目内的 agents 共享记忆）
     │       ├── kf-markdown-to-docx-skill/ # MD→DOCX
 │       ├── asta-skill/           # 学术论文搜索
 │       ├── gspowers/          # SOP 导航（上游）
-│       └── gstack/            # 产品流程（上游）
+│       ├── gstack/            # 产品流程（上游）
+│       └── ... (+66 来自 jeffallan/claude-skills)  # 第三方技能合集
 ```
 
 ---

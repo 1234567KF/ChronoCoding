@@ -76,6 +76,7 @@
 | [OpenCLI](https://github.com/jackwener/OpenCLI) | jackwener | MIT | 100+ 平台 CLI 数据直取，AI 原生浏览器自动化 |
 | [autoresearch](https://github.com/karpathy/autoresearch) | karpathy | MIT | 自主 ML 实验：AI 整夜改模型→训练→验证→循环 |
 | [asta-skill](https://github.com/Agents365-ai/asta-skill) | Agents365-ai | MIT | 学术论文搜索 — Semantic Scholar via Ai2 Asta MCP |
+| [jeffallan/claude-skills](https://github.com/jeffallan/claude-skills) | jeffallan | MIT | 66 个 Claude Code 第三方技能：语言/后端/前端/基础设施/API/测试/DevOps/安全/数据ML/平台 |
 
 详见 [CREDITS.md](docs/CREDITS.md) 完整致谢。
 

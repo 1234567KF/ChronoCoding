@@ -195,3 +195,4 @@ node .claude/helpers/harness-audit.cjs --all --verbose
 | MCP 工具（pencil/ruflo） | v | 取决于 Trae MCP 支持 |
 | 技能安装管家（kf-add-skill） | v | v（关键词搜索→安装→.claude/.trae 同步） |
 | 学术论文搜索（asta-skill） | v | v（MCP 协议，需 ASTA_API_KEY） |
+| jeffallan/claude-skills (66) | v | v（第三方技能合集，按需加载） |
