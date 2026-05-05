@@ -34,7 +34,7 @@ Q1 回答后，若用户提供了 `.xlsx` 文件，**MUST 立即检测是否为 
 
 - Q2: "目标用户角色有哪些？请逐一列出（如：普通员工、部门经理、HR管理员）"
 - Q3: "核心业务目标是什么？期望达到什么可量化的效果？"
-- Q4: "技术约束有哪些？请分别说明：\n  - 后端：框架及版本（如 Spring Boot 3.x + Kotlin 1.9）\n  - 前端：框架、UI 组件库及版本（如 Vue 3 + ant-design-vue 4.1.2）\n  - 数据库及中间件\n  （系统会自动扫描项目依赖文件辅助检测，此处可回答'使用现有技术栈'）"
+- Q4: "技术约束有哪些？请分别说明：\n  - 后端：框架及版本（如 Spring Boot 3.x + Kotlin 1.9）\n  - 前端：框架、UI 组件库及版本（如 Vue 3 + ant-design-vue 4.1.2）\n  - 数据库及中间件\n  （系统会自动扫描项目依赖文件辅助检测，此处可回答'使用现有技术栈'）\n  （如需快速原型验证，也可选择 **MVP 模式**：Node.js + Express + SQLite + Vue 3 + Vite，详见 `docs/mvp技术栈.md`）"
 - Q5: "是否有需要对接的已有系统或接口？如有请说明"
 - Q6: "本期明确不做的事项有哪些？（Out of Scope）"
 - Q7: "是否有特殊的 UI 规范要求？（组件库、设计系统、品牌色等）"
@@ -52,6 +52,11 @@ Q1 回答后，若用户提供了 `.xlsx` 文件，**MUST 立即检测是否为 
 - 后端项目：读取 `build.gradle.kts` 或 `pom.xml` → 提取框架版本（Spring Boot）、语言版本（Kotlin/Java）、ORM 框架（MyBatis Plus/JPA）
 - 其他项目：读取对应依赖文件（requirements.txt、Cargo.toml 等）
 
+**MVP 模式兜底：**
+若项目无任何依赖文件（全新项目或纯原型阶段），MUST 检查 `docs/mvp技术栈.md` 是否存在：
+- **如果存在**：以 `docs/mvp技术栈.md` 作为技术约束默认值，输出 MVP 技术栈对照表，标注 `[MVP 默认]` 标识
+- **如果不存在**：MUST 向用户明确询问完整技术栈信息（此时可推荐使用 MVP 模式，引导用户参考 `docs/mvp技术栈.md`）
+
 **输出技术约束对照表（MUST 在继续前输出）：**
 
 | 维度 | 检测值 | 来源文件 | 用户回答 | 状态 |
@@ -61,11 +66,22 @@ Q1 回答后，若用户提供了 `.xlsx` 文件，**MUST 立即检测是否为 
 | 后端框架 | Spring Boot 3.x | build.gradle.kts | "现有技术栈" | ✅ 一致 |
 | ... | ... | ... | ... | ... |
 
+**MVP 兜底模式对照表示例（当项目无依赖文件且 `docs/mvp技术栈.md` 存在时）：**
+
+| 维度 | 推荐值 | 来源文件 | 用户回答 | 状态 |
+|------|--------|---------|---------|------|
+| 后端技术栈 | Node.js + Express + SQLite [MVP 默认] | docs/mvp技术栈.md | — | 💡 MVP 推荐 |
+| 前端技术栈 | Vue 3 + Vite + Ant Design Vue [MVP 默认] | docs/mvp技术栈.md | — | 💡 MVP 推荐 |
+| 数据库 | SQLite（better-sqlite3）[MVP 默认] | docs/mvp技术栈.md | — | 💡 MVP 推荐 |
+| 第三方服务 | 全部 Mock（签名一致可切换）[MVP 默认] | docs/mvp技术栈.md | — | 💡 MVP 推荐 |
+| 部署方式 | 本机 npm run dev，无需外部服务 [MVP 默认] | docs/mvp技术栈.md | — | 💡 MVP 推荐 |
+
 **规则：**
 - 检测到的版本与用户回答不一致时，MUST 向用户确认以哪个为准
 - 用户回答模糊（如"现有技术栈"）时，MUST 以检测值为准
 - 检测不到依赖文件时，MUST 向用户明确询问具体版本号
 - 若需求来源为 SDD Excel，MUST 将 Phase 1.5 检测值与 Sheet14（AI指令配置）数据交叉对比，冲突时以用户确认为准
+- **若用户选择 MVP 模式或检测不到依赖文件时回退到 `docs/mvp技术栈.md`**：技术约束表以 MVP 默认值为准，PRD 第 8 章「技术约束」自动填充 MVP 技术栈，Mock 策略（第三方全部 Mock，签名一致可切换）标注在备注中
 - 此对照表中的确认值将作为 PRD 第 7 章（UI 规范约束）和第 8 章（技术约束）的填充依据
 
 ### Gate 1 — DO NOT generate PRD until all questions in Phase 1 are fully answered and confirmed by user.
@@ -233,3 +249,4 @@ PRD 文档章节结构如下：
 |------|---------|------|
 | `assets/prd-template.md` | Step 7 | PRD 文档标准模板 |
 | `assets/sdd-excel-parsing-rules.md` | Phase 1 SDD 分流（检测到 SDD Excel 时） | SDD 需求采集 Excel 结构化解析规则（含 Sheet→PRD 映射总表、字段类型推断、Checkbox 解析） |
+| `docs/mvp技术栈.md` | Phase 1.5（项目无依赖文件时） | MVP 极简开发技术栈默认值（Node.js+Express+SQLite / Vue3+Vite，Mock 策略，Demo 优势说明） |
