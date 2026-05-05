@@ -573,7 +573,7 @@ function getIntegrationStatus() {
   return { mcpServers, hasDatabase, hasApi };
 }
 
-// Session cost: auto-refresh from lean-ctx, calculate with model-specific pricing
+// Session cost: use cost-tracker's baseline-subtracted data
 const DEEPSEEK_CACHE_TTL = 15000; // 15s refresh
 let _costCache = { data: null, ts: 0 };
 
@@ -581,59 +581,39 @@ function getSessionCost() {
   const now = Date.now();
   if (now - _costCache.ts < DEEPSEEK_CACHE_TTL && _costCache.data) return _costCache.data;
 
-  // Use lean-ctx tool_spend_usd (actual API spend tracked by lean-ctx)
-  // as primary cost, and also calculate DS-V4 token-based estimate.
-  const leanCtxBin = process.platform === 'win32' ? 'lean-ctx.exe' : 'lean-ctx';
-  try {
-    const raw = execSync(leanCtxBin + ' gain --json', {
-      encoding: 'utf-8', timeout: 3000, stdio: ['pipe', 'pipe', 'pipe'],
-    });
-    if (raw) {
-      const gain = JSON.parse(raw);
-      const input = gain.summary?.input_tokens || 0;
-      const output = gain.summary?.output_tokens || 0;
-      const rawSpend = gain.summary?.tool_spend_usd || 0;
+  const costFile = path.join(CWD, '.claude', 'session-cost.json');
+  const tracker = path.join(CWD, '.claude', 'helpers', 'cost-tracker.cjs');
 
-      // Detect model & pricing ($/MTok)
-      const model = (getSettings()?.model || '').toLowerCase();
-      const isDS = model.includes('deepseek');
-      const p = isDS
-        ? { label: 'DS-V4', input: 0.14, output: 0.28 }
-        : { label: 'Claude', input: 3.00, output: 15.00 };
-      const tokenCost = ((input * p.input) + (output * p.output)) / 1_000_000;
-
-      // Primary cost: tool_spend_usd (real API spend). If lean-ctx has no
-      // spend data, fall back to DS-V4 token estimate.
-      const cost_usd = rawSpend > 0 ? rawSpend : tokenCost;
-
-      _costCache.data = {
-        cost_usd, pricing: p, tool_input: input, tool_output: output,
-        token_est: tokenCost, raw_spend: rawSpend, model, isDS,
-      };
-      _costCache.ts = now;
-
-      // Persist for other tools
-      try {
-        const cf = path.join(CWD, '.claude', 'session-cost.json');
-        fs.mkdirSync(path.dirname(cf), { recursive: true });
-        fs.writeFileSync(cf, JSON.stringify(_costCache.data, null, 2));
-      } catch { /* best-effort persist */ }
-
-      return _costCache.data;
-    }
-  } catch { /* lean-ctx not available, fall through */ }
-
-  // Fallback: read cached file
-  if (!_costCache.data) {
+  // Refresh via cost-tracker (computes delta from baseline)
+  if (fs.existsSync(tracker)) {
     try {
-      const p = path.join(CWD, '.claude', 'session-cost.json');
-      if (fs.existsSync(p)) {
-        _costCache.data = JSON.parse(fs.readFileSync(p, 'utf-8'));
-        _costCache.ts = now;
-      }
-    } catch { /* ignore */ }
+      execSync('node ' + JSON.stringify(tracker) + ' --update', {
+        encoding: 'utf-8', timeout: 5000, stdio: ['pipe', 'pipe', 'pipe'],
+      });
+    } catch { /* fall through to file read */ }
   }
-  return _costCache.data;
+
+  // Read baseline-adjusted cost file
+  try {
+    if (fs.existsSync(costFile)) {
+      const d = JSON.parse(fs.readFileSync(costFile, 'utf-8'));
+      if (d && d.cost_usd > 0) {
+        _costCache.data = {
+          cost_usd: d.cost_usd,
+          pricing: d.pricing || { label: '?', input: 0, output: 0 },
+          token_est: d.token_est || 0,
+          model: d.model || '',
+          isDS: (d.model || '').toLowerCase().includes('deepseek'),
+        };
+        _costCache.ts = now;
+        return _costCache.data;
+      }
+    }
+  } catch { /* ignore */ }
+
+  _costCache.data = null;
+  _costCache.ts = now;
+  return null;
 }
 
 // Session stats (pure file reads)

@@ -2,17 +2,21 @@
 /**
  * Session Cost Tracker for Claude Code + Third-party Models
  *
- * Reads token counts from lean-ctx gain data (tool-level) and stdin (API-level),
- * calculates cumulative cost with model-specific pricing.
+ * Tracks per-session cost using lean-ctx as data source with a
+ * baseline subtraction: cost = current_lean_ctx - baseline_at_reset.
+ * This avoids cumulative pollution from prior sessions.
  *
  * Pricing (2026-05, $/MTok):
- *   DeepSeek-V3:  input=$0.27  output=$1.10
- *   DeepSeek-R1:  input=$0.55  output=$2.19
- *   Claude Sonnet: input=$3.00 output=$15.00 (fallback)
+ *   DeepSeek-V4-Flash: input=$0.14 output=$0.28
+ *   DeepSeek-V3:       input=$0.27 output=$1.10
+ *   DeepSeek-R1:       input=$0.55 output=$2.19
+ *   Claude Sonnet:     input=$3.00 output=$15.00 (fallback)
  *
- * Usage: node cost-tracker.cjs              # display current cost
- *        node cost-tracker.cjs --update     # recalculate from lean-ctx
- *        node cost-tracker.cjs --json       # JSON output
+ * Usage:
+ *   node cost-tracker.cjs              # display current cost
+ *   node cost-tracker.cjs --update     # recalculate from lean-ctx
+ *   node cost-tracker.cjs --reset      # reset baseline to current lean-ctx
+ *   node cost-tracker.cjs --json       # JSON output
  */
 
 const fs = require('fs');
@@ -57,12 +61,12 @@ function detectPricing(modelName) {
   return PRICING.claude; // fallback
 }
 
-// Read cumulative cost file
+// Read session cost file (includes baseline + computed deltas)
 function readCostFile() {
   try {
     return JSON.parse(fs.readFileSync(COST_FILE, 'utf-8'));
   } catch {
-    return { sessions: [], total_cost: 0, total_input: 0, total_output: 0 };
+    return { version: 2, baseline: null, cost_usd: 0, token_est: 0 };
   }
 }
 
@@ -71,9 +75,9 @@ function writeCostFile(data) {
   fs.writeFileSync(COST_FILE, JSON.stringify(data, null, 2));
 }
 
-// Get token counts from lean-ctx gain --json
+// Get raw counters from lean-ctx gain --json
 const leanCtxBin = process.platform === 'win32' ? 'lean-ctx.exe' : 'lean-ctx';
-function getToolTokenCounts() {
+function getRawCounts() {
   try {
     const raw = execSync(leanCtxBin + ' gain --json', {
       encoding: 'utf-8', timeout: 3000, stdio: ['pipe', 'pipe', 'pipe'],
@@ -83,33 +87,56 @@ function getToolTokenCounts() {
     return {
       input: data.summary?.input_tokens || 0,
       output: data.summary?.output_tokens || 0,
-      raw_cost: data.summary?.tool_spend_usd || 0,
+      raw_spend: data.summary?.tool_spend_usd || 0,
     };
   } catch {
     return null;
   }
 }
 
-// Main: update cost from lean-ctx data
+// Reset baseline — save current lean-ctx counters so future costs
+// are computed as delta-from-this-point.
+function cmdReset() {
+  const cur = getRawCounts();
+  if (!cur) { console.error('lean-ctx not available'); process.exit(1); }
+  const costData = readCostFile();
+  costData.version = 2;
+  costData.baseline = { input: cur.input, output: cur.output, raw_spend: cur.raw_spend };
+  costData.cost_usd = 0;
+  costData.token_est = 0;
+  costData.tool_tokens = { input: 0, output: 0 };
+  costData.updated_at = new Date().toISOString();
+  writeCostFile(costData);
+  return costData;
+}
+
+// Update: compute delta = current - baseline, apply DS-V4 pricing
 function update() {
-  const tokens = getToolTokenCounts();
-  if (!tokens) {
-    console.error('lean-ctx not available — run lean-ctx init first');
-    process.exit(1);
-  }
+  const cur = getRawCounts();
+  if (!cur) { console.error('lean-ctx not available'); process.exit(1); }
 
   const modelName = getModelName();
   const pricing = detectPricing(modelName);
-  const inputCost = (tokens.input * pricing.input) / 1_000_000;
-  const outputCost = (tokens.output * pricing.output) / 1_000_000;
-  const total = inputCost + outputCost;
-
   const costData = readCostFile();
+
+  // If no baseline set yet, snapshot now (= start tracking)
+  const bl = costData.baseline || { input: cur.input, output: cur.output, raw_spend: cur.raw_spend };
+
+  // Delta since baseline
+  const dIn = cur.input - bl.input;
+  const dOut = cur.output - bl.output;
+  const dSpend = cur.raw_spend - bl.raw_spend;
+
+  // Token-based DS-V4 estimate for whatever lean-ctx compressed
+  const tokenEst = ((dIn * pricing.input) + (dOut * pricing.output)) / 1_000_000;
+
+  costData.version = 2;
+  costData.baseline = bl;
   costData.model = modelName;
   costData.pricing = pricing;
-  costData.tool_tokens = { input: tokens.input, output: tokens.output };
-  costData.token_est = parseFloat(total.toFixed(8)); // token-based DS-V4 estimate
-  costData.cost_usd = tokens.raw_cost > 0 ? tokens.raw_cost : costData.token_est; // real API spend
+  costData.tool_tokens = { input: dIn, output: dOut };
+  costData.token_est = parseFloat(tokenEst.toFixed(8));
+  costData.cost_usd = dSpend > 0 ? parseFloat(dSpend.toFixed(8)) : costData.token_est;
   costData.updated_at = new Date().toISOString();
   writeCostFile(costData);
   return costData;
@@ -138,7 +165,11 @@ function display(format) {
 
 // CLI
 const args = process.argv.slice(2);
-if (args.includes('--update')) {
+if (args.includes('--reset')) {
+  const data = cmdReset();
+  if (args.includes('--json')) console.log(JSON.stringify(data, null, 2));
+  else console.log('Baseline reset. Next update will show delta since this point.');
+} else if (args.includes('--update')) {
   const data = update();
   if (args.includes('--json')) console.log(JSON.stringify(data, null, 2));
   else display(args.includes('--json'));
