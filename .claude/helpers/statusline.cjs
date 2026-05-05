@@ -585,33 +585,46 @@ function getSessionCost() {
 
   const DSV4_IN = 0.14, DSV4_OUT = 0.28;
 
-  // Read lean-ctx gain data
+  // Read baseline from session-cost.json (set via cost-tracker --reset)
+  let baseline = { input: 0, output: 0, raw_spend: 0 };
+  try {
+    const costFile = JSON.parse(fs.readFileSync(
+      path.join(CWD, '.claude', 'session-cost.json'), 'utf-8'));
+    if (costFile.baseline) baseline = costFile.baseline;
+  } catch {}
+
+  // Read lean-ctx cumulative data
   try {
     const raw = execSync('lean-ctx.exe gain --json', {
       encoding: 'utf-8', timeout: 3000, stdio: ['pipe', 'pipe', 'pipe'],
     });
     const g = JSON.parse(raw);
-    const input = g.summary?.input_tokens || 0;
-    const output = g.summary?.output_tokens || 0;
-    const toolSpend = g.summary?.tool_spend_usd || 0;
+    const curInput = g.summary?.input_tokens || 0;
+    const curOutput = g.summary?.output_tokens || 0;
+    const curSpend = g.summary?.tool_spend_usd || 0;
 
-    if (input === 0 && output === 0 && toolSpend === 0) {
+    if (curInput === 0 && curOutput === 0 && curSpend === 0) {
       _costCache.data = null; return null;
     }
 
-    // DS-V4 token estimate for lean-ctx compressed tokens
-    const tokenEst = ((input * DSV4_IN) + (output * DSV4_OUT)) / 1_000_000;
+    // Delta since baseline (per-session cost, not lifetime cumulative)
+    const dIn = Math.max(0, curInput - baseline.input);
+    const dOut = Math.max(0, curOutput - baseline.output);
+    const dSpend = Math.max(0, curSpend - baseline.raw_spend);
 
-    // Total: real MCP API spend + DS-V4 chat estimate
-    const costUsd = toolSpend + tokenEst;
+    // DS-V4 token estimate for delta tokens
+    const tokenEst = ((dIn * DSV4_IN) + (dOut * DSV4_OUT)) / 1_000_000;
+
+    // Real API spend if available, else DS-V4 token estimate
+    const costUsd = dSpend > 0 ? dSpend : tokenEst;
 
     _costCache.data = {
       cost_usd: costUsd,
       cost_rmb: costUsd * FX_RATE,
       pricing: { label: 'DS-V4', input: DSV4_IN, output: DSV4_OUT },
-      tool_spend_usd: toolSpend,
+      tool_spend_usd: dSpend,
       token_est_dsv4: tokenEst,
-      tokens: { input, output },
+      tokens: { input: dIn, output: dOut },
     };
     return _costCache.data;
   } catch {
