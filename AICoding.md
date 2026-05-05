@@ -273,6 +273,7 @@ git log --oneline -3
 | `kf-spec` | spec coding | 快 | **自动调用** | kf-alignment（Step 1 对齐 + 产出后复盘）、kf-model-router（Step 0 切换 pro） | 用户手动、kf-multi-team-compete Stage 0 | pro→flash |
 | `kf-code-review-graph` | `/review-graph` | 省 | 独立 | 无 | kf-multi-team-compete Stage 4（自动） | flash |
 | `kf-web-search` | `/web-search` | 准 | 独立（被动技能） | 无 | **kf-multi-team-compete agent 按需自动调用**、kf-spec 资料收集、用户手动 | flash |
+| `kf-scrapling` | — | 准 | 独立（被动技能） | 无 | kf-multi-team-compete Stage 1/2/3 按需自动调用、kf-grant-research 自动调用、用户手动 | flash |
 | `kf-opencli` | — | 准 | 独立（被动技能） | 无 | kf-multi-team-compete Stage 1/2/3 按需自动调用、用户手动 | flash |
 | `kf-browser-ops` | `/browser-ops` | 测的准 | 独立（被动技能） | 无 | **kf-multi-team-compete Stage 3 自动调用**、用户手动 | flash |
 | `kf-multi-team-compete` | **`/夯`** | 夯 | **内部 spawn + 自动调用** | kf-prd-generator（Pre-Stage）、kf-alignment、kf-spec、kf-browser-ops、kf-code-review-graph、**kf-web-search**、kf-ui-prototype-generator、gspowers Pipeline | **主入口**，用户手动 `/夯` | pro（裁判+汇总）+ flash（各队 agent） |
@@ -308,18 +309,24 @@ git log --oneline -3
   │
   ├─ kf-model-router 自动切换 → 裁判用 pro
   │
+  ├─ claude-code-pro 智能调度 → 判断是否需要 spawn
+  │
   ├─ Pre-Stage（条件触发：输入含 SDD Excel .xlsx 时）
   │     └─ kf-prd-generator 读取 SDD Excel → 生成 PRD.md
   │
   ├─ Phase 1: 任务拆解
   │     └─ kf-alignment（对齐任务理解）
   │
-  ├─ Phase 2: 三队 Pipeline 并发
-  │   ├─ 红队 Pipeline（gspowers Pipeline 引擎）
+  ├─ Phase 2: 三队 Pipeline 并发（gspowers Pipeline 引擎）
+  │   │
+  │   ├─ lambda-lang 注入 ← 所有 agent prompt 注入 Λ 通信协议（3x 压缩）
+  │   ├─ claude-code-pro 回调注入 ← 所有 agent prompt 注入完成回调
+  │   │
+  │   ├─ 红队 Pipeline
   │   │   ├─ Stage 0: kf-alignment + kf-spec（需求对齐）
   │   │   ├─ Stage 1: 架构设计
-  │   │   ├─ Stage 2: kf-ui-prototype-generator（UI）+ kf-image-editor（P图）+ kf-web-search（查资料）+ kf-opencli（平台数据直取）
-  │   │   ├─ Stage 3: kf-browser-ops（自动化测试）+ kf-opencli（平台数据验证）
+  │   │   ├─ Stage 2: kf-ui-prototype-generator（UI）+ kf-image-editor（P图）+ kf-web-search（查资料）+ kf-scrapling（爬虫）+ kf-opencli（平台数据直取）
+  │   │   ├─ Stage 3: kf-browser-ops（自动化测试）+ kf-opencli（平台数据验证）+ kf-scrapling（深度抓取）
   │   │   ├─ Stage 4: kf-code-review-graph（代码审查）
   │   │   └─ Stage 5: kf-image-editor（方案配图）+ 方案汇总
   │   ├─ 蓝队 Pipeline（同上，稳健工程视角）

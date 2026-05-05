@@ -32,6 +32,8 @@
 | `kf-add-skill` | — | 稳 | 关键词搜索→下载安装→同步所有文档+SKILL.md，自动触发一致性检查 | 技能安装管家：搜索安装+文档全自动同步 |
 | `kf-markdown-to-docx-skill` | — | — | 独立 | Markdown → DOCX 转换 |
 | `kf-langextract` | — | 准 | Pipeline + Tool Wrapper + Generator，调用 lx.extract() | LLM 驱动结构化提取（非结构化文本→JSON/CSV/YAML），带 source grounding |
+| `lambda-lang` | λ | 省 | **自动注入**：多 Agent 并发时注入 Λ 通信协议（3x 压缩）；被 `/夯`、`/triple` 自动调用 | Agent-to-Agent 原生语言，340+ 原子，7 域（a2a/evo/code/...），握手 `@v2.0#h` |
+| `claude-code-pro` | ccp | 省 | **自动触发**：多 Agent spawn 前 CCP 智能调度（不 spawn 则省 10K-15K token）；完成回调替代轮询（省 80-97%）；被 `/夯`、`/triple` 自动调用 | Token 高效调度：知道何时不 spawn Agent，回调替代轮询 |
 
 ### 上游技能（非自建，不加 kf- 前缀）
 
@@ -39,7 +41,8 @@
 |------|------|------|
 | `gspowers` | fshaan | SOP 流程导航 |
 | `gstack` | garrytan | 产品流程框架 |
-| `asta-skill` | Agents365-ai | Academic paper search — Semantic Scholar via Ai2 Asta MCP |
+| `astra-skill` | Agents365-ai | Academic paper search — Semantic Scholar via Ai2 Asta MCP |
+| `atlassian-mcp` | atlassian-mcp | Atlassian Jira/Confluence integration |
 | **jeffallan/claude-skills** (66) | [jeffallan](https://github.com/jeffallan/claude-skills) | 第三方技能合集，分 10 类：12 语言、7 后端、7 前端/移动、5 基础设施、8 API/架构、5 质量/测试、5 DevOps、3 安全、6 数据/ML、8 平台/专业 |
 
 ## 目录结构
@@ -53,10 +56,12 @@
 ├── install-local.sh           # Linux/macOS 安装脚本
 ├── helpers/                   # Hook 处理器 + 审计脚本
 │   ├── harness-gate-check.cjs # 机械化门控验证
-│   └── harness-audit.cjs      # 五根铁律全路径审计
+│   ├── harness-audit.cjs      # 五根铁律全路径审计
+│   ├── ccp-smart-dispatch.cjs # CCP 智能调度 + Lambda 注入（claude-code-pro 桥接）
 ├── agents/                   # Agent 定义
 ├── commands/                 # 自定义命令
 └── skills/                   # 技能
+    ├── kf-go/            # 工作流导航
     ├── kf-spec/        # Spec 驱动开发
     ├── kf-code-review-graph/  # 代码审查图谱
     ├── kf-web-search/         # 多引擎搜索
@@ -78,7 +83,10 @@
     ├── kf-opencli/            # OpenCLI — 100+ 平台 CLI 数据直取
     ├── kf-grant-research/    # 课题申报研究助手
     ├── kf-langextract/       # LLM 驱动结构化提取
+    ├── lambda-lang/          # Agent-to-Agent 原生语言（340+ 原子，7 域，3x 压缩）
+    ├── claude-code-pro/      # Token 高效调度（智能跳过 + 回调替代轮询）
     ├── asta-skill/           # 学术论文搜索（Semantic Scholar / Ai2 Asta MCP）
+    ├── atlassian-mcp/        # Atlassian Jira/Confluence integration
     ├── gspowers/              # SOP 导航（上游）
     ├── gstack/               # 产品流程（上游）
     └── ... (+66 来自 jeffallan/claude-skills)  # 第三方技能合集
@@ -121,6 +129,9 @@ claude
 | `提取` / `结构化提取` / `parse` / `langextract` | kf-langextract | 准 | LLM 驱动结构化提取：非结构化文本→JSON/CSV/YAML，source grounding |
 | `逆向` / `存量代码` / `代码扫描` / `逆向工程` | kf-reverse-spec | 准/省 | 存量代码→Spec/文档 逆向流水线 |
 | `课题申报` / `科研项目` / `国自然` / `研究计划` | kf-grant-research | 准 | 课题申报研究助手：论文搜索→分析→gap→申报材料 |
+| `UI原型` / `原型生成` / `prototype` | kf-ui-prototype-generator | 快 | 被 `/夯` Stage 2/5 自动调用 |
+| `ccp` / `智能调度` / `回调` | claude-code-pro | 省 | Token 高效调度：不 spawn 则省 10K-15K token |
+| `λ` / `lambda` / `!ta ct` / `@v2.0#h` / `agent通信` | lambda-lang | 省 | Agent 间 Lambda 压缩通信，自动注入 |
 
 ## 自动调用链速览
 
@@ -129,9 +140,15 @@ claude
   │
   ├─ kf-model-router 自动切换模型（pro/flash）
   │
+  ├─ claude-code-pro 智能调度 → 判断是否需要 spawn（<3 文件则跳过，省 10K-15K token）
+  │
   ├─ Pre-Stage：kf-prd-generator → PRD.md（条件触发：输入含 SDD Excel 时）
   │
   └─ 三队 Pipeline 并发（gspowers Pipeline 引擎）
+       │
+       ├─ lambda-lang 注入 ← 所有 agent prompt 注入 Λ 通信协议（3x 压缩）
+       ├─ claude-code-pro 回调注入 ← 所有 agent prompt 注入完成回调（不轮询）
+       │
        ├─ kf-alignment   ← 需求对齐（Stage 0）
        ├─ kf-spec        ← 需求基线（Stage 0）
        ├─ kf-web-search  ← 技术资料搜索（Stage 1/2/3 按需）
