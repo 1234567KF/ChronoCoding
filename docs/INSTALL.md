@@ -1,6 +1,6 @@
 # AI编程智驾 - AI 执行安装指南
 
-> **版本**：v1.3（完整版）
+> **版本**：v1.5（已迁移: RTK→lean-ctx）
 >
 > 本文档供 AI 阅读并完整执行。目标：在全新环境（可能只有任一 AI 编程工具）上，从零搭建完整的 AI 编程工作台。
 > 支持 Windows 和 Linux，自动检测平台并使用对应命令。
@@ -318,120 +318,111 @@ function New-ProjectWiki {
     // ... 1982 lines omitted
   }
 }
-// ... 1980 more lines (total: 2271)### 步骤 3.6：安装 RTK（Token 节省工具）
+// ... 1980 more lines (total: 2271)### 步骤 3.6：安装 lean-ctx（上下文压缩引擎）
 
-> RTK（Rust Token Killer）是一个高性能 CLI 代理，通过过滤和压缩命令输出，可节省 60-90% 的 token 消耗
+> lean-ctx 是 Rust 单二进制上下文运行时，通过 Shell Hook + Claude Code Hook 双通道压缩，可节省 60-90% 的 token 消耗。
+> 支持 90+ 压缩模式 + CCP (Context Continuity Protocol) 跨会话持久化。
 
 #### 安装方式（Windows）
 
 ```powershell
 # 下载最新版本
-curl -sL "https://github.com/rtk-ai/rtk/releases/download/v0.37.2/rtk-x86_64-pc-windows-msvc.zip" -o $env:TEMP\rtk.zip
-Expand-Archive -Path $env:TEMP\rtk.zip -DestinationPath $env:TEMP\rtk -Force
+$url = "https://github.com/garrytan/lean-ctx/releases/latest/download/lean-ctx-x86_64-pc-windows-msvc.zip"
+$out = "$env:TEMP\lean-ctx.zip"
+Invoke-WebRequest -Uri $url -OutFile $out -UseBasicParsing
+Expand-Archive -Path $out -DestinationPath $env:TEMP\lean-ctx -Force
 # 安装到用户目录
 $binDir = "$env:USERPROFILE\.local\bin"
 if (!(Test-Path $binDir)) { New-Item -ItemType Directory -Force -Path $binDir }
-Move-Item "$env:TEMP\rtk\rtk.exe" "$binDir\rtk.exe"
+Move-Item "$env:TEMP\lean-ctx\lean-ctx.exe" "$binDir\lean-ctx.exe" -Force
 # 验证
-& "$binDir\rtk.exe" --version
+& "$binDir\lean-ctx.exe" --version
 ```
 
-#### 初始化（全局 Hook）
+#### 安装方式（Linux/macOS）
+
+```bash
+curl -sL "https://github.com/garrytan/lean-ctx/releases/latest/download/lean-ctx-x86_64-unknown-linux-gnu.tar.gz" -o /tmp/lean-ctx.tar.gz
+tar -xzf /tmp/lean-ctx.tar.gz -C /tmp/lean-ctx
+mkdir -p ~/.local/bin
+mv /tmp/lean-ctx/lean-ctx ~/.local/bin/lean-ctx
+lean-ctx --version
+```
+
+#### 初始化（Claude Code Hook）
 
 ```powershell
-# 初始化并自动修补 settings.json
-& "$env:USERPROFILE\.local\bin\rtk.exe" init -g --auto-patch
+# 初始化 shell 别名
+& "$env:USERPROFILE\.local\bin\lean-ctx.exe" init
+
+# 初始化 Claude Code hook（创建 AGENTS.md + .cursorrules + .claude/rules/lean-ctx.md）
+& "$env:USERPROFILE\.local\bin\lean-ctx.exe" init --agent claude
 
 # 验证安装
-& "$env:USERPROFILE\.local\bin\rtk.exe" gain
+& "$env:USERPROFILE\.local\bin\lean-ctx.exe" ctx_overview
 ```
 
 #### Token 节省效果
 
-| 操作                          | 频率 | 普通消耗           | RTK 消耗          | 节省           |
+| 操作                          | 频率 | 普通消耗           | lean-ctx 消耗      | 节省           |
 | ----------------------------- | ---- | ------------------ | ----------------- | -------------- |
-| `ls` / `tree`             | 10x  | 2,000              | 400               | -80%           |
-| `git status`                | 10x  | 3,000              | 600               | -80%           |
-| `git diff`                  | 5x   | 10,000             | 2,500             | -75%           |
-| `cargo test` / `npm test` | 5x   | 25,000             | 2,500             | -90%           |
-| `grep` / `rg`             | 8x   | 16,000             | 3,200             | -80%           |
-| **总计**                |      | **~118,000** | **~23,900** | **-80%** |
+| `ls` / `tree`                 | 10x  | 2,000              | 400               | -80%           |
+| `git status`                  | 10x  | 3,000              | 600               | -80%           |
+| `git diff`                    | 5x   | 10,000             | 2,500             | -75%           |
+| `cargo test` / `npm test`     | 5x   | 25,000             | 2,500             | -90%           |
+| `grep` / `rg`                 | 8x   | 16,000             | 3,200             | -80%           |
+| 文件读取（大文件）              | 8x   | 10,000+            | 自适应压缩        | -60-90%        |
+| **总计**                      |      | **~118,000**       | **~23,900**       | **-80%**       |
 
 #### 工作原理
 
 ```
-Claude Code          settings.json        rtk-rewrite.sh        RTK binary
-     │                    │                     │                    │
-     │  "git status"      │                     │                    │
-     │ ──────────────────►│                     │                    │
+Claude Code          settings.json        lean-ctx hook          lean-ctx binary
+     │                    │                    │                    │
+     │  "git status"      │                    │                    │
+     │ ──────────────────►│                    │                    │
      │                    │  PreToolUse trigger  │                    │
      │                    │ ───────────────────►│                    │
-     │                    │                     │  rewrite command   │
-     │                    │                     │  → rtk git status  │
+     │                    │                    │  hook rewrite       │
+     │                    │                    │  → ctx_shell        │
      │                    │◄────────────────────│                    │
      │                    │  updated command     │                    │
-     │  execute: rtk git status                                      │
-     │ ─────────────────────────────────────────────────────────────►│
-     │                                                               │  filter
+     │  execute: ctx_shell git status                                │
+     │ ────────────────────────────────────────────────────────────►│
+     │                                                               │  filter + compress
      │  "3 modified, 1 untracked ✓"                                  │
      │◄──────────────────────────────────────────────────────────────│
 ```
 
 #### 命令速查
 
-| 命令                   | 说明                                |
-| ---------------------- | ----------------------------------- |
-| `rtk gain`           | 显示 token 节省统计                 |
-| `rtk gain --history` | 显示命令使用历史                    |
-| `rtk discover`       | 分析 Claude Code 历史，发现节省机会 |
-| `rtk proxy <cmd>`    | 直接执行命令（不过滤，用于调试）    |
+| 命令                          | 说明                                |
+| ----------------------------- | ----------------------------------- |
+| `lean-ctx ctx_overview`      | 显示项目概况与 token 统计           |
+| `lean-ctx ctx_compress`      | 手动触发上下文压缩                  |
+| `lean-ctx ctx_session`       | 显示会话内存                        |
+| `lean-ctx ctx_read --mode aggressive` | 激进模式压缩文件读取        |
+| `lean-ctx sessions`          | 查看所有会话历史                    |
 
-#### ⚠️ AI 必读：npm 上的 rtk-cli 是同名错误包
+#### 读取模式速查
 
-```
-AI 执行此处时必须严格遵循以下安装方式，禁止使用 npm install -g rtk
-```
-
-**npm 上有一个叫 `rtk-cli` 的包，它是 Static Site Generator (ssg)，跟 token 节省毫无关系！**
-
-**正确的 RTK (Rust Token Killer) 必须从 GitHub 下载二进制：**
-
-- GitHub: https://github.com/rtk-ai/rtk
-- 下载地址: https://github.com/rtk-ai/rtk/releases/latest
-- 包名格式: `rtk-x86_64-pc-windows-msvc.zip` (Windows)
-
-**禁止**：
-
-```powershell
-npm install -g rtk        # 错误！这是 ssg，不是 token 节省工具
-npm install -g rtk-cli     # 同样是错误的 ssg 工具
-```
-
-**正确安装方式**：
-
-```powershell
-# 从 GitHub 下载（见上方安装方式）
-```
-
-**验证方法**：
-
-```powershell
-rtk gain        # 显示 "RTK Token Savings" 即为正确
-rtk --version   # 显示 rtk 0.37.2 即为正确（不是 rtk-cli/0.0.1）
-```
-
-#### 注意事项
-
-- **名称冲突**：npm 上的 `rtk-cli` (ssg) 与 `rtk-ai/rtk` 重名但功能完全不同
-- **Windows**：使用 Windows Terminal 或 PowerShell 运行，不要直接双击 .exe
-- **重启 Claude Code**：初始化后需要重启才能加载 hook
+| 模式 | 说明 | 适用场景 |
+|------|------|---------|
+| `auto` | 自适应选择最优模式 | 默认 |
+| `full` | 完整输出，不压缩 | 小文件精确读取 |
+| `map` | 仅输出结构映射 | 浏览目录结构 |
+| `signatures` | 仅输出函数/类签名 | 快速了解 API |
+| `diff` | 仅输出更改部分 | Code Review |
+| `aggressive` | 激进压缩 | 巨量文件摘要 |
+| `entropy` | 仅保留高信息量行 | 日志分析 |
+| `task` | 按任务目标过滤 | 定向查找 |
 
 ---
 
 ### 步骤 3.x：安装 claude-mem（跨会话持久记忆）
 
 > claude-mem 是跨会话持久记忆插件，自动捕获工具调用、决策和上下文，存储在本地 SQLite + Chroma 向量库。
-> 它和 context-mode（会话内上下文管理）、RTK（命令 Token 优化）**功能互补，无冲突**。
+> 它和 context-mode（会话内上下文管理）、lean-ctx（命令 Token 优化）**功能互补，无冲突**。
 
 ```powershell
 # 全局安装
@@ -797,7 +788,7 @@ claude
 │  第一步：全局安装（每台电脑只需一次）                        │
 │    - Claude Code、Node.js、Git                             │
 │    - ruflo (npm install -g)                               │
-│    - RTK (Token 节省工具)                                   │
+│    - lean-ctx (上下文压缩引擎)                               │
 │    - gspowers、gstack (复制到 ~/.claude/skills/)           │
 ├─────────────────────────────────────────────────────────────┤
 │  第二步：项目安装（每个新项目只需一次）                      │
@@ -837,23 +828,26 @@ claude mcp add ruflo -- npx -y ruflo@latest mcp start
 claude-flow --version
 ```
 
-#### 1.3 安装 RTK（Token 节省）
+#### 1.3 安装 lean-ctx（上下文压缩引擎）
 
 ```powershell
-# 下载 RTK
-curl -sL "https://github.com/rtk-ai/rtk/releases/download/v0.37.2/rtk-x86_64-pc-windows-msvc.zip" -o $env:TEMP\rtk.zip
-Expand-Archive -Path $env:TEMP\rtk.zip -DestinationPath $env:TEMP\rtk -Force
+# 下载 lean-ctx
+$url = "https://github.com/garrytan/lean-ctx/releases/latest/download/lean-ctx-x86_64-pc-windows-msvc.zip"
+$out = "$env:TEMP\lean-ctx.zip"
+Invoke-WebRequest -Uri $url -OutFile $out -UseBasicParsing
+Expand-Archive -Path $out -DestinationPath $env:TEMP\lean-ctx -Force
 
 # 安装到用户目录
 $binDir = "$env:USERPROFILE\.local\bin"
 New-Item -ItemType Directory -Force -Path $binDir
-Move-Item "$env:TEMP\rtk\rtk.exe" "$binDir\rtk.exe"
+Move-Item "$env:TEMP\lean-ctx\lean-ctx.exe" "$binDir\lean-ctx.exe" -Force
 
-# 初始化（会自动修补 settings.json）
-& "$binDir\rtk.exe" init -g --auto-patch
+# 初始化（shell hooks + Claude Code hooks）
+& "$binDir\lean-ctx.exe" init
+& "$binDir\lean-ctx.exe" init --agent claude
 
 # 验证
-& "$binDir\rtk.exe" gain
+& "$binDir\lean-ctx.exe" --version
 ```
 
 #### 1.4 安装全局技能（gspowers、gstack）
@@ -1209,7 +1203,7 @@ D:\your-project\
 | 组件 | 全局必须 | 说明 |
 |------|---------|------|
 | **npm 全局包** | 是 | `npm install -g ruflo` 仍需全局安装 |
-| **RTK** | 是 | `~/.local/bin/rtk.exe` 仍需全局安装 |
+| **lean-ctx** | 是 | `~/.local/bin/lean-ctx.exe` 仍需全局安装 |
 | **Claude Code** | 是 | 仍需全局安装 |
 | **Git/Node.js** | 是 | 仍需全局安装 |
 | **superpowers** | 是 | 需在 Claude Code 中手动安装 plugin |
@@ -1340,7 +1334,7 @@ Get-ChildItem "$env:USERPROFILE\.claude\skills" -Directory
 
 > 以下是 AI 完整执行顺序，确保每步成功后再执行下一步
 >
-> **版本**：v1.3（完整版，包含 RTK、TDD、Pipeline 扩展）
+> **版本**：v1.5（已迁移: RTK→lean-ctx）
 
 ```powershell
 # ═══════════════════════════════════════════════════════════════
@@ -1385,18 +1379,21 @@ if (claude 命令不存在):
 npm install -g @digipair/skill-markitdown
 claude mcp add markitdown -- npx -y @digipair/skill-markitdown
 
-# [步骤 3.2] 安装 RTK（Token 节省工具，节省 60-90% token）
-# 下载 RTK
-curl -sL "https://github.com/rtk-ai/rtk/releases/download/v0.37.2/rtk-x86_64-pc-windows-msvc.zip" -o $env:TEMP\rtk.zip
-Expand-Archive -Path $env:TEMP\rtk.zip -DestinationPath $env:TEMP\rtk -Force
+# [步骤 3.2] 安装 lean-ctx（上下文压缩引擎，节省 60-90% token）
+# 下载 lean-ctx
+$url = "https://github.com/garrytan/lean-ctx/releases/latest/download/lean-ctx-x86_64-pc-windows-msvc.zip"
+$out = "$env:TEMP\lean-ctx.zip"
+Invoke-WebRequest -Uri $url -OutFile $out -UseBasicParsing
+Expand-Archive -Path $out -DestinationPath $env:TEMP\lean-ctx -Force
 # 安装到用户目录
 $binDir = "$env:USERPROFILE\.local\bin"
 New-Item -ItemType Directory -Force -Path $binDir
-Move-Item "$env:TEMP\rtk\rtk.exe" "$binDir\rtk.exe"
-# 初始化并自动修补 settings.json
-& "$binDir\rtk.exe" init -g --auto-patch
+Move-Item "$env:TEMP\lean-ctx\lean-ctx.exe" "$binDir\lean-ctx.exe" -Force
+# 初始化 shell hooks + Claude Code hooks
+& "$binDir\lean-ctx.exe" init
+& "$binDir\lean-ctx.exe" init --agent claude
 # 验证
-& "$binDir\rtk.exe" gain
+& "$binDir\lean-ctx.exe" --version
 
 # [步骤 3.3] 配置 Claude Code 权限模式（Yolo 模式）
 # 在 settings.json 中添加：
@@ -1474,7 +1471,7 @@ claude-flow --version      # ruflo
 claude --version           # Claude Code
 git --version              # Git
 node --version             # Node.js
-& "$env:USERPROFILE\.local\bin\rtk.exe" --version  # RTK
+& "$env:USERPROFILE\.local\bin\lean-ctx.exe" --version  # lean-ctx
 # 检查 MCP
 claude mcp list            # 应包含 ruflo, markitdown
 # 检查 skills
@@ -1508,7 +1505,7 @@ Write-Host "  - 说 '安全审计' 启动三方协作评审"
 | 2 | 安装 Claude Code | ✓ | |
 | 3 | 配置 API Token | ✓ | **是** |
 | 3.1 | 安装 markitdown | | |
-| 3.2 | 安装 RTK | | |
+| 3.2 | 安装 lean-ctx | | |
 | 3.3 | 配置权限模式 | | |
 | 4 | 安装 ruflo | ✓ | |
 | 5 | 创建全局配置 | ✓ | |
@@ -1524,7 +1521,7 @@ Write-Host "  - 说 '安全审计' 启动三方协作评审"
 | TDD 流程 | gspowers/tdd-helper.ps1 | 强制测试先行模式 |
 | Wiki 生成 | gspowers/wiki-helper.ps1 | 上下文压缩 |
 | Pipeline 开发 | gspowers/references/pipeline.md | 多模块流水线 |
-| RTK Token 节省 | .local/bin/rtk.exe | 节省 60-90% token |
+| lean-ctx 上下文压缩 | .local/bin/lean-ctx.exe | 节省 60-90% token，90+ 压缩模式 |
 | context-mode | MCP + hooks | 会话连续性 + 压缩存活 |
 | markitdown | MCP | Markdown 转换 |
 
@@ -2002,13 +1999,13 @@ Write-Host "  说 '生成 Wiki' 压缩上下文"
 # ═══════════════════════════════════════════════════════════════
 # Claude × gspowers × ruflo 金手指 - 一键安装脚本
 # AI 执行，无需用户介入（除 Token 配置和 superpowers 安装）
-# 版本：v1.3（包含 RTK、TDD、Pipeline 扩展）
+# 版本：v1.5（已迁移: RTK→lean-ctx）
 # ═══════════════════════════════════════════════════════════════
 
 Write-Host ""
 Write-Host "╔═══════════════════════════════════════════════════════════╗"
 Write-Host "║  Claude × gspowers × ruflo 金手指 - 一键安装                ║"
-Write-Host "║  版本: v1.3（完整版）                                      ║"
+Write-Host "║  版本: v1.5（已迁移: RTK→lean-ctx）                ║"
 Write-Host "╚═══════════════════════════════════════════════════════════╝" -ForegroundColor Cyan
 Write-Host ""
 
@@ -2044,18 +2041,19 @@ Write-Host "[3.2/9] 安装 markitdown..." -ForegroundColor Yellow
 npm install -g @digipair/skill-markitdown
 claude mcp add markitdown -- npx -y @digipair/skill-markitdown
 
-Write-Host "[3.3/9] 安装 RTK（Token 节省 60-90%）..." -ForegroundColor Yellow
-# 下载 RTK
-$rtkUrl = "https://github.com/rtk-ai/rtk/releases/download/v0.37.2/rtk-x86_64-pc-windows-msvc.zip"
-curl -sL $rtkUrl -o $env:TEMP\rtk.zip
-Expand-Archive -Path $env:TEMP\rtk.zip -DestinationPath $env:TEMP\rtk -Force
+Write-Host "[3.3/9] 安装 lean-ctx（上下文压缩引擎）..." -ForegroundColor Yellow
+# 下载 lean-ctx
+$lcUrl = "https://github.com/garrytan/lean-ctx/releases/latest/download/lean-ctx-x86_64-pc-windows-msvc.zip"
+Invoke-WebRequest -Uri $lcUrl -OutFile $env:TEMP\lean-ctx.zip -UseBasicParsing
+Expand-Archive -Path $env:TEMP\lean-ctx.zip -DestinationPath $env:TEMP\lean-ctx -Force
 # 安装到用户目录
 $binDir = "$env:USERPROFILE\.local\bin"
 New-Item -ItemType Directory -Force -Path $binDir
-Move-Item "$env:TEMP\rtk\rtk.exe" "$binDir\rtk.exe"
-# 初始化并自动修补 settings.json
-& "$binDir\rtk.exe" init -g --auto-patch
-& "$binDir\rtk.exe" gain
+Move-Item "$env:TEMP\lean-ctx\lean-ctx.exe" "$binDir\lean-ctx.exe" -Force
+# 初始化
+& "$binDir\lean-ctx.exe" init
+& "$binDir\lean-ctx.exe" init --agent claude
+& "$binDir\lean-ctx.exe" --version
 
 Write-Host "[3.4/9] 配置权限模式（Yolo）..." -ForegroundColor Yellow
 # 在 settings.json 中添加 bypassPermissions 配置
@@ -2127,11 +2125,11 @@ claude-flow --version
 claude --version
 git --version
 node --version
-& "$binDir\rtk.exe" --version
+& "$binDir\lean-ctx.exe" --version
 claude mcp list
 
 Write-Host "[9/9] 清理..." -ForegroundColor Yellow
-Remove-Item $env:TEMP\rtk.zip -Force -ErrorAction SilentlyContinue
+Remove-Item $env:TEMP\lean-ctx.zip -Force -ErrorAction SilentlyContinue
 
 # ═══════════════════════════════════════════════════════════════
 # 完成！
@@ -2139,7 +2137,7 @@ Remove-Item $env:TEMP\rtk.zip -Force -ErrorAction SilentlyContinue
 
 Write-Host ""
 Write-Host "═══════════════════════════════════════════════════════════" -ForegroundColor Green
-Write-Host "✅ 安装完成！版本: v1.3" -ForegroundColor Green
+Write-Host "✅ 安装完成！版本: v1.5" -ForegroundColor Green
 Write-Host "═══════════════════════════════════════════════════════════" -ForegroundColor Green
 Write-Host ""
 Write-Host "下一步："

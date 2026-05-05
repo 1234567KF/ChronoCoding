@@ -8,6 +8,21 @@
             "type": "command",
             "command": "cmd /c node %CLAUDE_PROJECT_DIR%/.claude/helpers/hook-handler.cjs pre-bash",
             "timeout": 5000
+          },
+          {
+            "type": "command",
+            "command": "lean-ctx hook rewrite",
+            "timeout": 5000
+          }
+        ]
+      },
+      {
+        "matcher": "Read|Grep|Glob|View",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "lean-ctx hook redirect",
+            "timeout": 5000
           }
         ]
       },
@@ -64,7 +79,7 @@
         ]
       },
       {
-        "matcher": "Bash|Read|Write|Edit|NotebookEdit|Glob|Grep|TodoWrite|TaskCreate|TaskUpdate|EnterPlanMode|ExitPlanMode|Skill|Agent|AskUserQuestion|EnterWorktree|mcp__",
+        "matcher": "",
         "hooks": [
           {
             "type": "command",

@@ -13,7 +13,7 @@
 | 1 | **Claude Autopilot** | Claude Code + Yolo mode, AI autonomous decision-making without frequent confirmations |
 | 2 | **gspowers SOP Navigation** | Industry consensus skill rules framework, standardized development process |
 | 3 | **ruflo Multi-Agent Parallel** | Session memory integration, multi-agent parallel/relay execution |
-| 4 | **RTK Token Saving** | Save 60-90% Token consumption, significantly reducing costs |
+| 4 | **lean-ctx Context Compression** | 90+ 压缩模式，Shell Hook + Claude Code Hook 双通道，节省 60-90% Token 消耗 |
 | 5 | **markitdown Universal Read** | Markdown/HTML/document conversion, any format can be processed |
 | 6 | **TDD Test-First** | Mandatory test-first mode, guaranteed quality |
 | 7 | **Universal Triple Collaboration** | Shop around, multi-angle review, more comprehensive decisions |
@@ -53,15 +53,23 @@ ruflo integrates session memory and supports multiple agents in parallel/relay m
 - **Relay**: Previous agent output becomes next agent input
 - **Memory**: Cross-session memory, no knowledge loss
 
-### 4. RTK Token Saving
+### 4. lean-ctx Context Compression
 
-RTK (Rust Token Killer) saves 60-90% Token by filtering and compressing command output:
+lean-ctx 是 Rust 单二进制上下文运行时，通过 Shell Hook + Claude Code Hook 双通道压缩命令输出和文件读取：
 
-| Operation | Normal Consumption | RTK Consumption | Savings |
-|-----------|-------------------|------------------|---------|
+| Operation | Normal Consumption | lean-ctx Consumption | Savings |
+|-----------|-------------------|----------------------|---------|
 | `ls` / `tree` | 2,000 | 400 | -80% |
 | `git status` | 3,000 | 600 | -80% |
 | `npm test` | 25,000 | 2,500 | -90% |
+| 文件读取（大文件） | 10,000+ | 自适应 | -60-90% |
+
+**关键特性**：
+- **Shell Hook**：`lean-ctx hook rewrite` 自动重写 Bash 命令，过滤无关输出
+- **Redirect Hook**：`lean-ctx hook redirect` 自动压缩 Read/Grep/Glob 等读取操作
+- **CCP (Context Continuity Protocol)**：跨会话状态持久化，`/compact` 后自动恢复
+- **90+ 压缩模式**：覆盖自动、全文、地图、签名、差异、激进、熵、任务、参考、lines:N-M 等多种场景
+- **加权上下文压缩**：按文件新旧程度/修改频率智能分配上下文预算
 
 ### 5. markitdown Universal Read
 

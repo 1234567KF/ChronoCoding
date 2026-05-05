@@ -150,7 +150,7 @@ claude
 | Claude Code | `irm https://claude.ai/install.ps1 \| iex` | 主界面 |
 | Node.js | `winget install OpenJS.NodeJS.LTS` | 运行环境 |
 | ruflo | `npm install -g ruflo` | 多 Agent + 记忆 |
-| RTK | 见 INSTALL.md | Token 节省 |
+| lean-ctx | 见 INSTALL.md | 上下文压缩引擎，90+ 压缩模式 + CCP |
 | OpenCLI | `npm install -g @jackwener/opencli` | 100+ 平台 CLI 数据提取 |
 | context-mode | `npm install -g context-mode` | 会话连续性 + 压缩存活（MCP + hooks） |
 | claude-mem | `npm install -g claude-mem && claude-mem install` | 跨会话持久记忆（SQLite + Chroma 向量库），自动记忆工具调用和决策 |

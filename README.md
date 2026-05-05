@@ -117,7 +117,7 @@ flowchart LR
 | 原则 | 含义 | 对应技能 |
 |------|------|---------|
 | **稳** | 好用不贵，长期维护 | gspowers、gstack、kf-skill-design-expert、kf-add-skill、kf-reverse-skill、kf-doc-consistency |
-| **省** | 模型搭配，稳固 ROI | kf-model-router、kf-code-review-graph、RTK |
+| **省** | 模型搭配，稳固 ROI | kf-model-router、kf-code-review-graph、lean-ctx |
 | **准** | 多源搜索 + 反反爬 + 平台直取 + 结构化提取，精准调研 | kf-web-search、kf-scrapling、kf-opencli、markdown-to-docx、kf-go、bili-extract、harness-code-dev、observability-designer、performance-profiler、kf-langextract |
 | **夯** | 多 Agent 并发竞争碾压 | kf-multi-team-compete、kf-triple-collaboration |
 | **快** | MVP 快速验证，多工具速出原型 | kf-prd-generator、kf-ui-prototype-generator、kf-spec、kf-image-editor、markdown-to-docx |
@@ -137,7 +137,7 @@ flowchart LR
 | [Scrapling](https://github.com/D4Vinci/Scrapling) | D4Vinci | BSD-3-Clause | Web 爬虫 + 反反爬 |
 | [frontend-slides](https://github.com/zarazhangrui/frontend-slides) | zarazhangrui | MIT | 演示文稿生成 |
 | [ruflo](https://github.com/ruvnet/ruflo) | ruvnet | MIT | 多 Agent 编排 |
-| [RTK](https://github.com/rafaelkallis/rtk) | rafaelkallis | MIT | Token 优化 |
+| [lean-ctx](https://github.com/garrytan/lean-ctx) | garrytan | MIT | 上下文压缩引擎，90+ 压缩模式 |
 | [context-mode](https://github.com/mksglu/context-mode) | mksglu | Elastic-2.0 | 会话连续性 + 压缩存活 |
 | [claude-mem](https://github.com/thedotmack/claude-mem) | thedotmack | AGPL-3.0 | 跨会话持久记忆（SQLite + Chroma 向量库） |
 | [OpenCLI](https://github.com/jackwener/OpenCLI) | jackwener | MIT | 100+ 平台 CLI 数据直取，AI 原生浏览器自动化 |

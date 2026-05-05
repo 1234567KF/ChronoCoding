@@ -95,7 +95,7 @@ docs/INSTALL.md 包含以下步骤（你逐项执行）：
 | 安装 ruflo | `npm install -g ruflo` | ✓ |
 | 配置 MCP | `claude mcp add ruflo -- npx -y ruflo@latest mcp start` | ✓ |
 | 安装 markitdown | `npm install -g @digipair/skill-markitdown` | ✓ |
-| 安装 RTK | 从 GitHub 下载 RTK 二进制 | ✓ |
+| 安装 lean-ctx | `Invoke-WebRequest ...` 下载 lean-ctx 二进制 | ✓ |
 | 安装 context-mode | `npm install -g context-mode` | ✓ |
 | 安装 claude-mem | `npm install -g claude-mem && claude-mem install` | ✓ |
 | 安装 gspowers/gstack | 克隆到 `~/.claude/skills/` | ✓ |
@@ -175,7 +175,7 @@ bash .claude/install-local.sh
 | 组件 | 检查命令 | 升级命令 |
 |------|---------|---------|
 | ruflo | `npm ls -g ruflo` | `npm update -g ruflo` |
-| RTK | `rtk --version` | 重新下载最新 RTK 二进制 |
+| lean-ctx | `lean-ctx --version` | 重新下载最新 lean-ctx 二进制 |
 | Claude Code | `claude --version` | `npm update -g @anthropic-ai/claude-code` |
 
 **注意**：全局组件升级是可选操作，不强制。仅当现有版本无法正常工作时才需要升级。
@@ -213,7 +213,7 @@ git log --oneline -3
 确认：
   1. 技能已刷新：.claude/skills/
   2. 配置文件未被覆盖：.claude/settings.json、.claude-flow/config.yaml
-  3. 如需更新全局组件（ruflo/RTK/Claude Code），请手动执行
+  3. 如需更新全局组件（ruflo/lean-ctx/Claude Code），请手动执行
 ```
 
 ---

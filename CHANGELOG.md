@@ -2,7 +2,27 @@
 
 所有重要版本变更将记录在此。
 
-## [v1.4] - 2026-04-28
+## [v1.5] - 2026-05-05
+
+### 重大变更
+
+- **RTK 退役 → lean-ctx 接替**：RTK (Rust Token Killer) 被 lean-ctx 3.4.7 替代
+  - lean-ctx 提供 90+ 上下文压缩模式（RTK 仅 ~20 种）
+  - Shell Hook + Claude Code Hook 双通道压缩
+  - CCP (Context Continuity Protocol) 跨会话持久化
+
+### 新增
+
+- **lean-ctx 集成**：Shell Hook + MCP 双通道上下文压缩
+- **CCP 会话连续性**：跨会话状态持久化
+
+### 更新
+
+- settings.json：新增 lean-ctx PreToolUse hooks（rewrite + redirect）
+- 所有文档：RTK 引用替换为 lean-ctx
+- README.md / CREDITS.md / FEATURES.md / INSTALL.md / AICoding.md：同步更新
+
+---
 
 ### 新增
 

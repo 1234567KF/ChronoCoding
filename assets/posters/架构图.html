@@ -1,0 +1,484 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI编程智驾 — 技能生态架构图</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  :root {
+    --bg: #f8fafc;
+    --card-bg: #ffffff;
+    --border: #e2e8f0;
+    --accent: #0ea5e9;
+    --accent2: #8b5cf6;
+    --accent3: #22c55e;
+    --accent4: #f59e0b;
+    --accent5: #ef4444;
+    --text: #0f172a;
+    --text2: #334155;
+    --text3: #64748b;
+    --grad: linear-gradient(135deg, #0ea5e9, #8b5cf6);
+  }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    padding: 40px;
+    width: 1600px;
+    min-height: 100vh;
+  }
+  h1 {
+    font-size: 32px;
+    font-weight: 700;
+    margin-bottom: 8px;
+    background: var(--grad);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  h2 {
+    font-size: 20px;
+    font-weight: 600;
+    margin: 28px 0 12px;
+    padding-bottom: 6px;
+    border-bottom: 2px solid var(--border);
+    color: var(--text);
+  }
+  h3 {
+    font-size: 15px;
+    font-weight: 600;
+    margin: 14px 0 8px;
+    color: var(--text2);
+  }
+  .subtitle { color: var(--text3); font-size: 14px; margin-bottom: 20px; }
+
+  /* 五层架构 */
+  .layers { display: flex; flex-direction: column; gap: 4px; margin: 16px 0; }
+  .layer {
+    display: flex; align-items: stretch; min-height: 48px;
+    border-radius: 10px; overflow: hidden;
+  }
+  .layer-label {
+    width: 130px; min-width: 130px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 13px; font-weight: 600; color: #fff; text-align: center;
+    padding: 8px; line-height: 1.3;
+  }
+  .layer-body {
+    flex: 1; padding: 8px 14px;
+    display: flex; align-items: center; flex-wrap: wrap; gap: 6px;
+    font-size: 12px; line-height: 1.4;
+  }
+  .layer-tag {
+    display: inline-block; padding: 3px 10px; border-radius: 5px;
+    font-size: 11px; font-weight: 500; white-space: nowrap;
+  }
+  .layer-dir {
+    display: inline-block; padding: 2px 8px; border-radius: 4px;
+    font-size: 10px; color: var(--text3); font-weight: 500;
+  }
+  .L0-label { background: #1e293b; }
+  .L0-body { background: #e2e8f0; }
+  .L0-tag { background: #334155; color: #e2e8f0; }
+  .L1-label { background: #0ea5e9; }
+  .L1-body { background: #e0f2fe; }
+  .L1-tag { background: #38bdf8; color: #fff; }
+  .L2-label { background: #8b5cf6; }
+  .L2-body { background: #ede9fe; }
+  .L2-tag { background: #a78bfa; color: #fff; }
+  .L3a-label { background: #22c55e; }
+  .L3a-body { background: #dcfce7; }
+  .L3a-tag { background: #4ade80; color: #fff; }
+  .L3b-label { background: #f59e0b; }
+  .L3b-body { background: #fef3c7; }
+  .L3b-tag { background: #fbbf24; color: #fff; }
+  .L4-label { background: #ef4444; }
+  .L4-body { background: #fee2e2; }
+  .L4-tag { background: #f87171; color: #fff; }
+  .L5-label { background: #64748b; }
+  .L5-body { background: #f1f5f9; }
+  .L5-tag { background: #94a3b8; color: #fff; }
+
+  /* 卡片网格 */
+  .grid { display: grid; gap: 12px; margin: 12px 0; }
+  .grid-3 { grid-template-columns: repeat(3, 1fr); }
+  .grid-4 { grid-template-columns: repeat(4, 1fr); }
+  .grid-5 { grid-template-columns: repeat(5, 1fr); }
+  .grid-6 { grid-template-columns: repeat(6, 1fr); }
+  .card {
+    background: var(--card-bg); border: 1px solid var(--border);
+    border-radius: 8px; padding: 10px 12px;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.04);
+  }
+  .card h4 { font-size: 13px; font-weight: 600; margin-bottom: 4px; }
+  .card p { font-size: 11px; color: var(--text3); line-height: 1.4; }
+  .card .keywords { font-size: 10px; color: var(--accent); margin-top: 4px; }
+
+  /* 调用链大图 */
+  .callchain {
+    background: #0f172a; border-radius: 10px; padding: 20px;
+    font-family: 'Cascadia Code', 'Fira Code', 'JetBrains Mono', monospace;
+    font-size: 12px; line-height: 1.5; color: #e2e8f0;
+    margin: 12px 0; overflow-x: auto;
+  }
+  .callchain .header { color: #38bdf8; font-weight: 600; }
+  .callchain .node { color: #fbbf24; }
+  .callchain .arrow { color: #64748b; }
+  .callchain .passive { color: #4ade80; }
+  .callchain .hook { color: #a78bfa; }
+  .callchain .comment { color: #64748b; }
+
+  /* 表格 */
+  table { width: 100%; border-collapse: collapse; font-size: 11px; margin: 10px 0; }
+  th, td { padding: 6px 10px; text-align: left; border: 1px solid var(--border); }
+  th { background: #f1f5f9; font-weight: 600; font-size: 11px; }
+  td { vertical-align: top; }
+  tr:nth-child(even) td { background: #f8fafc; }
+
+  .badge {
+    display: inline-block; padding: 2px 8px; border-radius: 10px;
+    font-size: 10px; font-weight: 600;
+  }
+  .badge-blue { background: #dbeafe; color: #1d4ed8; }
+  .badge-green { background: #dcfce7; color: #15803d; }
+  .badge-orange { background: #fef3c7; color: #b45309; }
+  .badge-red { background: #fee2e2; color: #b91c1c; }
+  .badge-purple { background: #ede9fe; color: #6d28d9; }
+
+  .section { margin: 16px 0; }
+  .footer { text-align: center; color: var(--text3); font-size: 11px; margin-top: 30px; padding-top: 12px; border-top: 1px solid var(--border); }
+</style>
+</head>
+<body>
+
+<h1>AI编程智驾 — 技能生态架构图</h1>
+<p class="subtitle">AI编程智驾 · 2026-05-05 · 总计约 157 个技能</p>
+
+<!-- ===== 五层架构 ===== -->
+<h2>五层技能架构</h2>
+<div class="layers">
+
+  <div class="layer">
+    <div class="layer-label L0-label">L0 用户触发层</div>
+    <div class="layer-body L0-body">
+      <span class="layer-tag L0-tag">/go</span>
+      <span class="layer-tag L0-tag">/夯 [任务]</span>
+      <span class="layer-tag L0-tag">/对齐</span>
+      <span class="layer-tag L0-tag">spec coding</span>
+      <span class="layer-tag L0-tag">/prd-generator</span>
+      <span class="layer-tag L0-tag">/web-search</span>
+      <span class="layer-tag L0-tag">/review-graph</span>
+      <span class="layer-tag L0-tag">/browser-ops</span>
+      <span class="layer-tag L0-tag">triple [任务]</span>
+    </div>
+  </div>
+
+  <div class="layer">
+    <div class="layer-label L1-label">L1 模型路由层</div>
+    <div class="layer-body L1-body">
+      <span class="layer-tag L1-tag">kf-model-router</span>
+      <span class="layer-dir">自动切换：pro（架构/需求）↔ flash（编码/执行）</span>
+    </div>
+  </div>
+
+  <div class="layer">
+    <div class="layer-label L2-label">L2 工作流编排层</div>
+    <div class="layer-body L2-body">
+      <span class="layer-tag L2-tag">kf-spec</span>
+      <span class="layer-tag L2-tag">kf-multi-team-compete</span>
+      <span class="layer-tag L2-tag">kf-reverse-spec</span>
+      <span class="layer-tag L2-tag">kf-triple-collaboration</span>
+      <span class="layer-tag L2-tag">kf-autoresearch</span>
+      <span class="layer-tag L2-tag">kf-grant-research</span>
+      <span class="layer-tag L2-tag">gspowers Pipeline</span>
+    </div>
+  </div>
+
+  <div class="layer">
+    <div class="layer-label L3a-label">L3a 能力服务 — 信息获取</div>
+    <div class="layer-body L3a-body">
+      <span class="layer-tag L3a-tag">kf-web-search</span>
+      <span class="layer-tag L3a-tag">kf-scrapling</span>
+      <span class="layer-tag L3a-tag">kf-opencli</span>
+      <span class="layer-tag L3a-tag">kf-langextract</span>
+      <span class="layer-tag L3a-tag">asta-skill</span>
+    </div>
+  </div>
+
+  <div class="layer">
+    <div class="layer-label L3b-label">L3b 能力服务 — 生成/测试/管理</div>
+    <div class="layer-body L3b-body">
+      <span class="layer-tag L3b-tag">kf-prd-generator</span>
+      <span class="layer-tag L3b-tag">kf-ui-prototype-generator</span>
+      <span class="layer-tag L3b-tag">kf-image-editor</span>
+      <span class="layer-tag L3b-tag">markdown-to-docx</span>
+      <span class="layer-tag L3b-tag">kf-browser-ops</span>
+      <span class="layer-tag L3b-tag">kf-code-review-graph</span>
+      <span class="layer-tag L3b-tag">kf-alignment</span>
+      <span class="layer-tag L3b-tag">kf-go</span>
+      <span class="layer-tag L3b-tag">kf-add-skill</span>
+      <span class="layer-tag L3b-tag">kf-doc-consistency</span>
+      <span class="layer-tag L3b-tag">kf-skill-design-expert</span>
+    </div>
+  </div>
+
+  <div class="layer">
+    <div class="layer-label L4-label">L4 gstack 产品流程</div>
+    <div class="layer-body L4-body">
+      <span class="layer-tag L4-tag">office-hours</span>
+      <span class="layer-tag L4-tag">plan-*review</span>
+      <span class="layer-tag L4-tag">design-*</span>
+      <span class="layer-tag L4-tag">browse</span>
+      <span class="layer-tag L4-tag">review / codex</span>
+      <span class="layer-tag L4-tag">cso / health</span>
+      <span class="layer-tag L4-tag">qa</span>
+      <span class="layer-tag L4-tag">ship / land-deploy</span>
+      <span class="layer-tag L4-tag">canary / retro</span>
+      <span class="layer-dir">+ 约 50 个辅助子技能</span>
+    </div>
+  </div>
+
+  <div class="layer">
+    <div class="layer-label L5-label">L5 第三方专业×66 + BitFun×5</div>
+    <div class="layer-body L5-body">
+      <span class="layer-tag L5-tag">12 编程语言</span>
+      <span class="layer-tag L5-tag">7 后端框架</span>
+      <span class="layer-tag L5-tag">7 前端/移动</span>
+      <span class="layer-tag L5-tag">5 基础设施</span>
+      <span class="layer-tag L5-tag">8 API/架构</span>
+      <span class="layer-tag L5-tag">5 质量/测试</span>
+      <span class="layer-tag L5-tag">5 DevOps</span>
+      <span class="layer-tag L5-tag">3 安全</span>
+      <span class="layer-tag L5-tag">6 数据/ML</span>
+      <span class="layer-tag L5-tag">8 平台专业</span>
+      <span class="layer-tag L5-tag">pdf/docx/pptx/xlsx/browser</span>
+    </div>
+  </div>
+</div>
+
+<!-- ===== kf- 系列技能 ===== -->
+<h2>kf- 系列技能全览（21 个）</h2>
+<div class="grid grid-4">
+  <div class="card">
+    <h4>kf-spec</h4>
+    <p>Spec 驱动开发，6 步 Pipeline：需求→设计→编码→测试</p>
+    <div class="keywords">spec coding · SDD</div>
+  </div>
+  <div class="card">
+    <h4>kf-multi-team-compete</h4>
+    <p>多团队竞争评审，红/蓝/绿三队并发 + 裁判评分</p>
+    <div class="keywords">/夯 · 主入口</div>
+  </div>
+  <div class="card">
+    <h4>kf-reverse-spec</h4>
+    <p>逆向工程，存量代码→Spec/Wiki 文档</p>
+    <div class="keywords">逆向 · 存量代码</div>
+  </div>
+  <div class="card">
+    <h4>kf-triple-collaboration</h4>
+    <p>红队 vs 蓝队 vs 裁判，三方协作评估</p>
+    <div class="keywords">triple · 轻量版/夯</div>
+  </div>
+  <div class="card">
+    <h4>kf-web-search</h4>
+    <p>多引擎智能搜索，自动选策略和关键词</p>
+    <div class="keywords">/web-search · 查资料</div>
+  </div>
+  <div class="card">
+    <h4>kf-scrapling</h4>
+    <p>Web 爬虫 + 反反爬，Cloudflare Turnstile 绕过</p>
+    <div class="keywords">爬虫 · 抓取</div>
+  </div>
+  <div class="card">
+    <h4>kf-opencli</h4>
+    <p>网站→CLI 工具，100+ 平台数据直取</p>
+    <div class="keywords">opencli · 热榜</div>
+  </div>
+  <div class="card">
+    <h4>kf-langextract</h4>
+    <p>LLM 驱动结构化提取，非结构化文本→JSON/CSV/YAML</p>
+    <div class="keywords">提取 · langextract</div>
+  </div>
+  <div class="card">
+    <h4>kf-prd-generator</h4>
+    <p>业务需求→结构化 Markdown PRD 文档</p>
+    <div class="keywords">/prd-generator · SDD Excel</div>
+  </div>
+  <div class="card">
+    <h4>kf-ui-prototype-generator</h4>
+    <p>PRD → 高保真 HTML 原型页面</p>
+    <div class="keywords">生成原型 · UI 原型</div>
+  </div>
+  <div class="card">
+    <h4>kf-image-editor</h4>
+    <p>AI 自然语言 P 图，基于 Gemini MCP</p>
+    <div class="keywords">P图 · 修图 · 改图</div>
+  </div>
+  <div class="card">
+    <h4>kf-browser-ops</h4>
+    <p>浏览器自动化：截图、填表、点击、验证</p>
+    <div class="keywords">/browser-ops · UI 测试</div>
+  </div>
+  <div class="card">
+    <h4>kf-code-review-graph</h4>
+    <p>代码审查依赖图谱，识别涟漪效应</p>
+    <div class="keywords">/review-graph · 依赖分析</div>
+  </div>
+  <div class="card">
+    <h4>kf-alignment</h4>
+    <p>对齐工作流，动前理解、动后 diff</p>
+    <div class="keywords">/对齐 · 懂</div>
+  </div>
+  <div class="card">
+    <h4>kf-go</h4>
+    <p>工作流导航，显示进度和下一步</p>
+    <div class="keywords">/go · 导航</div>
+  </div>
+  <div class="card">
+    <h4>kf-model-router</h4>
+    <p>模型智能路由，pro↔flash 自动切换</p>
+    <div class="keywords">省 · Hook 触发</div>
+  </div>
+  <div class="card">
+    <h4>kf-autoresearch</h4>
+    <p>自主 ML 实验，改模型→训练→验证→循环</p>
+    <div class="keywords">实验跑一夜 · Karpathy</div>
+  </div>
+  <div class="card">
+    <h4>kf-grant-research</h4>
+    <p>课题申报助手，查论文→分析→生成申报材料</p>
+    <div class="keywords">课题申报 · 国自然</div>
+  </div>
+  <div class="card">
+    <h4>kf-add-skill</h4>
+    <p>技能安装管家，搜索安装 + 文档同步</p>
+    <div class="keywords">装技能 · 搜索技能</div>
+  </div>
+  <div class="card">
+    <h4>kf-doc-consistency</h4>
+    <p>文档全局一致性自检</p>
+    <div class="keywords">一致性 · 文档自检</div>
+  </div>
+  <div class="card">
+    <h4>kf-skill-design-expert</h4>
+    <p>Skill 设计专家，5 种设计模式</p>
+    <div class="keywords">设计Skill · 审查Skill</div>
+  </div>
+</div>
+
+<!-- ===== 主入口 /夯 调用链 ===== -->
+<h2>主入口 /夯（kf-multi-team-compete）完整调用链</h2>
+<div class="callchain">
+<div class="header">用户: /夯 [任务]</div>
+│<br>
+├─ <span class="node">kf-model-router</span> <span class="comment">→ 裁判用 pro，各队用 flash</span><br>
+│<br>
+├─ <span class="header">Pre-Stage</span>（输入 SDD Excel 时）<br>
+│&nbsp;&nbsp;&nbsp;└─ <span class="node">kf-prd-generator</span> <span class="comment">→ PRD.md</span><br>
+│&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;└─ <span class="hook">Hook → kf-alignment</span><br>
+│<br>
+├─ <span class="header">Phase 1-4: 三队 Pipeline 并发</span><br>
+│&nbsp;&nbsp;&nbsp;├─ Stage 0: <span class="node">kf-alignment</span> + <span class="node">kf-spec</span><br>
+│&nbsp;&nbsp;&nbsp;├─ Stage 1: 架构设计<br>
+│&nbsp;&nbsp;&nbsp;├─ Stage 2: <span class="node">kf-ui-prototype-generator</span> + <span class="node">kf-image-editor</span> + <span class="node">kf-web-search</span> + <span class="node">kf-opencli</span><br>
+│&nbsp;&nbsp;&nbsp;├─ Stage 3: <span class="node">kf-browser-ops</span> + <span class="node">kf-opencli</span><br>
+│&nbsp;&nbsp;&nbsp;├─ Stage 4: <span class="node">kf-code-review-graph</span><br>
+│&nbsp;&nbsp;&nbsp;└─ Stage 5: <span class="node">kf-image-editor</span> + 汇总<br>
+│<br>
+├─ <span class="header">Phase 3: 裁判评分</span><br>
+│&nbsp;&nbsp;&nbsp;└─ <span class="node">kf-alignment（统一评分标准）</span><br>
+│<br>
+└─ <span class="header">Phase 4: 汇总融合 → 最终方案</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;└─ <span class="passive">gspowers Pipeline 引擎（阶段编排）</span>
+</div>
+
+<!-- ===== gstack 产品流程 ===== -->
+<h2>gstack 产品流程框架概要</h2>
+<div class="grid grid-6">
+  <div class="card">
+    <h4>探索</h4>
+    <p>office-hours · design-consultation · design-shotgun</p>
+  </div>
+  <div class="card">
+    <h4>规划</h4>
+    <p>plan-ceo-review · plan-eng-review · plan-design-review · plan-devex-review · autoplan</p>
+  </div>
+  <div class="card">
+    <h4>构建</h4>
+    <p>design-html · design-review · browse</p>
+  </div>
+  <div class="card">
+    <h4>审核</h4>
+    <p>review · codex · cso · health · benchmark · qa</p>
+  </div>
+  <div class="card">
+    <h4>发布</h4>
+    <p>ship · land-and-deploy · canary · setup-deploy</p>
+  </div>
+  <div class="card">
+    <h4>运维</h4>
+    <p>retro · document-release · learn · devex-review · investigate</p>
+  </div>
+</div>
+
+<!-- ===== 完整技能统计 ===== -->
+<h2>技能统计</h2>
+<table>
+  <tr>
+    <th>层级</th><th>数量</th><th>说明</th>
+  </tr>
+  <tr><td>kf- 系列（自建）</td><td><span class="badge badge-blue">21</span></td><td>核心工作流 + 能力服务</td></tr>
+  <tr><td>gstack 系列</td><td><span class="badge badge-green">~60</span></td><td>产品流程框架子技能</td></tr>
+  <tr><td>jeffallan/claude-skills</td><td><span class="badge badge-orange">66</span></td><td>第三方技术技能</td></tr>
+  <tr><td>其他（asta/gspowers/bitfun等）</td><td><span class="badge badge-purple">~10</span></td><td>学术搜索/SOP/文档处理</td></tr>
+  <tr><td><strong>总计</strong></td><td><span class="badge badge-red">~157</span></td><td>完整技能生态</td></tr>
+</table>
+
+<!-- ===== 第三方技能分类 ===== -->
+<h2>jeffallan/claude-skills 第三方技能分类（×66）</h2>
+<div class="grid grid-5">
+  <div class="card">
+    <h4>编程语言 ×12</h4>
+    <p>Python · TypeScript · Go · Rust · C++ · Java · C# · PHP · Swift · Kotlin · JavaScript · Dart</p>
+  </div>
+  <div class="card">
+    <h4>后端框架 ×7</h4>
+    <p>FastAPI · Django · NestJS · Next.js · Spring Boot · Rails · Laravel</p>
+  </div>
+  <div class="card">
+    <h4>前端/移动 ×7</h4>
+    <p>React · Vue · Angular · Flutter · React Native · Vue-ts · Vue-js</p>
+  </div>
+  <div class="card">
+    <h4>基础设施 ×5</h4>
+    <p>Kubernetes · Terraform · DevOps · Cloud · SRE</p>
+  </div>
+  <div class="card">
+    <h4>API/架构 ×8</h4>
+    <p>API Design · GraphQL · Microservices · RAG · MCP · Architecture · WebSocket · SQL</p>
+  </div>
+  <div class="card">
+    <h4>质量/测试 ×5</h4>
+    <p>Code Review · Test Master · Debugging · Playwright · SQL Pro</p>
+  </div>
+  <div class="card">
+    <h4>DevOps ×5</h4>
+    <p>DevOps · Monitoring · DB Optimizer · Chaos · ML Pipeline</p>
+  </div>
+  <div class="card">
+    <h4>安全 ×3</h4>
+    <p>Security Reviewer · Secure Code · Security Audit</p>
+  </div>
+  <div class="card">
+    <h4>数据/ML ×6</h4>
+    <p>ML Pipeline · Fine-tuning · Spark · Pandas · Prompt Engineer · Feature Forge</p>
+  </div>
+  <div class="card">
+    <h4>平台专业 ×8</h4>
+    <p>Salesforce · Shopify · WordPress · Embedded · Game Dev · Legacy · CLI · Documenter</p>
+  </div>
+</div>
+
+<div class="footer">AI编程智驾 · 六字真言：稳 · 省 · 准 · 夯 · 快 · 懂</div>
+</body>
+</html>

@@ -11,7 +11,7 @@
 | **Scrapling** | https://github.com/D4Vinci/Scrapling | BSD-3-Clause | Web 爬虫框架，自适应反反爬 + Spider 并发 |
 | **frontend-slides** | https://github.com/zarazhangrui/frontend-slides | MIT | HTML 演示文稿生成器 |
 | **ruflo** | https://github.com/ruvnet/ruflo | MIT | 多 Agent 编排与记忆系统 |
-| **RTK** | https://github.com/rafaelkallis/rtk | MIT | Token 消耗优化 |
+| **lean-ctx** | https://github.com/garrytan/lean-ctx | MIT | 上下文压缩引擎，90+ 压缩模式 + CCP 会话连续性 |
 
 ## 项目结构致谢
 
@@ -48,11 +48,11 @@ AICoding/
 - **描述**: AI Agent 编排平台，支持多 Agent 并行/记忆系统
 - **本项目使用**: 多 Agent 协同执行框架
 
-### RTK (Rust Token Killer)
+### lean-ctx
 - **许可证**: MIT License
-- **来源**: https://github.com/rafaelkallis/rtk
-- **描述**: CLI 代理工具，大幅降低 Token 消耗
-- **本项目使用**: 命令输出压缩与优化
+- **来源**: https://github.com/garrytan/lean-ctx
+- **描述**: Rust 单二进制上下文运行时，Shell Hook + Claude Code Hook 双通道压缩
+- **本项目使用**: 命令输出压缩、文件读取重定向、CCP 跨会话持久化
 
 ### Scrapling
 - **许可证**: BSD-3-Clause License
