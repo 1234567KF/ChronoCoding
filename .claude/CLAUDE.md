@@ -83,6 +83,7 @@
     ├── kf-opencli/            # OpenCLI — 100+ 平台 CLI 数据直取
     ├── kf-grant-research/    # 课题申报研究助手
     ├── kf-langextract/       # LLM 驱动结构化提取
+    ├── lean-ctx/             # 上下文压缩引擎，90+ 压缩模式 + CCP
     ├── lambda-lang/          # Agent-to-Agent 原生语言（340+ 原子，7 域，3x 压缩）
     ├── claude-code-pro/      # Token 高效调度（智能跳过 + 回调替代轮询）
     ├── asta-skill/           # 学术论文搜索（Semantic Scholar / Ai2 Asta MCP）

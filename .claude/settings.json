@@ -83,7 +83,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "node C:/Users/KF/AppData/Roaming/npm/node_modules/context-mode/hooks/posttooluse.mjs",
+            "command": "node C:/Users/Administrator/AppData/Roaming/npm/node_modules/context-mode/hooks/posttooluse.mjs",
             "timeout": 10000
           }
         ]
@@ -95,7 +95,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "node C:/Users/KF/AppData/Roaming/npm/node_modules/context-mode/hooks/userpromptsubmit.mjs",
+            "command": "node C:/Users/Administrator/AppData/Roaming/npm/node_modules/context-mode/hooks/userpromptsubmit.mjs",
             "timeout": 10000
           }
         ]
@@ -116,7 +116,7 @@
           },
           {
             "type": "command",
-            "command": "node C:/Users/KF/AppData/Roaming/npm/node_modules/context-mode/hooks/sessionstart.mjs",
+            "command": "node C:/Users/Administrator/AppData/Roaming/npm/node_modules/context-mode/hooks/sessionstart.mjs",
             "timeout": 15000
           }
         ]
@@ -178,7 +178,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "node C:/Users/KF/AppData/Roaming/npm/node_modules/context-mode/hooks/precompact.mjs",
+            "command": "node C:/Users/Administrator/AppData/Roaming/npm/node_modules/context-mode/hooks/precompact.mjs",
             "timeout": 10000
           }
         ]
@@ -251,6 +251,12 @@
     "CLAUDE_CODE_STREAM_DELAY": "0"
   },
   "model": "deepseek-v4-flash",
+  "modelPreferences": {
+    "preferred": "deepseek-v4-flash",
+    "fallbacks": ["deepseek-v4-pro"],
+    "automaticallySwitch": true
+  },
+
   "claudeFlow": {
     "version": "3.0.0",
     "enabled": true,
@@ -359,8 +365,12 @@
     "context-mode": {
       "command": "node",
       "args": [
-        "C:/Users/KF/AppData/Roaming/npm/node_modules/context-mode/start.mjs"
+        "C:/Users/Administrator/AppData/Roaming/npm/node_modules/context-mode/start.mjs"
       ]
+    },
+    "lean-ctx": {
+      "command": "C:/Users/Administrator/AppData/Roaming/npm/node_modules/lean-ctx-bin/bin/lean-ctx.exe",
+      "args": []
     }
   }
 }
