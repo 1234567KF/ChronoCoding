@@ -110,6 +110,9 @@ claude
 | `转docx` / `markdown转word` | 🆕 Markdown → DOCX 转换 | kf-markdown-to-docx-skill |
 | `ctx_stats` / `ctx_doctor` | 🆕 上下文压缩统计 / 诊断           | context-mode |
 | `会话恢复` / `压缩存活`   | 🆕 `/compact` 后自动恢复工作状态   | context-mode |
+| `提取` / `结构化提取` / `parse` / `langextract` | 🆕 LLM 驱动结构化提取：非结构化文本→JSON/CSV/YAML | kf-langextract |
+| `/mem-search` / `搜索记忆` / `我之前的` | 🆕 搜索跨会话持久记忆 | claude-mem |
+| `http://localhost:37777` | 🆕 记忆 Web 可视化面板（记忆浏览/搜索/管理） | claude-mem |
 
 ---
 
@@ -170,6 +173,7 @@ Agent 共享（在同一个项目内的 agents 共享记忆）
     │       ├── kf-scrapling/      # Web 爬虫 + 反反爬
     │       ├── kf-grant-research/ # 课题申报研究助手
     │       ├── kf-markdown-to-docx-skill/ # MD→DOCX
+    │       ├── kf-langextract/     # LLM 驱动结构化提取
 │       ├── asta-skill/           # 学术论文搜索
 │       ├── gspowers/          # SOP 导航（上游）
 │       ├── gstack/            # 产品流程（上游）

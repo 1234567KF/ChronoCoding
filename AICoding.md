@@ -97,6 +97,7 @@ docs/INSTALL.md 包含以下步骤（你逐项执行）：
 | 安装 markitdown | `npm install -g @digipair/skill-markitdown` | ✓ |
 | 安装 RTK | 从 GitHub 下载 RTK 二进制 | ✓ |
 | 安装 context-mode | `npm install -g context-mode` | ✓ |
+| 安装 claude-mem | `npm install -g claude-mem && claude-mem install` | ✓ |
 | 安装 gspowers/gstack | 克隆到 `~/.claude/skills/` | ✓ |
 | 配置 ruflo 全局配置 | 创建 `~/.claude-flow/config.yaml` | ✓ |
 | 配置 API Token | 在 `~/.claude/settings.json` 中设置 | **需用户提供** |
@@ -288,6 +289,7 @@ git log --oneline -3
 | `kf-add-skill` | — | 稳 | Pipeline + Inversion | kf-model-router、kf-skill-design-expert、kf-doc-consistency | kf-grant-research（自动调用）、用户手动 | pro |
 | `kf-grant-research` | — | 准 | Pipeline + Inversion + Generator | asta-skill、kf-scrapling、kf-web-search、kf-alignment、kf-add-skill、kf-model-router | 用户手动 | pro |
 | `kf-markdown-to-docx-skill` | — | — | 独立 | 无 | 用户手动 | flash |
+| `kf-langextract` | — | 准 | Pipeline + Tool Wrapper + Generator | kf-model-router | 用户手动 | flash |
 
 ### 上游技能（gstack / gspowers）
 

@@ -428,7 +428,35 @@ rtk --version   # 显示 rtk 0.37.2 即为正确（不是 rtk-cli/0.0.1）
 
 ---
 
-### 步骤 3.x：安装 context-mode（会话连续性 + 压缩存活）
+### 步骤 3.x：安装 claude-mem（跨会话持久记忆）
+
+> claude-mem 是跨会话持久记忆插件，自动捕获工具调用、决策和上下文，存储在本地 SQLite + Chroma 向量库。
+> 它和 context-mode（会话内上下文管理）、RTK（命令 Token 优化）**功能互补，无冲突**。
+
+```powershell
+# 全局安装
+npm install -g claude-mem
+
+# 安装并注册 hooks（安装到 ~/.claude/plugins/marketplaces/thedotmack/）
+claude-mem install
+
+# 启动 worker 服务（默认端口 37777）
+claude-mem start
+
+# 验证
+claude-mem status
+```
+
+**效果**：
+| 场景 | 之前 | 之后 |
+|------|------|------|
+| 跨会话记忆 | 每次对话白板开始 | 自动注入相关历史决策/上下文 |
+| 搜索过去工作 | 凭记忆回想 | `/mem-search` 自然语言搜索 |
+| Web 可视化 | 无 | `http://localhost:37777` 记忆面板 |
+
+---
+
+### 步骤 3.y：安装 context-mode（会话连续性 + 压缩存活）
 
 > Context Mode 是 MCP 服务器 + hooks 系统，解决两个问题：
 > 1. **压缩存活**：`/compact` 后自动恢复工作状态，不会失忆

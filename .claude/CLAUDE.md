@@ -31,6 +31,7 @@
 | `kf-doc-consistency` | — | 准/省 | Pipeline + Reviewer，被 kf-add-skill 自动调用 | 文档全局一致性自检 |
 | `kf-add-skill` | — | 稳 | 关键词搜索→下载安装→同步所有文档+SKILL.md，自动触发一致性检查 | 技能安装管家：搜索安装+文档全自动同步 |
 | `kf-markdown-to-docx-skill` | — | — | 独立 | Markdown → DOCX 转换 |
+| `kf-langextract` | — | 准 | Pipeline + Tool Wrapper + Generator，调用 lx.extract() | LLM 驱动结构化提取（非结构化文本→JSON/CSV/YAML），带 source grounding |
 
 ### 上游技能（非自建，不加 kf- 前缀）
 
@@ -76,6 +77,7 @@
     ├── kf-scrapling/          # Web 爬虫 + 反反爬
     ├── kf-opencli/            # OpenCLI — 100+ 平台 CLI 数据直取
     ├── kf-grant-research/    # 课题申报研究助手
+    ├── kf-langextract/       # LLM 驱动结构化提取
     ├── asta-skill/           # 学术论文搜索（Semantic Scholar / Ai2 Asta MCP）
     ├── gspowers/              # SOP 导航（上游）
     ├── gstack/               # 产品流程（上游）
@@ -116,6 +118,7 @@ claude
 | `爬虫` / `抓取` / `scrape` / `反反爬` | kf-scrapling | 准 | Web 爬虫，被 `/夯` Stage 1/2/3 按需调用 |
 | `热榜` / `平台抓取` / `CLI数据` / `opencli` | kf-opencli | 准 | 100+ 平台 CLI 数据直取，被 `/夯` Stage 1/2/3 按需调用 |
 | `论文` / `查论文` / `学术搜索` / `文献` | asta-skill | 准 | Semantic Scholar 学术论文搜索，需配置 ASTA_API_KEY |
+| `提取` / `结构化提取` / `parse` / `langextract` | kf-langextract | 准 | LLM 驱动结构化提取：非结构化文本→JSON/CSV/YAML，source grounding |
 | `逆向` / `存量代码` / `代码扫描` / `逆向工程` | kf-reverse-spec | 准/省 | 存量代码→Spec/文档 逆向流水线 |
 | `课题申报` / `科研项目` / `国自然` / `研究计划` | kf-grant-research | 准 | 课题申报研究助手：论文搜索→分析→gap→申报材料 |
 
@@ -150,6 +153,7 @@ claude
 | RTK | 见 INSTALL.md | Token 节省 |
 | OpenCLI | `npm install -g @jackwener/opencli` | 100+ 平台 CLI 数据提取 |
 | context-mode | `npm install -g context-mode` | 会话连续性 + 压缩存活（MCP + hooks） |
+| claude-mem | `npm install -g claude-mem && claude-mem install` | 跨会话持久记忆（SQLite + Chroma 向量库），自动记忆工具调用和决策 |
 | uv | `npm install -g uv` 或 `curl -LsSf https://astral.sh/uv/install.sh | sh` | Python 包管理器（kf-autoresearch 依赖） |
 
 ## 项目隔离

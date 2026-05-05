@@ -52,7 +52,7 @@
 |------|------|---------|
 | **稳** | 好用不贵，长期维护 | gspowers、gstack、kf-skill-design-expert、kf-add-skill、kf-reverse-skill、kf-doc-consistency |
 | **省** | 模型搭配，稳固 ROI | kf-model-router、kf-code-review-graph、RTK |
-| **准** | 多源搜索 + 反反爬 + 平台直取，精准调研 | kf-web-search、kf-scrapling、kf-opencli、markdown-to-docx、kf-go、bili-extract、harness-code-dev、observability-designer、performance-profiler |
+| **准** | 多源搜索 + 反反爬 + 平台直取 + 结构化提取，精准调研 | kf-web-search、kf-scrapling、kf-opencli、markdown-to-docx、kf-go、bili-extract、harness-code-dev、observability-designer、performance-profiler、kf-langextract |
 | **夯** | 多 Agent 并发竞争碾压 | kf-multi-team-compete、kf-triple-collaboration |
 | **快** | MVP 快速验证，多工具速出原型 | kf-prd-generator、kf-ui-prototype-generator、kf-spec、kf-image-editor、markdown-to-docx |
 | **懂** | 动前对齐，动后 diff | kf-alignment |
@@ -73,6 +73,7 @@
 | [ruflo](https://github.com/ruvnet/ruflo) | ruvnet | MIT | 多 Agent 编排 |
 | [RTK](https://github.com/rafaelkallis/rtk) | rafaelkallis | MIT | Token 优化 |
 | [context-mode](https://github.com/mksglu/context-mode) | mksglu | Elastic-2.0 | 会话连续性 + 压缩存活 |
+| [claude-mem](https://github.com/thedotmack/claude-mem) | thedotmack | AGPL-3.0 | 跨会话持久记忆（SQLite + Chroma 向量库） |
 | [OpenCLI](https://github.com/jackwener/OpenCLI) | jackwener | MIT | 100+ 平台 CLI 数据直取，AI 原生浏览器自动化 |
 | [autoresearch](https://github.com/karpathy/autoresearch) | karpathy | MIT | 自主 ML 实验：AI 整夜改模型→训练→验证→循环 |
 | [asta-skill](https://github.com/Agents365-ai/asta-skill) | Agents365-ai | MIT | 学术论文搜索 — Semantic Scholar via Ai2 Asta MCP |
@@ -165,6 +166,7 @@ git clone https://github.com/fshaan/gspowers.git ~/.claude/skills/gspowers
 | `装技能` / `安装技能` / `添加技能` / `搜索技能` | 技能安装管家 | kf-add-skill |
 | `课题申报` / `科研项目` / `国自然` / `研究计划` | 课题申报研究助手 | kf-grant-research |
 | `论文` / `查论文` / `学术搜索` / `文献` | Semantic Scholar 学术论文搜索 | asta-skill |
+| `提取` / `结构化提取` / `parse` / `langextract` | LLM 驱动结构化提取，非结构化文本→JSON/CSV/YAML | kf-langextract |
 
 ---
 
@@ -232,6 +234,7 @@ AI编程智驾/
 │       ├── kf-opencli/             # OpenCLI — 100+ 平台 CLI 数据直取
 │       ├── kf-reverse-spec/        # 存量代码→Spec 逆向
 │       ├── kf-scrapling/           # Web 爬虫 + 反反爬
+│       ├── kf-langextract/         # LLM 驱动结构化提取
 │       ├── asta-skill/             # 学术论文搜索
 │       ├── gspowers/               # SOP 导航（上游）
 │       └── gstack/                 # 产品流程（上游）
