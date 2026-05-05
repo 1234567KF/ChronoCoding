@@ -2,77 +2,79 @@
 /**
  * Session Cost Tracker for Claude Code + Third-party Models
  *
- * Tracks per-session cost by parsing the Claude Code session transcript
- * JSONL file for actual API token counts. No more lean-ctx MCP spend
- * (that tracks tool calls, not LLM inference).
+ * Parses the session transcript JSONL for real API token counts,
+ * applies model-specific pricing, and writes session-cost.json.
  *
  * Data source: ~/.claude/projects/<project>/<sessionId>.jsonl
- *   → input_tokens, output_tokens, cache_read_input_tokens (deduplicated by message.id)
+ *   → input_tokens, output_tokens, cache_read_input_tokens (dedup by message.id)
  *
- * Pricing (2026-05, $/MTok):
- *   DeepSeek-V4-Flash: input=$0.14 output=$0.28 cache_read=$0.0028 (¥0.02/MTok)
- *   DeepSeek-V3:       input=$0.27 output=$1.10
- *   DeepSeek-R1:       input=$0.55 output=$2.19
- *   Claude Sonnet:     input=$3.00 output=$15.00 (fallback)
+ * Pricing in ¥/MTok (DeepSeek bills in RMB), USD via /7.2 conversion.
+ *
+ *   DeepSeek-V4-Flash:  ¥1.00 in  ¥2.00 out  ¥0.02 cache
+ *   DeepSeek-V4-Pro:    ¥3.00 in  ¥6.00 out  ¥0.025 cache (2.5折, to 2026/5/31)
+ *   Claude Sonnet:      $3/$15 (fallback)
  *
  * Usage:
- *   node cost-tracker.cjs              # display current cost
- *   node cost-tracker.cjs --update     # parse transcript & compute
- *   node cost-tracker.cjs --reset      # clear cached cost data
+ *   node cost-tracker.cjs              # display current
+ *   node cost-tracker.cjs --update     # parse transcript & write
+ *   node cost-tracker.cjs --reset      # zero out cost data
  *   node cost-tracker.cjs --json       # JSON output
  */
 
 const fs = require('fs');
 const path = require('path');
 const os = require('os');
-
 const { execSync } = require('child_process');
 
 const CWD = process.cwd();
 const COST_FILE = path.join(CWD, '.claude', 'session-cost.json');
 const HOME = os.homedir();
+const FX = 7.2;
 
-// Model pricing: $/MTok
+// ─── Pricing: ¥/MTok ───────────────────────────────────────────
+
 const PRICING = {
-  'deepseek-v4':  { label: 'DS-V4',  input: 0.14, output: 0.28, cache_read: 0.0028 },
-  'deepseek-v3':  { label: 'DS-V3',  input: 0.27, output: 1.10 },
-  'deepseek-r1':  { label: 'DS-R1',  input: 0.55, output: 2.19 },
-  'deepseek':     { label: 'DS-V4',  input: 0.14, output: 0.28, cache_read: 0.0028 },
-  'claude':       { label: 'Claude', input: 3.00, output: 15.00 },
+  'deepseek-v4-pro':   { label: 'DS-V4-Pro',   input: 3.00, output: 6.00, cache_read: 0.025 },
+  'deepseek-v4-flash': { label: 'DS-V4-Flash', input: 1.00, output: 2.00, cache_read: 0.02 },
+  'deepseek-v4':       { label: 'DS-V4-Flash', input: 1.00, output: 2.00, cache_read: 0.02 },
+  'deepseek-v3':       { label: 'DS-V3',       input: 2.00, output: 8.00 },
+  'deepseek-r1':       { label: 'DS-R1',       input: 4.00, output: 16.00 },
+  'claude-sonnet':     { label: 'Sonnet',      input: 21.60, output: 108.00 },  // $3/$15
+  'claude-opus':       { label: 'Opus',        input: 108.00, output: 540.00 }, // $15/$75
+  'claude-haiku':      { label: 'Haiku',       input: 5.76, output: 28.80 },    // $0.80/$4
 };
+
+function detectPricing(modelName) {
+  const m = modelName.toLowerCase();
+  if (m.includes('deepseek-v4-pro')) return PRICING['deepseek-v4-pro'];
+  if (m.includes('deepseek-v4'))     return PRICING['deepseek-v4-flash'];
+  if (m.includes('deepseek-v3'))     return PRICING['deepseek-v3'];
+  if (m.includes('deepseek-r1'))     return PRICING['deepseek-r1'];
+  if (m.includes('deepseek'))        return PRICING['deepseek-v4-flash'];
+  if (m.includes('sonnet'))          return PRICING['claude-sonnet'];
+  if (m.includes('opus'))            return PRICING['claude-opus'];
+  if (m.includes('haiku'))           return PRICING['claude-haiku'];
+  return PRICING['claude-sonnet'];
+}
+
+// ─── Helpers ────────────────────────────────────────────────────
 
 function getModelName() {
   try {
-    const settingsPath = path.join(CWD, '.claude', 'settings.local.json');
-    if (fs.existsSync(settingsPath)) {
-      const s = JSON.parse(fs.readFileSync(settingsPath, 'utf-8'));
-      if (s.model) return s.model;
-    }
-    const settingsPath2 = path.join(CWD, '.claude', 'settings.json');
-    if (fs.existsSync(settingsPath2)) {
-      const s = JSON.parse(fs.readFileSync(settingsPath2, 'utf-8'));
-      if (s.model) return s.model;
+    for (const f of ['settings.local.json', 'settings.json']) {
+      const fp = path.join(CWD, '.claude', f);
+      if (fs.existsSync(fp)) {
+        const s = JSON.parse(fs.readFileSync(fp, 'utf-8'));
+        if (s.model) return s.model;
+      }
     }
   } catch {}
   return '';
 }
 
-function detectPricing(modelName) {
-  const m = modelName.toLowerCase();
-  if (m.includes('deepseek')) return PRICING.deepseek;
-  if (m.includes('sonnet')) return PRICING.claude;
-  if (m.includes('opus')) return { label: 'Opus', input: 15.00, output: 75.00, cache_read: 1.50 };
-  if (m.includes('haiku')) return { label: 'Haiku', input: 0.80, output: 4.00, cache_read: 0.08 };
-  if (m.includes('gpt-4')) return { label: 'GPT-4o', input: 2.50, output: 10.00 };
-  return PRICING.claude;
-}
-
 function readCostFile() {
-  try {
-    return JSON.parse(fs.readFileSync(COST_FILE, 'utf-8'));
-  } catch {
-    return { version: 3, cost_usd: 0, cost_rmb: 0 };
-  }
+  try { return JSON.parse(fs.readFileSync(COST_FILE, 'utf-8')); }
+  catch { return { version: 3, cost_usd: 0, cost_rmb: 0 }; }
 }
 
 function writeCostFile(data) {
@@ -83,40 +85,32 @@ function writeCostFile(data) {
 function cmdReset() {
   writeCostFile({
     version: 3,
-    cost_usd: 0,
-    cost_rmb: 0,
+    cost_usd: 0, cost_rmb: 0,
     input_tokens: 0, output_tokens: 0,
     cache_read_tokens: 0, cache_create_tokens: 0,
     api_calls: 0,
     updated_at: new Date().toISOString(),
   });
-  return readCostFile();
 }
 
-// ─── Transcript parsing ─────────────────────────────────────────
-
-function encodeDirName(raw) {
-  return raw.replace(/[^a-zA-Z0-9\-._~]/g, '-');
-}
+// ─── Transcript ─────────────────────────────────────────────────
 
 function findTranscript() {
-  const projName = encodeDirName(CWD);
+  const projName = CWD.replace(/[^a-zA-Z0-9\-._~]/g, '-');
   const projDir = path.join(HOME, '.claude', 'projects', projName);
-  if (!fs.existsSync(projDir)) {
-    // Fallback: scan all dirs
-    const base = path.join(HOME, '.claude', 'projects');
-    if (!fs.existsSync(base)) return null;
-    const dirs = fs.readdirSync(base).filter(d => {
-      try { return fs.statSync(path.join(base, d)).isDirectory(); } catch { return false; }
-    });
-    for (const d of dirs) {
-      if (CWD.replace(/[:/\\]/g, '-').includes(d.replace(/-/g, '').toLowerCase())) {
-        return findLatestJsonl(path.join(base, d));
-      }
+  if (fs.existsSync(projDir)) return findLatestJsonl(projDir);
+
+  const base = path.join(HOME, '.claude', 'projects');
+  if (!fs.existsSync(base)) return null;
+  const dirs = fs.readdirSync(base).filter(d => {
+    try { return fs.statSync(path.join(base, d)).isDirectory(); } catch { return false; }
+  });
+  for (const d of dirs) {
+    if (CWD.replace(/[:/\\]/g, '-').includes(d.replace(/-/g, '').toLowerCase())) {
+      return findLatestJsonl(path.join(base, d));
     }
-    return null;
   }
-  return findLatestJsonl(projDir);
+  return null;
 }
 
 function findLatestJsonl(dir) {
@@ -126,14 +120,9 @@ function findLatestJsonl(dir) {
       .map(f => ({ name: f, mtime: fs.statSync(path.join(dir, f)).mtimeMs }))
       .sort((a, b) => b.mtime - a.mtime);
     return files.length > 0 ? path.join(dir, files[0].name) : null;
-  } catch {
-    return null;
-  }
+  } catch { return null; }
 }
 
-// One API response → multiple assistant entries (one per content block).
-// Only the LAST entry carries final output_tokens. Dedupe by message.id,
-// taking max per field.
 function parseTranscript(filePath) {
   const raw = fs.readFileSync(filePath, 'utf-8');
   const lines = raw.split('\n').filter(Boolean);
@@ -145,30 +134,32 @@ function parseTranscript(filePath) {
       if (j.type !== 'assistant' || !j.message || !j.message.usage) continue;
       const id = j.message.id;
       const u = j.message.usage;
-      const existing = calls.get(id);
-      if (!existing) {
-        calls.set(id,
-          { input: u.input_tokens||0, output: u.output_tokens||0,
-            cacheCreate: u.cache_creation_input_tokens||0,
-            cacheRead: u.cache_read_input_tokens||0 });
+      const ex = calls.get(id);
+      if (!ex) {
+        calls.set(id, {
+          input: u.input_tokens || 0,
+          output: u.output_tokens || 0,
+          cacheCreate: u.cache_creation_input_tokens || 0,
+          cacheRead: u.cache_read_input_tokens || 0,
+        });
       } else {
-        if ((u.input_tokens||0) > existing.input) existing.input = u.input_tokens;
-        if ((u.output_tokens||0) > existing.output) existing.output = u.output_tokens;
-        if ((u.cache_creation_input_tokens||0) > existing.cacheCreate) existing.cacheCreate = u.cache_creation_input_tokens;
-        if ((u.cache_read_input_tokens||0) > existing.cacheRead) existing.cacheRead = u.cache_read_input_tokens;
+        if ((u.input_tokens || 0) > ex.input) ex.input = u.input_tokens;
+        if ((u.output_tokens || 0) > ex.output) ex.output = u.output_tokens;
+        if ((u.cache_creation_input_tokens || 0) > ex.cacheCreate) ex.cacheCreate = u.cache_creation_input_tokens;
+        if ((u.cache_read_input_tokens || 0) > ex.cacheRead) ex.cacheRead = u.cache_read_input_tokens;
       }
     } catch {}
   }
 
-  let tIn=0, tOut=0, tCacheCreate=0, tCacheRead=0;
+  let tIn = 0, tOut = 0, tCC = 0, tCR = 0;
   for (const u of calls.values()) {
     tIn += u.input; tOut += u.output;
-    tCacheCreate += u.cacheCreate; tCacheRead += u.cacheRead;
+    tCC += u.cacheCreate; tCR += u.cacheRead;
   }
-  return { input: tIn, output: tOut, cacheCreate: tCacheCreate, cacheRead: tCacheRead, apiCalls: calls.size };
+  return { input: tIn, output: tOut, cacheCreate: tCC, cacheRead: tCR, apiCalls: calls.size };
 }
 
-// ─── Cost computation ───────────────────────────────────────────
+// ─── Cost ───────────────────────────────────────────────────────
 
 function computeCost(usage, pricing) {
   const costIn = usage.input * pricing.input / 1_000_000;
@@ -176,43 +167,39 @@ function computeCost(usage, pricing) {
   const costCache = pricing.cache_read
     ? usage.cacheRead * pricing.cache_read / 1_000_000
     : 0;
+  const totalRmb = costIn + costOut + costCache;
   return {
-    cost_usd: parseFloat((costIn + costOut + costCache).toFixed(8)),
-    cost_rmb: parseFloat(((costIn + costOut + costCache) * 7.2).toFixed(6)),
-    cost_in: costIn, cost_out: costOut, cost_cache: costCache,
+    cost_rmb: parseFloat(totalRmb.toFixed(6)),
+    cost_usd: parseFloat((totalRmb / FX).toFixed(8)),
+    cost_in: parseFloat(costIn.toFixed(6)),
+    cost_out: parseFloat(costOut.toFixed(6)),
+    cost_cache: parseFloat(costCache.toFixed(6)),
   };
 }
 
 // ─── Lean-ctx savings ───────────────────────────────────────────
 
-// Returns estimated RMB saved by lean-ctx token compression,
-// using DS-V4 weighted pricing based on actual I/O ratio.
-function getLCSavings(usage, pricing) {
+function getLCSavings(pricing) {
   try {
     const raw = execSync('lean-ctx.exe gain --json', {
       encoding: 'utf-8', timeout: 3000, stdio: ['pipe', 'pipe', 'pipe'],
     });
     const g = JSON.parse(raw);
-    const s = g.summary || {};
-    const saved = s.tokens_saved || 0;
-    if (saved === 0) return { tokens_saved: 0, savings_usd: 0, savings_rmb: 0 };
+    const saved = (g.summary || {}).tokens_saved || 0;
+    if (saved === 0) return { tokens_saved: 0, savings_rmb: 0, savings_usd: 0 };
 
-    // Weighted DS-V4 price from actual I/O ratio
-    const total = usage.input + usage.output;
-    const inRatio = total > 0 ? usage.input / total : 0.7;
-    const outRatio = 1 - inRatio;
-    const weightedPrice = inRatio * pricing.input + outRatio * pricing.output;
-
-    const savingsUsd = saved * weightedPrice / 1_000_000;
+    const savingsRmb = saved * pricing.input / 1_000_000;
     return {
       tokens_saved: saved,
-      savings_usd: parseFloat(savingsUsd.toFixed(8)),
-      savings_rmb: parseFloat((savingsUsd * 7.2).toFixed(6)),
+      savings_rmb: parseFloat(savingsRmb.toFixed(6)),
+      savings_usd: parseFloat((savingsRmb / FX).toFixed(8)),
     };
   } catch {
-    return { tokens_saved: 0, savings_usd: 0, savings_rmb: 0 };
+    return { tokens_saved: 0, savings_rmb: 0, savings_usd: 0 };
   }
 }
+
+// ─── Update ─────────────────────────────────────────────────────
 
 function update() {
   const transcriptPath = findTranscript();
@@ -225,7 +212,7 @@ function update() {
   const modelName = getModelName();
   const pricing = detectPricing(modelName);
   const cost = computeCost(usage, pricing);
-  const lcSavings = getLCSavings(usage, pricing);
+  const savings = getLCSavings(pricing);
 
   const data = readCostFile();
   data.version = 3;
@@ -241,7 +228,7 @@ function update() {
   data.cost_cache = cost.cost_cache;
   data.cost_usd = cost.cost_usd;
   data.cost_rmb = cost.cost_rmb;
-  data.savings = lcSavings;
+  data.savings = savings;
   data.updated_at = new Date().toISOString();
   writeCostFile(data);
   return data;
@@ -256,14 +243,17 @@ function display(format) {
     return;
   }
 
-  const p = data.pricing || { label: '?', input: 0, output: 0 };
+  const p = data.pricing || { label: '?', input: 0, output: 0, cache_read: 0 };
   const s = data.savings || {};
   console.log(`Model:   ${data.model || 'unknown'}`);
-  console.log(`Pricing: ${p.label}  in=$${p.input}/M  out=$${p.output}/M  cache=$${p.cache_read||0}/M`);
-  console.log(`Tokens:  ${(data.input_tokens||0).toLocaleString()} in  ${(data.output_tokens||0).toLocaleString()} out  ${(data.cache_read_tokens||0).toLocaleString()} cache`);
-  console.log(`Calls:   ${data.api_calls||0} API calls`);
-  console.log(`Cost:    ¥${(data.cost_rmb||0).toFixed(4)}  ($${(data.cost_usd||0).toFixed(6)})`);
-  if (s.savings_rmb > 0) console.log(`Saved:   ¥${s.savings_rmb.toFixed(4)}  (${(s.tokens_saved||0).toLocaleString()} tokens via lean-ctx)`);
+  console.log(`Pricing: ${p.label}  in=¥${p.input}/M  out=¥${p.output}/M  cache=¥${p.cache_read || 0}/M`);
+  console.log(`Tokens:  ${(data.input_tokens || 0).toLocaleString()} in  ${(data.output_tokens || 0).toLocaleString()} out  ${(data.cache_read_tokens || 0).toLocaleString()} cache`);
+  console.log(`Calls:   ${data.api_calls || 0} API calls`);
+  console.log(`Cost:    ¥${(data.cost_rmb || 0).toFixed(4)}  ($${(data.cost_usd || 0).toFixed(6)})`);
+  if (s.savings_rmb > 0) {
+    const pct = data.cost_rmb > 0 ? (s.savings_rmb / (data.cost_rmb + s.savings_rmb) * 100).toFixed(0) : 0;
+    console.log(`Saved:   ¥${s.savings_rmb.toFixed(4)}  (${(s.tokens_saved || 0).toLocaleString()} tokens, ${pct}% of would-be cost)`);
+  }
 }
 
 // ─── CLI ────────────────────────────────────────────────────────
