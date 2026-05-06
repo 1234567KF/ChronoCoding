@@ -19,6 +19,8 @@
 const fs = require("fs");
 const path = require("path");
 
+const MONITOR_URL = "http://localhost:3456";
+
 const PROJECT_ROOT = path.resolve(__dirname, "../..");
 const DATA_DIR = path.join(PROJECT_ROOT, ".claude-flow", "data");
 const SKILLS_DIR = path.join(PROJECT_ROOT, ".claude", "skills");
@@ -151,9 +153,44 @@ function logEntry(args) {
 let _inputProcessed = false;
 
 function processInputSafe(hookInput) {
-  if (_inputProcessed) return;
+  if (_inputProcessed) return Promise.resolve();
   _inputProcessed = true;
-  processInput(hookInput);
+  return processInput(hookInput);
+}
+
+// ── Push skill entry to monitor dashboard ───────────────────────────
+async function pushToMonitor(entry) {
+  try {
+    const health = await fetch(MONITOR_URL + "/api/health");
+    if (!health.ok) return;
+  } catch { return; }
+  try {
+    await fetch(MONITOR_URL + "/api/records", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        sessionId: entry.trace_id || "trace_" + Date.now(),
+        title: entry.skill || "unknown",
+        model: entry.model_used || "unknown",
+        messages: [{
+          role: "assistant",
+          content: entry.note || "",
+          input_tokens: entry.tokens_in || 0,
+          output_tokens: entry.tokens_out || 0,
+          cache_hit: entry.cache_hit || 0,
+          created_at: entry.timestamp || new Date().toISOString(),
+        }],
+        skillCalls: [{
+          name: entry.skill,
+          type: entry.skill_type,
+          input_tokens: entry.tokens_in || 0,
+          output_tokens: entry.tokens_out || 0,
+          duration_ms: entry.duration_ms || null,
+          status: entry.result === "success" ? "success" : entry.result === "failure" ? "error" : "running",
+        }],
+      }),
+    });
+  } catch {}
 }
 
 async function preToolHook() {
@@ -161,10 +198,11 @@ async function preToolHook() {
   let hookInput = {};
   try {
     const chunks = [];
-    const timer = setTimeout(() => {
+    const timer = setTimeout(async () => {
       process.stdin.removeAllListeners();
       process.stdin.pause();
-      processInputSafe(hookInput);
+      await processInputSafe(hookInput);
+      process.exit(0);
     }, 2000);
     // NOTE: intentionally NOT unref'd — on Windows, unref + stdin.resume()
     // creates a race: process may hang when stdin never closes (common on Windows pipes).
@@ -186,7 +224,8 @@ async function preToolHook() {
     }
   } catch {}
 
-  processInputSafe(hookInput);
+  await processInputSafe(hookInput);
+  process.exit(0);
 }
 
 function processInput(hookInput) {
@@ -206,11 +245,11 @@ function processInput(hookInput) {
       skillName = skillMatch[1];
     } else {
       // Not a skill invocation, skip logging
-      process.exit(0);
+      return Promise.resolve();
     }
   } else {
     // Not a skill-related tool call, exit silently
-    process.exit(0);
+    return Promise.resolve();
   }
   
   const entry = {
@@ -235,8 +274,8 @@ function processInput(hookInput) {
   };
   
   try { fs.appendFileSync(LOG_PATH, JSON.stringify(entry) + "\n"); } catch {}
-  // Exit silently - hooks must not produce stdout output
-  process.exit(0);
+  // Push to monitor (fire & forget — return promise for callers to await)
+  return pushToMonitor(entry);
 }
 
 // ============================================================
