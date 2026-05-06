@@ -82,30 +82,8 @@
                                                             "timeout":  5000
                                                         }
                                                     ]
-                                      },
-                                      {
-                                          "matcher":  "",
-                                          "hooks":  [
-                                                        {
-                                                            "type":  "command",
-                                                            "command":  "node C:/Users/Administrator/AppData/Roaming/npm/node_modules/context-mode/hooks/posttooluse.mjs",
-                                                            "timeout":  10000
-                                                        }
-                                                    ]
                                       }
                                   ],
-                  "UserPromptSubmit":  [
-                                           {
-                                               "matcher":  "",
-                                               "hooks":  [
-                                                             {
-                                                                 "type":  "command",
-                                                                 "command":  "node C:/Users/Administrator/AppData/Roaming/npm/node_modules/context-mode/hooks/userpromptsubmit.mjs",
-                                                                 "timeout":  10000
-                                                             }
-                                                         ]
-                                           }
-                                       ],
                   "SessionStart":  [
                                        {
                                            "hooks":  [
@@ -118,11 +96,6 @@
                                                              "type":  "command",
                                                              "command":  "cmd /c node %CLAUDE_PROJECT_DIR%/.claude/helpers/auto-memory-hook.mjs import",
                                                              "timeout":  8000
-                                                         },
-                                                         {
-                                                             "type":  "command",
-                                                             "command":  "node C:/Users/Administrator/AppData/Roaming/npm/node_modules/context-mode/hooks/sessionstart.mjs",
-                                                             "timeout":  15000
                                                          }
                                                      ]
                                        }
@@ -175,16 +148,6 @@
                                                            "type":  "command",
                                                            "command":  "cmd /c node %CLAUDE_PROJECT_DIR%/.claude/helpers/hook-handler.cjs session-end",
                                                            "timeout":  6000
-                                                       }
-                                                   ]
-                                     },
-                                     {
-                                         "matcher":  "",
-                                         "hooks":  [
-                                                       {
-                                                           "type":  "command",
-                                                           "command":  "node C:/Users/Administrator/AppData/Roaming/npm/node_modules/context-mode/hooks/precompact.mjs",
-                                                           "timeout":  10000
                                                        }
                                                    ]
                                      }
@@ -368,12 +331,6 @@
                                     }
                    },
     "mcpServers":  {
-                       "context-mode":  {
-                                            "command":  "node",
-                                            "args":  [
-                                                         "C:/Users/Administrator/AppData/Roaming/npm/node_modules/context-mode/start.mjs"
-                                                     ]
-                                        },
                        "lean-ctx":  {
                                         "command":  "C:/Users/Administrator/AppData/Roaming/npm/node_modules/lean-ctx-bin/bin/lean-ctx.exe",
                                         "args":  [
