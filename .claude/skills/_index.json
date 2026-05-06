@@ -1,0 +1,190 @@
+﻿{
+    "generated":  "2026-05-06",
+    "version":  "1.0",
+    "stats":  {
+                  "thirdParty":  73,
+                  "total":  95,
+                  "kf":  22
+              },
+    "kf":  [
+               {
+                   "alias":  "/add-skill",
+                   "name":  "kf-add-skill",
+                   "auto":  [
+
+                            ],
+                   "principle":  "快"
+               },
+               {
+                   "alias":  "alignment",
+                   "name":  "kf-alignment",
+                   "auto":  [
+                                "kf-model-router"
+                            ],
+                   "principle":  "夯"
+               },
+               {
+                   "alias":  "/autoresearch",
+                   "name":  "kf-autoresearch",
+                   "auto":  [
+
+                            ],
+                   "principle":  "快"
+               },
+               {
+                   "alias":  "browser-ops",
+                   "name":  "kf-browser-ops",
+                   "auto":  [
+
+                            ],
+                   "principle":  "快"
+               },
+               {
+                   "alias":  "/review-graph",
+                   "name":  "kf-code-review-graph",
+                   "auto":  [
+
+                            ],
+                   "principle":  "夯"
+               },
+               {
+                   "alias":  "consistency",
+                   "name":  "kf-doc-consistency",
+                   "auto":  [
+                                "kf-alignment"
+                            ],
+                   "principle":  "快"
+               },
+               {
+                   "alias":  "/go",
+                   "name":  "kf-go",
+                   "auto":  [
+
+                            ],
+                   "principle":  "快"
+               },
+               {
+                   "alias":  "/grant",
+                   "name":  "kf-grant-research",
+                   "auto":  [
+
+                            ],
+                   "principle":  "快"
+               },
+               {
+                   "alias":  "image-edit",
+                   "name":  "kf-image-editor",
+                   "auto":  [
+
+                            ],
+                   "principle":  "快"
+               },
+               {
+                   "alias":  "langextract",
+                   "name":  "kf-langextract",
+                   "auto":  [
+
+                            ],
+                   "principle":  "快"
+               },
+               {
+                   "alias":  "model-router",
+                   "name":  "kf-model-router",
+                   "auto":  [
+
+                            ],
+                   "principle":  "快"
+               },
+               {
+                   "alias":  "/夯",
+                   "name":  "kf-multi-team-compete",
+                   "auto":  [
+                                "kf-alignment",
+                                "kf-model-router"
+                            ],
+                   "principle":  "夯"
+               },
+               {
+                   "alias":  "opencli",
+                   "name":  "kf-opencli",
+                   "auto":  [
+
+                            ],
+                   "principle":  "快"
+               },
+               {
+                   "alias":  "/prd",
+                   "name":  "kf-prd-generator",
+                   "auto":  [
+
+                            ],
+                   "principle":  "快"
+               },
+               {
+                   "alias":  "/reverse",
+                   "name":  "kf-reverse-spec",
+                   "auto":  [
+                                "kf-alignment"
+                            ],
+                   "principle":  "快"
+               },
+               {
+                   "alias":  "scrapling",
+                   "name":  "kf-scrapling",
+                   "auto":  [
+
+                            ],
+                   "principle":  "快"
+               },
+               {
+                   "alias":  "skill-design",
+                   "name":  "kf-skill-design-expert",
+                   "auto":  [
+
+                            ],
+                   "principle":  "快"
+               },
+               {
+                   "alias":  "skill-monitor",
+                   "name":  "kf-skill-monitor",
+                   "auto":  [
+
+                            ],
+                   "principle":  "夯"
+               },
+               {
+                   "alias":  "spec coding",
+                   "name":  "kf-spec",
+                   "auto":  [
+                                "kf-alignment",
+                                "kf-model-router"
+                            ],
+                   "principle":  "快"
+               },
+               {
+                   "alias":  "/triple",
+                   "name":  "kf-triple-collaboration",
+                   "auto":  [
+                                "kf-alignment",
+                                "kf-model-router"
+                            ],
+                   "principle":  "夯"
+               },
+               {
+                   "alias":  "/ui",
+                   "name":  "kf-ui-prototype-generator",
+                   "auto":  [
+
+                            ],
+                   "principle":  "快"
+               },
+               {
+                   "alias":  "web-search",
+                   "name":  "kf-web-search",
+                   "auto":  [
+
+                            ],
+                   "principle":  "快"
+               }
+           ]
+}
