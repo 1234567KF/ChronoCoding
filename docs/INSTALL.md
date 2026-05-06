@@ -1253,10 +1253,12 @@ D:\your-project\
 | `triple [任务]` | 通用三方协作 | kf-triple-collaboration |
 | `模型路由` / `省模式` | 模型智能路由（全自动） | kf-model-router |
 | `Harness 评审` / `五根铁律审计` | Skill 质量审计 | kf-skill-design-expert |
+| `/skill-monitor` / `技能监控` / `使用率` / `token成本` | 技能调用追踪 + Token成本追踪 | kf-skill-monitor |
 | `爬虫` / `抓取` / `scrape` / `反反爬` | Web 爬虫 + 反反爬 | kf-scrapling |
 | `生成UI原型` / `UI原型` / `页面原型` | UI 原型 HTML 生成 | kf-ui-prototype-generator |
 | `转docx` / `markdown转word` | Markdown → DOCX 转换 | kf-markdown-to-docx-skill |
 | `课题申报` / `科研项目` / `国自然` / `研究计划` | 课题申报研究助手 | kf-grant-research |
+| `提取` / `结构化提取` / `parse` / `langextract` | LLM 驱动结构化提取：非结构化文本→JSON/CSV/YAML | kf-langextract |
 
 ---
 

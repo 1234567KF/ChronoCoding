@@ -1,5 +1,17 @@
 ---
 name: kf-skill-monitor
+description: |
+  技能调用链路追踪 + Token成本追踪。追踪所有技能的调用情况、Token消耗、缓存命中率。
+  触发词：/skill-monitor、skill-monitor、技能监控、使用率、调用链路、技能清单、token成本、cost
+triggers:
+  - /skill-monitor
+  - skill-monitor
+  - 技能监控
+  - 使用率
+  - 调用链路
+  - 技能清单
+  - token成本
+  - cost
 recommended_model: flash
 metadata:
   integrated-skills: kf-model-router

@@ -104,6 +104,7 @@ claude
 | `/prd-generator` | 🆕 PRD 文档生成 | kf-prd-generator |
 | `爬虫` / `抓取` / `scrape` / `反反爬` | 🆕 Web 爬虫 + 反反爬 | kf-scrapling |
 | `Harness 评审` / `五根铁律审计` | 🆕 Skill 质量审计 | kf-skill-design-expert |
+| `/skill-monitor` / `技能监控` / `使用率` / `token成本` | 🆕 技能调用追踪 + Token成本追踪 | kf-skill-monitor |
 | `生成UI原型` / `UI原型` / `页面原型` | 🆕 UI 原型 HTML 生成 | kf-ui-prototype-generator |
 | `课题申报` / `科研项目` / `国自然` / `研究计划` | 🆕 课题申报研究助手 | kf-grant-research |
 | `装技能` / `安装技能` / `添加技能` / `搜索技能` | 🆕 技能安装管家 | kf-add-skill |
@@ -170,6 +171,7 @@ Agent 共享（在同一个项目内的 agents 共享记忆）
 │       ├── kf-doc-consistency/   # 文档一致性自检
 │       ├── kf-go/                # 工作流导航
 │       ├── kf-skill-design-expert/ # Skill 设计
+│       ├── kf-skill-monitor/     # 技能调用追踪 + Token成本
     │       ├── kf-scrapling/      # Web 爬虫 + 反反爬
     │       ├── kf-grant-research/ # 课题申报研究助手
     │       ├── kf-markdown-to-docx-skill/ # MD→DOCX

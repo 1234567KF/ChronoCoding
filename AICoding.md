@@ -286,6 +286,7 @@ git log --oneline -3
 | `kf-ui-prototype-generator` | — | 快 | 独立（被动技能） | 无 | kf-multi-team-compete Stage 2/5 自动调用 | flash |
 | `kf-image-editor` | — | 快 | 独立（被动技能） | 无 | kf-multi-team-compete Stage 2/5 自动调用 | flash |
 | `kf-skill-design-expert` | — | 稳 | 独立 | 无 | 用户手动 | pro |
+| `kf-skill-monitor` | `/skill-monitor` | 准 | 独立（被动技能） | kf-model-router | kf-multi-team-compete agent 按需自动调用、用户手动 | flash |
 | `kf-doc-consistency` | — | 准/省 | Pipeline + Reviewer | kf-model-router | kf-add-skill（自动）、用户手动 | flash |
 | `kf-add-skill` | — | 稳 | Pipeline + Inversion | kf-model-router、kf-skill-design-expert、kf-doc-consistency | kf-grant-research（自动调用）、用户手动 | pro |
 | `kf-grant-research` | — | 准 | Pipeline + Inversion + Generator | asta-skill、kf-scrapling、kf-web-search、kf-alignment、kf-add-skill、kf-model-router | 用户手动 | pro |

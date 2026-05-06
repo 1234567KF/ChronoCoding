@@ -225,6 +225,7 @@ git clone https://github.com/fshaan/gspowers.git ~/.claude/skills/gspowers
 | `P图` / `改图` / `修图` / `去水印` | AI 自然语言 P 图 | kf-image-editor |
 | `转docx` / `markdown转word` | Markdown → DOCX 转换 | kf-markdown-to-docx-skill |
 | `Harness 评审` / `五根铁律审计` | Skill 质量审计 | kf-skill-design-expert |
+| `/skill-monitor` / `技能监控` / `使用率` / `token成本` | 技能调用追踪 + Token成本追踪 | kf-skill-monitor |
 | `模型路由` / `省模式` | 模型智能路由（全自动） | kf-model-router |
 | `自动实验` / `ai实验` / `实验跑一夜` / `autoresearch` | Karpathy 自主 ML 实验 | kf-autoresearch |
 | `一致性` / `文档自检` / `doc consistency` | 文档全局一致性自检 | kf-doc-consistency |
@@ -291,6 +292,7 @@ AI编程智驾/
 │       ├── kf-triple-collaboration/# 三方协作
 │       ├── kf-ui-prototype-generator/ # UI 原型
 │       ├── kf-skill-design-expert/ # Skill 设计
+│       ├── kf-skill-monitor/        # 技能调用追踪 + Token成本
 │       ├── kf-markdown-to-docx-skill/ # MD→DOCX
 │       ├── kf-add-skill/           # 技能安装管家
 │       ├── kf-doc-consistency/     # 文档一致性自检
