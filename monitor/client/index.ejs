@@ -10,9 +10,10 @@
   <thead>
     <tr>
       <th>标题</th>
+      <th>模型</th>
       <th>输入 Token</th>
       <th>输出 Token</th>
-      <th>输出花费</th>
+      <th>花费 (¥)</th>
       <th>技能数</th>
       <th>时间</th>
     </tr>
@@ -36,10 +37,12 @@ async function loadList() {
 function renderList(json) {
   const tbody = document.getElementById('convBody');
   tbody.innerHTML = json.data.map(c => {
-    const cost = c.total_cost_output ? '¥' + c.total_cost_output.toFixed(4) : '-';
+    const cost = c.total_cost ? '¥' + c.total_cost.toFixed(4) : '-';
+    const model = c.model ? esc(c.model) : '<span style="color:#999">-</span>';
     const time = new Date(c.started_at).toLocaleString('zh-CN');
     return `<tr onclick="location='/conversations/${c.id}'" style="cursor:pointer">
       <td><strong>${esc(c.title || '(无标题)')}</strong></td>
+      <td>${model}</td>
       <td>${c.total_input_tokens?.toLocaleString() || 0}</td>
       <td>${c.total_output_tokens?.toLocaleString() || 0}</td>
       <td>${cost}</td>

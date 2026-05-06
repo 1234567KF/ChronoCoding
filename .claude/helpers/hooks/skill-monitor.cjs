@@ -158,26 +158,44 @@ function processInputSafe(hookInput) {
   return processInput(hookInput);
 }
 
+// ── Get real session ID (from env or state file) ────────────────────
+function getSessionId() {
+  // Try env vars first (set by Claude Code during hook execution)
+  const envId = process.env.CLAUDE_SESSION_ID || process.env.CLAUDE_FLOW_SESSION_ID;
+  if (envId) return envId;
+  // Fallback: read from session-state.json (written by monitor-session start)
+  try {
+    const statePath = path.join(DATA_DIR, 'session-state.json');
+    if (fs.existsSync(statePath)) {
+      const state = JSON.parse(fs.readFileSync(statePath, 'utf-8'));
+      if (state.sessionId) return state.sessionId;
+    }
+  } catch {}
+  return null;
+}
+
 // ── Push skill entry to monitor dashboard ───────────────────────────
 async function pushToMonitor(entry) {
   try {
     const health = await fetch(MONITOR_URL + "/api/health");
     if (!health.ok) return;
   } catch { return; }
+
+  const sessionId = getSessionId() || entry.trace_id || "trace_" + Date.now();
   try {
     await fetch(MONITOR_URL + "/api/records", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        sessionId: entry.trace_id || "trace_" + Date.now(),
-        title: entry.skill || "unknown",
+        sessionId,
+        title: '',
         model: entry.model_used || "unknown",
         messages: [{
           role: "assistant",
-          content: entry.note || "",
-          input_tokens: entry.tokens_in || 0,
-          output_tokens: entry.tokens_out || 0,
-          cache_hit: entry.cache_hit || 0,
+          content: `Skill: ${entry.skill || 'unknown'}`,
+          input_tokens: 0,
+          output_tokens: 0,
+          cache_hit: 0,
           created_at: entry.timestamp || new Date().toISOString(),
         }],
         skillCalls: [{
@@ -186,7 +204,7 @@ async function pushToMonitor(entry) {
           input_tokens: entry.tokens_in || 0,
           output_tokens: entry.tokens_out || 0,
           duration_ms: entry.duration_ms || null,
-          status: entry.result === "success" ? "success" : entry.result === "failure" ? "error" : "running",
+          status: "running",
         }],
       }),
     });
@@ -223,6 +241,21 @@ async function preToolHook() {
       try { hookInput = JSON.parse(raw); } catch {}
     }
   } catch {}
+
+  // Fallback: read from env var if stdin was empty
+  if (!hookInput || Object.keys(hookInput).length === 0) {
+    const envData = process.env.CLAUDE_TOOL_USE_REQUEST || process.env.CLAUDE_EXTRA_CONTEXT;
+    if (envData) {
+      try {
+        const parsed = JSON.parse(envData);
+        // Normalize to hookInput format: { tool_name, tool_input: {...} }
+        hookInput = {
+          tool_name: parsed.name || parsed.tool || parsed.toolName || 'Skill',
+          tool_input: parsed.args || parsed.arguments || parsed.toolInput || parsed,
+        };
+      } catch {}
+    }
+  }
 
   await processInputSafe(hookInput);
   process.exit(0);

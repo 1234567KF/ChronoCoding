@@ -2,9 +2,10 @@ CREATE TABLE IF NOT EXISTS conversations (
   id TEXT PRIMARY KEY,
   session_id TEXT NOT NULL,
   title TEXT,
+  model TEXT,
   total_input_tokens INTEGER DEFAULT 0,
   total_output_tokens INTEGER DEFAULT 0,
-  total_cost_output REAL DEFAULT 0,
+  total_cost REAL DEFAULT 0,
   started_at TEXT NOT NULL,
   ended_at TEXT
 );

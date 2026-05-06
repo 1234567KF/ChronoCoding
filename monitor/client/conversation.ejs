@@ -11,7 +11,8 @@
     <div style="font-size:13px;color:#888;margin-top:4px;">
       输入: ${conv.total_input_tokens?.toLocaleString() || 0} |
       输出: ${conv.total_output_tokens?.toLocaleString() || 0} |
-      输出花费: ${conv.total_cost_output ? '¥' + conv.total_cost_output.toFixed(4) : '-'} |
+      总花费: ${conv.total_cost ? '¥' + conv.total_cost.toFixed(4) : '-'} |
+      ${conv.model ? '模型: ' + esc(conv.model) + ' | ' : ''}
       ${new Date(conv.started_at).toLocaleString('zh-CN')}
     </div>
   `;

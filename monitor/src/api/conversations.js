@@ -30,8 +30,8 @@ router.get('/conversations', (req, res) => {
 
   const total = db.prepare(`SELECT COUNT(*) as count FROM conversations ${where}`).get(...params).count;
   const data = db.prepare(
-    `SELECT id, session_id, title, total_input_tokens, total_output_tokens,
-            total_cost_output, started_at, ended_at
+    `SELECT id, session_id, title, model, total_input_tokens, total_output_tokens,
+            total_cost, started_at, ended_at
      FROM conversations ${where}
      ORDER BY started_at DESC LIMIT ? OFFSET ?`
   ).all(...params, limit, offset);
@@ -67,6 +67,26 @@ router.get('/conversations/:id', (req, res) => {
   }
 
   res.json({ ...conv, messages });
+});
+
+// PATCH /api/conversations/:id/tokens — update cumulative token totals (called mid-session)
+router.patch('/conversations/:id/tokens', (req, res) => {
+  const db = getDB();
+  const conv = db.prepare('SELECT id FROM conversations WHERE id = ?').get(req.params.id);
+  if (!conv) return res.status(404).json({ error: 'Conversation not found' });
+
+  const { total_input_tokens, total_output_tokens, total_cost, ended_at } = req.body;
+  const updates = [];
+  const params = [];
+  if (total_input_tokens !== undefined) { updates.push('total_input_tokens = ?'); params.push(total_input_tokens); }
+  if (total_output_tokens !== undefined) { updates.push('total_output_tokens = ?'); params.push(total_output_tokens); }
+  if (total_cost !== undefined) { updates.push('total_cost = ?'); params.push(total_cost); }
+  if (ended_at !== undefined) { updates.push('ended_at = ?'); params.push(ended_at); }
+  if (updates.length === 0) return res.status(400).json({ error: 'No fields to update' });
+
+  params.push(req.params.id);
+  db.prepare(`UPDATE conversations SET ${updates.join(', ')} WHERE id = ?`).run(...params);
+  res.json({ ok: true });
 });
 
 module.exports = router;

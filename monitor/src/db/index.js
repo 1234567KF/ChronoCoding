@@ -16,6 +16,14 @@ function initDB() {
   const schema = fs.readFileSync(SCHEMA_PATH, 'utf-8');
   db.exec(schema);
 
+  // Migration: rename total_cost_output → total_cost
+  try {
+    const cols = db.pragma('table_info(conversations)');
+    if (cols.some(c => c.name === 'total_cost_output')) {
+      db.exec('ALTER TABLE conversations RENAME COLUMN total_cost_output TO total_cost');
+    }
+  } catch {}
+
   return db;
 }
 

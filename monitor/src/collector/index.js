@@ -1,10 +1,18 @@
 const { getDB } = require('../db');
-const { calcCost } = require('../pricing');
+const { calcCost, MODEL_ALIASES } = require('../pricing');
+
+function resolveModel(raw) {
+  if (!raw) return null;
+  return MODEL_ALIASES[raw] || raw;
+}
 
 function saveRecord({ sessionId, title, model, messages, skillCalls }) {
   const db = getDB();
   const convId = sessionId || `conv_${Date.now()}`;
   const now = new Date().toISOString();
+
+  // Normalize model name for display consistency
+  const resolvedModel = resolveModel(model);
 
   let totalInput = 0, totalOutput = 0, totalCost = 0;
 
@@ -22,9 +30,14 @@ function saveRecord({ sessionId, title, model, messages, skillCalls }) {
     const existing = db.prepare('SELECT id FROM conversations WHERE id = ?').get(convId);
     if (!existing) {
       db.prepare(
-        `INSERT INTO conversations (id, session_id, title, started_at)
-         VALUES (?, ?, ?, ?)`
-      ).run(convId, sessionId || convId, title || '', now);
+        `INSERT INTO conversations (id, session_id, title, model, started_at)
+         VALUES (?, ?, ?, ?, ?)`
+      ).run(convId, sessionId || convId, title || '', resolvedModel, now);
+    } else {
+      // Update model if changed (e.g., model switch mid-session)
+      if (resolvedModel) {
+        db.prepare('UPDATE conversations SET model = ? WHERE id = ?').run(resolvedModel, convId);
+      }
     }
 
     let usedTopLevelSkills = false;
@@ -46,6 +59,7 @@ function saveRecord({ sessionId, title, model, messages, skillCalls }) {
       const msgSkills = msg.skillCalls;
       if (msgSkills && msgSkills.length > 0) {
         for (const skill of msgSkills) {
+          if (skill.type === 'subagent') continue; // 跳过 subagent 生命周期事件
           insertSkill.run(msgId, skill.name, skill.type || 'local',
             skill.input_tokens || 0, skill.output_tokens || 0,
             skill.duration_ms || null, skill.status || 'success');
@@ -53,6 +67,7 @@ function saveRecord({ sessionId, title, model, messages, skillCalls }) {
       } else if (skillCalls && skillCalls.length > 0 && !usedTopLevelSkills && msg.role === 'assistant') {
         usedTopLevelSkills = true;
         for (const skill of skillCalls) {
+          if (skill.type === 'subagent') continue; // 跳过 subagent 生命周期事件
           insertSkill.run(msgId, skill.name, skill.type || 'local',
             skill.input_tokens || 0, skill.output_tokens || 0,
             skill.duration_ms || null, skill.status || 'success');
@@ -69,7 +84,7 @@ function saveRecord({ sessionId, title, model, messages, skillCalls }) {
       `UPDATE conversations SET
         total_input_tokens = total_input_tokens + ?,
         total_output_tokens = total_output_tokens + ?,
-        total_cost_output = total_cost_output + ?,
+        total_cost = total_cost + ?,
         ended_at = ?
        WHERE id = ?`
     ).run(totalInput, totalOutput, totalCost, now, convId);
