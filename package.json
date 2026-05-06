@@ -1,0 +1,8 @@
+{
+  "name": "aicoding",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "monitor": "cd monitor && node src/server.js"
+  }
+}

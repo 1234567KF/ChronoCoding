@@ -1,0 +1,77 @@
+<div class="filter-bar">
+  <label style="font-size:13px;">时间范围:</label>
+  <select id="rangeSelect" onchange="loadStats()">
+    <option value="7d">近 7 天</option>
+    <option value="30d">近 30 天</option>
+  </select>
+</div>
+
+<div class="grid-3" id="summaryCards"></div>
+
+<div class="grid-2" style="margin-top:20px;">
+  <div class="card">
+    <h3 style="font-size:14px;margin-bottom:12px;">Token 趋势</h3>
+    <canvas id="tokenChart" height="200"></canvas>
+  </div>
+  <div class="card">
+    <h3 style="font-size:14px;margin-bottom:12px;">技能调用排行</h3>
+    <table id="skillTable">
+      <thead><tr><th>技能</th><th>调用次数</th><th>输入 Token</th><th>输出 Token</th></tr></thead>
+      <tbody id="skillBody"></tbody>
+    </table>
+  </div>
+</div>
+
+<script>
+let tokenChart = null;
+async function loadStats() {
+  const range = document.getElementById('rangeSelect').value;
+
+  // Token stats
+  const tRes = await fetch('/api/stats/tokens?range=' + range);
+  const tData = await tRes.json();
+  document.getElementById('summaryCards').innerHTML = `
+    <div class="card">
+      <div class="stat-value">${(tData.summary.total_input / 1000).toFixed(1)}K</div>
+      <div class="stat-label">总输入 Token (${range})</div>
+    </div>
+    <div class="card">
+      <div class="stat-value">${(tData.summary.total_output / 1000).toFixed(1)}K</div>
+      <div class="stat-label">总输出 Token (${range})</div>
+    </div>
+    <div class="card">
+      <div class="stat-value">${tData.summary.total_cost ? '¥' + tData.summary.total_cost.toFixed(4) : '¥0'}</div>
+      <div class="stat-label">输出总花费 (${range})</div>
+    </div>
+  `;
+
+  // Chart
+  const ctx = document.getElementById('tokenChart').getContext('2d');
+  if (tokenChart) tokenChart.destroy();
+  tokenChart = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: tData.daily.map(d => d.date.slice(5)),
+      datasets: [
+        { label: '输入 Token', data: tData.daily.map(d => d.total_input), borderColor: '#1565c0', fill: false, tension: 0.3 },
+        { label: '输出 Token', data: tData.daily.map(d => d.total_output), borderColor: '#c62828', fill: false, tension: 0.3 },
+      ]
+    },
+    options: { responsive: true, plugins: { legend: { position: 'top' } } }
+  });
+
+  // Skill stats
+  const sRes = await fetch('/api/stats/skills?range=' + range);
+  const sData = await sRes.json();
+  document.getElementById('skillBody').innerHTML = sData.data.map(s => `
+    <tr>
+      <td><strong>${esc(s.skill_name)}</strong></td>
+      <td>${s.call_count}</td>
+      <td>${s.total_input?.toLocaleString() || 0}</td>
+      <td>${s.total_output?.toLocaleString() || 0}</td>
+    </tr>
+  `).join('');
+}
+function esc(s) { const d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
+loadStats();
+</script>

@@ -170,6 +170,11 @@
                                                              "type":  "command",
                                                              "command":  "cmd /c node %CLAUDE_PROJECT_DIR%/.claude/helpers/hook-handler.cjs post-task",
                                                              "timeout":  5000
+                                                         },
+                                                         {
+                                                             "type":  "command",
+                                                             "command":  "cmd /c node %CLAUDE_PROJECT_DIR%/.claude/hooks/monitor-hooks.cjs push",
+                                                             "timeout":  3000
                                                          }
                                                      ]
                                        }

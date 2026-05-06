@@ -1,0 +1,64 @@
+<div class="filter-bar">
+  <input type="text" id="search" placeholder="搜索对话标题..." oninput="loadList()">
+  <input type="date" id="dateFrom" onchange="loadList()">
+  <span>—</span>
+  <input type="date" id="dateTo" onchange="loadList()">
+  <span style="font-size:13px;color:#888;"><span id="totalCount">0</span> 条对话</span>
+</div>
+
+<table>
+  <thead>
+    <tr>
+      <th>标题</th>
+      <th>输入 Token</th>
+      <th>输出 Token</th>
+      <th>输出花费</th>
+      <th>技能数</th>
+      <th>时间</th>
+    </tr>
+  </thead>
+  <tbody id="convBody"></tbody>
+</table>
+
+<div class="pagination" id="pagination"></div>
+
+<script>
+let page = 1;
+async function loadList() {
+  const search = document.getElementById('search').value;
+  const dateFrom = document.getElementById('dateFrom').value;
+  const dateTo = document.getElementById('dateTo').value;
+  const params = new URLSearchParams({ page, limit: 20, search, date_from: dateFrom, date_to: dateTo });
+  const res = await fetch('/api/conversations?' + params);
+  const json = await res.json();
+  renderList(json);
+}
+function renderList(json) {
+  const tbody = document.getElementById('convBody');
+  tbody.innerHTML = json.data.map(c => {
+    const cost = c.total_cost_output ? '¥' + c.total_cost_output.toFixed(4) : '-';
+    const time = new Date(c.started_at).toLocaleString('zh-CN');
+    return `<tr onclick="location='/conversations/${c.id}'" style="cursor:pointer">
+      <td><strong>${esc(c.title || '(无标题)')}</strong></td>
+      <td>${c.total_input_tokens?.toLocaleString() || 0}</td>
+      <td>${c.total_output_tokens?.toLocaleString() || 0}</td>
+      <td>${cost}</td>
+      <td><span class="badge badge-skill">${c.skill_count}</span></td>
+      <td>${time}</td>
+    </tr>`;
+  }).join('');
+  document.getElementById('totalCount').textContent = json.total;
+  renderPagination(json);
+}
+function renderPagination(json) {
+  const totalPages = Math.ceil(json.total / json.limit);
+  const el = document.getElementById('pagination');
+  let html = `<button onclick="goPage(${json.page - 1})" ${json.page <= 1 ? 'disabled' : ''}>上一页</button>`;
+  html += `<span>${json.page} / ${totalPages || 1}</span>`;
+  html += `<button onclick="goPage(${json.page + 1})" ${json.page >= totalPages ? 'disabled' : ''}>下一页</button>`;
+  el.innerHTML = html;
+}
+function goPage(p) { page = p; loadList(); }
+function esc(s) { const d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
+loadList();
+</script>

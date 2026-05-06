@@ -1,0 +1,41 @@
+<a href="/" style="color:#666;text-decoration:none;font-size:13px;">&larr; 返回列表</a>
+<div id="convHeader" style="margin:12px 0;"></div>
+<div id="messages"></div>
+
+<script>
+(async function() {
+  const res = await fetch('/api/conversations/<%= convId %>');
+  const conv = await res.json();
+  document.getElementById('convHeader').innerHTML = `
+    <h2>${esc(conv.title || '(无标题)')}</h2>
+    <div style="font-size:13px;color:#888;margin-top:4px;">
+      输入: ${conv.total_input_tokens?.toLocaleString() || 0} |
+      输出: ${conv.total_output_tokens?.toLocaleString() || 0} |
+      输出花费: ${conv.total_cost_output ? '¥' + conv.total_cost_output.toFixed(4) : '-'} |
+      ${new Date(conv.started_at).toLocaleString('zh-CN')}
+    </div>
+  `;
+  const container = document.getElementById('messages');
+  for (const msg of conv.messages) {
+    const cacheBadge = msg.cache_hit === 1 ? '<span class="badge badge-cache">缓存✓</span>' :
+      msg.cache_hit === 0 ? '<span class="badge badge-cache">未命中</span>' : '';
+    container.innerHTML += `
+      <div class="msg-${msg.role}">
+        <strong>${msg.role === 'user' ? '👤 用户' : '🤖 助手'}</strong>
+        <pre style="white-space:pre-wrap;margin:8px 0;font-size:13px;font-family:inherit;">${esc(msg.content || '')}</pre>
+        <div class="msg-meta">
+          <span class="badge badge-input">输入: ${msg.input_tokens?.toLocaleString() || 0}</span>
+          <span class="badge badge-output">输出: ${msg.output_tokens?.toLocaleString() || 0}</span>
+          ${cacheBadge}
+          ${msg.input_cost !== null ? `<span>输入费: ¥${msg.input_cost.toFixed(4)}</span>` : '<span>输入费: —</span>'}
+          <span>输出费: ${msg.output_cost ? '¥' + msg.output_cost.toFixed(4) : '-'}</span>
+        </div>
+        ${msg.skillCalls?.length ? `<div style="margin-top:6px;">${msg.skillCalls.map(s =>
+          `<span class="badge badge-skill">${esc(s.skill_name)}</span>`
+        ).join(' ')}</div>` : ''}
+      </div>
+    `;
+  }
+})();
+function esc(s) { const d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
+</script>

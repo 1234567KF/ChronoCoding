@@ -95,11 +95,13 @@ function classifySkill(skillName) {
 // Token cost model (per MTok, CNY)
 // ============================================================
 const MODEL_PRICING = {
-  "opus": { input: 15, output: 75, cache_read: 1.875 },
-  "sonnet": { input: 3, output: 15, cache_read: 0.375 },
-  "haiku": { input: 0.25, output: 1.25, cache_read: 0.03 },
-  "pro": { input: 3, output: 6, cache_read: 0.025 },  // deepseek-v4-pro estimate
-  "flash": { input: 1, output: 2, cache_read: 0.025 }, // deepseek-v4-flash estimate
+  "opus":              { input: 15,     output: 75,   cache_read: 1.875  },
+  "sonnet":            { input: 3,      output: 15,   cache_read: 0.375  },
+  "haiku":             { input: 0.25,   output: 1.25, cache_read: 0.03   },
+  "pro":               { input: 3,      output: 6,    cache_read: 0.025  },
+  "deepseek-v4-pro":   { input: 3,      output: 6,    cache_read: 0.025  },
+  "flash":             { input: 1,      output: 2,    cache_read: 0.02   },
+  "deepseek-v4-flash": { input: 1,      output: 2,    cache_read: 0.02   },
 };
 
 function calcCost(tokensIn, tokensOut, cacheHit, model) {
@@ -146,6 +148,14 @@ function logEntry(args) {
 // ============================================================
 // pre-tool hook - auto-capture via stdin (Claude Code hook protocol)
 // ============================================================
+let _inputProcessed = false;
+
+function processInputSafe(hookInput) {
+  if (_inputProcessed) return;
+  _inputProcessed = true;
+  processInput(hookInput);
+}
+
 async function preToolHook() {
   // Claude Code hooks pass data via stdin as JSON
   let hookInput = {};
@@ -154,10 +164,12 @@ async function preToolHook() {
     const timer = setTimeout(() => {
       process.stdin.removeAllListeners();
       process.stdin.pause();
-      processInput(hookInput);
+      processInputSafe(hookInput);
     }, 2000);
-    timer.unref();
-    
+    // NOTE: intentionally NOT unref'd — on Windows, unref + stdin.resume()
+    // creates a race: process may hang when stdin never closes (common on Windows pipes).
+    // The 2s timeout ensures clean exit even when stdin doesn't signal 'end'.
+
     if (!process.stdin.isTTY) {
       await new Promise((resolve) => {
         process.stdin.setEncoding("utf8");
@@ -167,14 +179,14 @@ async function preToolHook() {
         process.stdin.resume();
       });
     }
-    
+
     const raw = chunks.join("").trim();
     if (raw) {
       try { hookInput = JSON.parse(raw); } catch {}
     }
   } catch {}
-  
-  processInput(hookInput);
+
+  processInputSafe(hookInput);
 }
 
 function processInput(hookInput) {

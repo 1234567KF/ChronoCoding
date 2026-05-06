@@ -1,0 +1,75 @@
+<div class="filter-bar">
+  <input type="date" id="logDateFrom" onchange="loadLogs()">
+  <span>—</span>
+  <input type="date" id="logDateTo" onchange="loadLogs()">
+  <input type="text" id="skillFilter" placeholder="技能名筛选..." oninput="loadLogs()">
+  <select id="roleFilter" onchange="loadLogs()">
+    <option value="">全部角色</option>
+    <option value="user">用户</option>
+    <option value="assistant">助手</option>
+  </select>
+</div>
+
+<div class="timeline" id="logTimeline"></div>
+<div id="logEmpty" style="display:none;text-align:center;padding:40px;color:#888;">暂无记录</div>
+
+<script>
+async function loadLogs() {
+  const dateFrom = document.getElementById('logDateFrom').value;
+  const dateTo = document.getElementById('logDateTo').value;
+  const skill = document.getElementById('skillFilter').value;
+  const role = document.getElementById('roleFilter').value;
+  const params = new URLSearchParams({ limit: 200, date_from: dateFrom, date_to: dateTo, search: '', page: 1 });
+  const res = await fetch('/api/conversations?' + params);
+  const json = await res.json();
+
+  // fetch all conversations detail in parallel (limit 5 to be gentle)
+  const allMsgs = [];
+  for (const conv of json.data) {
+    const dRes = await fetch('/api/conversations/' + conv.id);
+    const d = await dRes.json();
+    for (const msg of d.messages || []) {
+      msg.convTitle = d.title;
+      allMsgs.push(msg);
+    }
+  }
+
+  // filter
+  let filtered = allMsgs;
+  if (skill) filtered = filtered.filter(m =>
+    (m.skillCalls || []).some(s => s.skill_name.toLowerCase().includes(skill.toLowerCase()))
+  );
+  if (role) filtered = filtered.filter(m => m.role === role);
+  filtered.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+
+  const timeline = document.getElementById('logTimeline');
+  if (!filtered.length) {
+    timeline.innerHTML = '';
+    document.getElementById('logEmpty').style.display = 'block';
+    return;
+  }
+  document.getElementById('logEmpty').style.display = 'none';
+
+  timeline.innerHTML = filtered.map(m => {
+    const skills = (m.skillCalls || []).map(s =>
+      `<span class="badge badge-skill">${esc(s.skill_name)}</span>`
+    ).join(' ');
+    const cacheMark = m.cache_hit === 1 ? '| 缓存: ✓' : '';
+    const time = new Date(m.created_at).toLocaleString('zh-CN');
+    return `<div class="tl-item">
+      <div class="tl-time">${time}</div>
+      <div class="tl-body">
+        ${m.convTitle ? `<div style="font-size:11px;color:#888;margin-bottom:4px;">📋 ${esc(m.convTitle)}</div>` : ''}
+        <div><strong>${m.role === 'user' ? '👤 用户' : '🤖 助手'}</strong></div>
+        <div style="font-size:13px;margin:4px 0;max-height:60px;overflow:hidden;">${esc((m.content || '').slice(0, 200))}</div>
+        <div class="msg-meta">
+          输入: ${m.input_tokens?.toLocaleString() || 0} | 输出: ${m.output_tokens?.toLocaleString() || 0} ${cacheMark}
+        </div>
+        ${skills ? `<div style="margin-top:4px;">${skills}</div>` : ''}
+      </div>
+    </div>`;
+  }).join('');
+}
+function esc(s) { const d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
+loadLogs();
+</script>
