@@ -1,0 +1,33 @@
+{
+  "trace_id": "hammer-20260505-0055",
+  "start": "2026-05-05T16:55:19.924Z",
+  "end": "2026-05-05T16:55:20.095Z",
+  "duration_min": 1,
+  "agents": 3,
+  "calls": 3,
+  "success_rate": 67,
+  "skills_used": 1,
+  "skills_installed": 95,
+  "token_total": {
+    "input": 120000,
+    "output": 23500,
+    "cache_hit": 0,
+    "cache_rate": "0.0%"
+  },
+  "kf_called": 0,
+  "general_called": 0,
+  "top": [
+    {
+      "skill": "directory-scan",
+      "count": 3,
+      "type": "other"
+    }
+  ],
+  "savings": {
+    "lean_ctx": 0,
+    "model_router": 0,
+    "ccp_skip": 0,
+    "lambda_lang": 0
+  },
+  "report": "D:\\AICoding\\token测评\\skill-usage-report.md"
+}
