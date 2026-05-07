@@ -145,8 +145,8 @@
                    "principle":  "快"
                },
                {
-                   "alias":  "skill-monitor",
-                   "name":  "kf-skill-monitor",
+                   "alias":  "token-tracker",
+                   "name":  "kf-token-tracker",
                    "auto":  [
 
                             ],

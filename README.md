@@ -11,7 +11,7 @@
 
 > 从环境搭建到代码交付，零手动干预。只需一个文件，放进 AI IDE，全自动完成。
 >
-> 总纲：[AICoding原则.docx](docs/AICoding原则.docx) — **稳 · 省 · 准 · 夯 · 快 · 懂**
+> 总纲：[AICoding原则.docx](../知识库相关/docs/AICoding原则.docx) — **稳 · 省 · 准 · 夯 · 快 · 懂**
 
 <p align="center">
   <img src="assets/posters/宣传海报_浅色.png" alt="AI编程智驾 宣传海报" width="900">
@@ -145,7 +145,7 @@ flowchart LR
 | [asta-skill](https://github.com/Agents365-ai/asta-skill) | Agents365-ai | MIT | 学术论文搜索 — Semantic Scholar via Ai2 Asta MCP |
 | [jeffallan/claude-skills](https://github.com/jeffallan/claude-skills) | jeffallan | MIT | 66 个 Claude Code 第三方技能：语言/后端/前端/基础设施/API/测试/DevOps/安全/数据ML/平台 |
 
-详见 [CREDITS.md](docs/CREDITS.md) 完整致谢。
+详见 [CREDITS.md](../知识库相关/docs/CREDITS.md) 完整致谢。
 
 ---
 
@@ -202,7 +202,7 @@ npm install -g ruflo
 git clone https://github.com/fshaan/gspowers.git ~/.claude/skills/gspowers
 ```
 
-详见 [INSTALL.md](docs/INSTALL.md)
+详见 [INSTALL.md](../知识库相关/docs/INSTALL.md)
 
 ---
 
@@ -224,9 +224,8 @@ git clone https://github.com/fshaan/gspowers.git ~/.claude/skills/gspowers
 | `/browser-ops` | 浏览器自动化测试 | kf-browser-ops |
 | `P图` / `改图` / `修图` / `去水印` | AI 自然语言 P 图 | kf-image-editor |
 | `摄入文件` / `ingest` / `lint` / `检查知识库` / `更新知识库` | Knowledge Base Envoy：知识库全生命周期管理 | kf-kb-envoy |
-| `转docx` / `markdown转word` | Markdown → DOCX 转换 | kf-markdown-to-docx-skill |
 | `Harness 评审` / `五根铁律审计` | Skill 质量审计 | kf-skill-design-expert |
-| `/skill-monitor` / `技能监控` / `使用率` / `token成本` | 技能调用追踪 + Token成本追踪 | kf-skill-monitor |
+| `/token-tracker` / `/skill-monitor` / `技能监控` / `使用率` / `token成本` | Token全量追踪 + 技能调用追踪 + 成本估算 | kf-token-tracker |
 | `模型路由` / `省模式` | 模型智能路由（全自动） | kf-model-router |
 | `自动实验` / `ai实验` / `实验跑一夜` / `autoresearch` | Karpathy 自主 ML 实验 | kf-autoresearch |
 | `一致性` / `文档自检` / `doc consistency` | 文档全局一致性自检 | kf-doc-consistency |
@@ -244,11 +243,11 @@ git clone https://github.com/fshaan/gspowers.git ~/.claude/skills/gspowers
 |------|------|
 | [README.md](README.md) | 项目介绍（你在这里） |
 | [AICoding.md](AICoding.md) | 单文件入口（给 AI 看） |
-| [MANUAL.md](docs/MANUAL.md) | 完整使用手册（给人看） |
-| [INSTALL.md](docs/INSTALL.md) | AI 执行安装指南（给 AI 看） |
+| [MANUAL.md](../知识库相关/docs/MANUAL.md) | 完整使用手册（给人看） |
+| [INSTALL.md](../知识库相关/docs/INSTALL.md) | AI 执行安装指南（给 AI 看） |
 | [CHANGELOG.md](CHANGELOG.md) | 版本变更记录 |
-| [FEATURES.md](docs/FEATURES.md) | 功能特性介绍 |
-| [CREDITS.md](docs/CREDITS.md) | 第三方开源项目致谢 |
+| [FEATURES.md](../知识库相关/docs/FEATURES.md) | 功能特性介绍 |
+| [CREDITS.md](../知识库相关/docs/CREDITS.md) | 第三方开源项目致谢 |
 
 ---
 
@@ -261,19 +260,8 @@ AI编程智驾/
 ├── CHANGELOG.md           # 版本记录
 ├── CONTRIBUTING.md        # 贡献指南
 ├── LICENSE                # MIT 许可证
-│
-├── docs/                  # 文档目录
-│   ├── MANUAL.md          # 完整手册
-│   ├── INSTALL.md         # AI 安装指南
-│   ├── FEATURES.md        # 功能特性
-│   ├── CREDITS.md         # 第三方致谢
-│   ├── mvp技术栈.md        # MVP 技术栈定义
-│   ├── 人类使用手册.md     # 简明工作流
-│   ├── 打包清单.md         # 文件清单
-│   └── AICoding原则.docx  # 修炼总纲
-│
-├── assets/                # 静态资源
-│   └── posters/           # 宣传海报
+├── assets/                # 静态资源（宣传海报、架构图）
+│   └── posters/
 │
 ├── .claude/               # Claude Code 项目配置
 │   ├── CLAUDE.md          # 项目指令
@@ -293,8 +281,7 @@ AI编程智驾/
 │       ├── kf-triple-collaboration/# 三方协作
 │       ├── kf-ui-prototype-generator/ # UI 原型
 │       ├── kf-skill-design-expert/ # Skill 设计
-│       ├── kf-skill-monitor/        # 技能调用追踪 + Token成本
-│       ├── kf-markdown-to-docx-skill/ # MD→DOCX
+│       ├── kf-token-tracker/        # Token全量追踪 + 技能调用链路
 │       ├── kf-add-skill/           # 技能安装管家
 │       ├── kf-doc-consistency/     # 文档一致性自检
 │       ├── kf-go/                  # 工作流导航
@@ -317,7 +304,7 @@ AI编程智驾/
 │   ├── pipeline-example.md
 │   └── wiki-template.md
 │
-└── gspowers-pipeline-patch/  # Pipeline 扩展
+└── kf-gspowers-pipeline-patch/  # Pipeline 扩展
     ├── pipeline.md
     ├── execute-patch.md
     └── install-pipeline.ps1

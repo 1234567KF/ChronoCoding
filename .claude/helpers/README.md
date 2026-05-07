@@ -16,7 +16,7 @@
 
 - `hook-handler.cjs` → `hooks/hook-handler.cjs`
 - `model-router-hook.cjs` → `hooks/model-router-hook.cjs`
-- `skill-monitor.cjs` → `hooks/skill-monitor.cjs`
+- `token-tracker.cjs` → `hooks/token-tracker.cjs`
 - `statusline.cjs` → `session/statusline.cjs`
 
 ## 回滚

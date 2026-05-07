@@ -1,7 +1,7 @@
 ---
 name: kf-add-skill
 description: |
-  Use when the user wants to add, install, or integrate a new skill/plugin to this project — search by keyword, GitHub URL, or npm package. Syncs installation to both .claude/ and .trae/ directories, updates all related documentation (CLAUDE.md, AICoding.md, README.md, docs/INSTALL.md, docs/MANUAL.md, .trae/rules.md), and patches SKILL.md frontmatter of calling/called skills.
+  Use when the user wants to add, install, or integrate a new skill/plugin to this project — search by keyword, GitHub URL, or npm package. Syncs installation to both .claude/ and .trae/ directories, updates all related documentation (CLAUDE.md, 安装配置文档相关/AICoding.md, 安装配置文档相关/README.md, 知识库相关/docs/INSTALL.md, 知识库相关/docs/MANUAL.md, .trae/rules.md), and patches SKILL.md frontmatter of calling/called skills.
   Triggers: "install skill", "add skill", "add plugin", "search skill", "find skill", "integrate skill", "安装技能", "添加技能", "搜索技能", "装个技能".
 allowed-tools:
   - Bash
@@ -163,9 +163,9 @@ Read `.claude/CLAUDE.md`. Add entry to the kf- series table (or create a new row
 
 Follow the exact table format. Match principle to one of: 稳/省/准/测的准/夯/快/懂.
 
-### 4b. Update AICoding.md calling chain
+### 4b. Update 安装配置文档相关/AICoding.md calling chain
 
-Read `AICoding.md`. Two places to update:
+Read `安装配置文档相关/AICoding.md`. Two places to update:
 
 1. **kf- series table** (or upstream table for non-kf): add the new skill row
 2. **Calling chain diagram**: if this skill calls or is called by others, add nodes/edges to the ASCII diagram
@@ -174,7 +174,7 @@ Read `AICoding.md`. Two places to update:
 
 If the skill requires new permissions (new domains for WebFetch, new allowed-tools), add them to `.claude/settings.json` under the appropriate permission section.
 
-Gate: Do NOT proceed until CLAUDE.md and AICoding.md are updated.
+Gate: Do NOT proceed until CLAUDE.md and 安装配置文档相关/AICoding.md are updated.
 
 ---
 
@@ -182,17 +182,17 @@ Gate: Do NOT proceed until CLAUDE.md and AICoding.md are updated.
 
 Load `references/doc-sync-rules.md` for the exact section templates and insertion points for each documentation file. Then update each file:
 
-### 5a. README.md
+### 5a. 安装配置文档相关/README.md
 
-Add skill to the skill list/table in README.md. If README.md has no skill table, add the entry in the same format as existing skills.
+Add skill to the skill list/table in 安装配置文档相关/README.md. If 安装配置文档相关/README.md has no skill table, add the entry in the same format as existing skills.
 
-### 5b. docs/INSTALL.md
+### 5b. 知识库相关/docs/INSTALL.md
 
 If the skill requires global dependencies or special install steps, add them to the dependency table and install instructions.
 
 If the skill is self-contained (just cloned into `.claude/skills/`), add a note in the "后续步骤" section.
 
-### 5c. docs/MANUAL.md
+### 5c. 知识库相关/docs/MANUAL.md
 
 Add a trigger entry to the "功能触发速查" table in Section 四 of MANUAL.md:
 
@@ -262,7 +262,7 @@ After all documentation updates are complete, trigger the document consistency c
 
 Say **"now do a doc consistency check"** to invoke `kf-doc-consistency`.
 
-This verifies all updated files (CLAUDE.md, AICoding.md, INSTALL.md, MANUAL.md) are internally consistent with:
+This verifies all updated files (CLAUDE.md, 安装配置文档相关/AICoding.md, INSTALL.md, MANUAL.md) are internally consistent with:
 - Every skill on disk has a row in every relevant table
 - No stale entries for deleted skills
 - Trigger words are consistent across all docs

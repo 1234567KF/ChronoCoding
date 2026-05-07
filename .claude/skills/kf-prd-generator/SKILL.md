@@ -38,7 +38,7 @@ After Q1, if user provided `.xlsx` file, **MUST immediately check if it's an SDD
 
 - Q2: "What are the target user roles? List them (e.g., regular employee, department manager, HR admin)"
 - Q3: "What is the core business objective? What quantifiable results are expected?"
-- Q4: "What are the technical constraints? Specify:\n  - Backend: framework and version (e.g., Spring Boot 3.x + Kotlin 1.9)\n  - Frontend: framework, UI component library and version (e.g., Vue 3 + ant-design-vue 4.1.2)\n  - Database and middleware\n  (System will auto-scan project dependency files; you can answer 'use current tech stack')\n  (For quick prototype validation, choose **MVP mode**: Node.js + Express + SQLite + Vue 3 + Vite, see `docs/mvp技术栈.md`)"
+- Q4: "What are the technical constraints? Specify:\n  - Backend: framework and version (e.g., Spring Boot 3.x + Kotlin 1.9)\n  - Frontend: framework, UI component library and version (e.g., Vue 3 + ant-design-vue 4.1.2)\n  - Database and middleware\n  (System will auto-scan project dependency files; you can answer 'use current tech stack')\n  (For quick prototype validation, choose **MVP mode**: Node.js + Express + SQLite + Vue 3 + Vite, see `知识库相关/docs/mvp技术栈.md`)"
 - Q5: "Are there existing systems or APIs to integrate? If yes, specify"
 - Q6: "What is explicitly out of scope for this phase?"
 - Q7: "Any special UI specification requirements? (component library, design system, brand colors)"
@@ -56,7 +56,7 @@ After collecting user answers, MUST auto-scan workspace dependency files to extr
 - Backend: Read `build.gradle.kts` or `pom.xml` → extract framework version, language version, ORM framework
 - Other: Read corresponding dependency files (`requirements.txt`, `Cargo.toml`, etc.)
 
-**MVP fallback:** If no dependency files exist (new project or prototype-only stage), MUST check `docs/mvp技术栈.md`:
+**MVP fallback:** If no dependency files exist (new project or prototype-only stage), MUST check `知识库相关/docs/mvp技术栈.md`:
 - **Exists**: Use as default tech constraint, output MVP tech stack comparison table with `[MVP 默认]` labels
 - **Not exists**: MUST ask user for complete tech stack info (can recommend MVP mode)
 
@@ -73,7 +73,7 @@ After collecting user answers, MUST auto-scan workspace dependency files to extr
 - User answer vague ("current stack") → MUST use detected value
 - Cannot detect dependency files → MUST ask for specific version numbers
 - If SDD Excel source: cross-compare Phase 1.5 detected values with Sheet14 data, conflicts resolved by user confirmation
-- **MVP mode or no dependency files falling back to `docs/mvp技术栈.md`**: Tech constraints table uses MVP defaults, PRD Chapter 8 auto-fills MVP tech stack, Mock strategy noted in remarks
+- **MVP mode or no dependency files falling back to `知识库相关/docs/mvp技术栈.md`**: Tech constraints table uses MVP defaults, PRD Chapter 8 auto-fills MVP tech stack, Mock strategy noted in remarks
 - Confirmed values from this table become the basis for PRD Chapters 7 and 8
 
 ### Gate 1 — DO NOT generate PRD until all Phase 1 questions are fully answered and confirmed by user.
@@ -220,4 +220,4 @@ After each PRD generation, MUST write summary to `memory/prd-generation-log.md`:
 |------|-----------|---------|
 | `assets/prd-template.md` | Step 7 | PRD document standard template |
 | `assets/sdd-excel-parsing-rules.md` | Phase 1 SDD routing | SDD requirements collection Excel structured parsing rules |
-| `docs/mvp技术栈.md` | Phase 1.5 (no dependency files) | MVP minimal dev tech stack defaults |
+| `知识库相关/docs/mvp技术栈.md` | Phase 1.5 (no dependency files) | MVP minimal dev tech stack defaults |

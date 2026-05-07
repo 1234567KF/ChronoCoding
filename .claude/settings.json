@@ -46,7 +46,7 @@
                     },
                     {
                         "type": "command",
-                        "command": "node D:/AICoding/.claude/helpers/skill-monitor.cjs pre-tool",
+                        "command": "node D:/AICoding/.claude/helpers/token-tracker.cjs pre-tool",
                         "timeout": 3000
                     }
                 ]
@@ -104,7 +104,7 @@
                     },
                     {
                         "type": "command",
-                        "command": "node D:/AICoding/.claude/helpers/auto-memory-hook.mjs import",
+                        "command": "node D:/AICoding/.claude/helpers/hooks/auto-memory-hook.mjs import",
                         "timeout": 8000
                     },
                     {

@@ -99,7 +99,7 @@ if (-not $SkipPipeline) {
     Write-Host ""
     Write-Host "[4/5] 安装 Pipeline 扩展..." -ForegroundColor Yellow
 
-    $pipelineSource = "$PROJECT_ROOT\gspowers-pipeline-patch"
+    $pipelineSource = "$PROJECT_ROOT\.claude\skills\kf-gspowers-pipeline-patch"
     $pipelineTargetGspowers = "$SCRIPT_DIR\skills\gspowers\references"
 
     if (Test-Path $pipelineSource) {

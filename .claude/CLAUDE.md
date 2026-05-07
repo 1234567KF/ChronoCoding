@@ -1,6 +1,6 @@
 # AI编程智驾 — 项目配置
 
-> 总纲：[AICoding原则.docx](docs/AICoding原则.docx) — AI编程修炼手册2026
+> 总纲：[AICoding原则.docx](知识库相关/docs/AICoding原则.docx) — AI编程修炼手册2026
 
 本项目是 AI 编程工作台的完整技能集合，遵循**稳、省、准、测的准、夯、快、懂**六大原则。
 
@@ -8,43 +8,42 @@
 
 ### kf- 系列（团队自建）
 
-| 技能 | 别名 | 原则 | 调用链 | 说明 |
-|------|------|------|--------|------|
-| `kf-go` | `/go` | 快 | 独立 | 工作流导航：查看全局路径和当前进度 |
-| `kf-spec` | spec coding | 快 | 自动调用 kf-alignment、kf-model-router；被 `/夯` 调用 | Spec 驱动开发：需求 → Spec → 分步实施 |
-| `kf-code-review-graph` | `/review-graph` | 省 | 被 `/夯` Stage 4 自动调用 | 代码审查依赖图谱，轻装上阵快速提取 |
-| `kf-web-search` | `/web-search` | 准 | 被 `/夯` agent 按需自动调用 | 多引擎智能搜索，agent 自动搜索技术方案 |
-| `kf-browser-ops` | `/browser-ops` | 测的准 | 被 `/夯` Stage 3 自动调用 | 浏览器自动化测试，Playwright 复现 bug |
-| `kf-scrapling` | — | 准 | 被 `/夯` Stage 1/2/3 按需自动调用 | Web 爬虫+反反爬，深度数据采集，替代/补充 web-search |
-| `kf-opencli` | — | 准 | 被 `/夯` Stage 1/2/3 按需自动调用 | OpenCLI — 100+ 平台 CLI 数据直取（知乎/B站/微博/GitHub/Reddit/HN/arXiv），补充 web-search 和 scrapling 中间地带 |
-| `kf-grant-research` | — | 准 | Pipeline + Inversion + Generator，调用 asta-skill + kf-scrapling + kf-web-search | 课题申报研究助手：顶刊搜索→论文分析→研究空白→申报材料 |
-| `kf-reverse-spec` | — | 准/省 | Pipeline，调用 kf-alignment + kf-web-search + kf-code-review-graph | 存量代码→Spec/文档 逆向流水线 |
-| `kf-multi-team-compete` | **`/夯`** | 夯 | **主入口**，自动调用 11 个技能 + Pipeline 引擎 | 红蓝绿队多 Agent 并发竞争评审 |
-| `kf-alignment` | `/对齐` | 懂 | 被 kf-spec、`/夯`、kf-prd-generator 自动调用 | 对齐工作流：动前谈理解，动后谈 diff |
-| `kf-autoresearch` | — | 准 | Pipeline + Loop，自动调用 kf-model-router | Karpathy 自主 ML 实验：改 train.py→5分钟训练→验证val_bpb→循环 |
-| `kf-model-router` | 模型路由 | 省 | **自动触发**：所有技能启动时自动检查并切换模型 | 模型智能路由：计划 pro，执行 flash，用户无感 |
-| `kf-prd-generator` | `/prd-generator` | 快 | 自动调用 kf-alignment（产出后 Hook 对齐）；被 `/夯` Pre-Stage 自动调用 | SDD Excel → PRD 生成器 |
-| `kf-triple-collaboration` | triple | 夯 | 内部 spawn（轻量版 `/夯`） | 三方协作评审 |
-| `kf-ui-prototype-generator` | — | 快 | 被 `/夯` Stage 2/5 自动调用 | UI 原型 HTML 生成 |
-| `kf-image-editor` | — | 快 | 被 `/夯` Stage 2/5 自动调用 | AI 自然语言 P 图，Nano Banana MCP |
-| `kf-kb-envoy` | — | 准 | 独立 | Knowledge Base Envoy：raw/ → wiki/ → CLAUDE.md 知识库全生命周期管理 |
-| `kf-skill-design-expert` | — | 稳 | 独立，包含 Harness Engineering 评审体系 | Skill 设计专家 + 五根铁律审计 |
-| `kf-skill-monitor` | `/skill-monitor` | 准 | 被 `/夯` agent 按需自动调用 | 技能调用追踪 + Token成本追踪 |
-| `kf-doc-consistency` | — | 准/省 | Pipeline + Reviewer，被 kf-add-skill 自动调用 | 文档全局一致性自检 |
-| `kf-add-skill` | — | 稳 | 关键词搜索→下载安装→同步所有文档+SKILL.md，自动触发一致性检查 | 技能安装管家：搜索安装+文档全自动同步 |
-| `kf-markdown-to-docx-skill` | — | — | 独立 | Markdown → DOCX 转换 |
-| `kf-langextract` | — | 准 | Pipeline + Tool Wrapper + Generator，调用 lx.extract() | LLM 驱动结构化提取（非结构化文本→JSON/CSV/YAML），带 source grounding |
-| `lambda-lang` | λ | 省 | **自动注入**：多 Agent 并发时注入 Λ 通信协议（3x 压缩）；被 `/夯`、`/triple` 自动调用 | Agent-to-Agent 原生语言，340+ 原子，7 域（a2a/evo/code/...），握手 `@v2.0#h` |
-| `claude-code-pro` | ccp | 省 | **自动触发**：多 Agent spawn 前 CCP 智能调度（不 spawn 则省 10K-15K token）；完成回调替代轮询（省 80-97%）；被 `/夯`、`/triple` 自动调用 | Token 高效调度：知道何时不 spawn Agent，回调替代轮询 |
+| 技能                          | 别名               | 原则   | 调用链                                                                                                                                             | 说明                                                                                                             |
+| ----------------------------- | ------------------ | ------ | -------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------- |
+| `kf-go`                     | `/go`            | 快     | 独立                                                                                                                                               | 工作流导航：查看全局路径和当前进度                                                                               |
+| `kf-spec`                   | spec coding        | 快     | 自动调用 kf-alignment、kf-model-router；被 `/夯` 调用                                                                                            | Spec 驱动开发：需求 → Spec → 分步实施                                                                          |
+| `kf-code-review-graph`      | `/review-graph`  | 省     | 被 `/夯` Stage 4 自动调用                                                                                                                        | 代码审查依赖图谱，轻装上阵快速提取                                                                               |
+| `kf-web-search`             | `/web-search`    | 准     | 被 `/夯` agent 按需自动调用                                                                                                                      | 多引擎智能搜索，agent 自动搜索技术方案                                                                           |
+| `kf-browser-ops`            | `/browser-ops`   | 测的准 | 被 `/夯` Stage 3 自动调用                                                                                                                        | 浏览器自动化测试，Playwright 复现 bug                                                                            |
+| `kf-scrapling`              | —                 | 准     | 被 `/夯` Stage 1/2/3 按需自动调用                                                                                                                | Web 爬虫+反反爬，深度数据采集，替代/补充 web-search                                                              |
+| `kf-opencli`                | —                 | 准     | 被 `/夯` Stage 1/2/3 按需自动调用                                                                                                                | OpenCLI — 100+ 平台 CLI 数据直取（知乎/B站/微博/GitHub/Reddit/HN/arXiv），补充 web-search 和 scrapling 中间地带 |
+| `kf-grant-research`         | —                 | 准     | Pipeline + Inversion + Generator，调用 asta-skill + kf-scrapling + kf-web-search                                                                   | 课题申报研究助手：顶刊搜索→论文分析→研究空白→申报材料                                                         |
+| `kf-reverse-spec`           | —                 | 准/省  | Pipeline，调用 kf-alignment + kf-web-search + kf-code-review-graph                                                                                 | 存量代码→Spec/文档 逆向流水线                                                                                   |
+| `kf-multi-team-compete`     | **`/夯`**  | 夯     | **主入口**，自动调用 11 个技能 + Pipeline 引擎                                                                                               | 红蓝绿队多 Agent 并发竞争评审                                                                                    |
+| `kf-alignment`              | `/对齐`          | 懂     | 被 kf-spec、`/夯`、kf-prd-generator 自动调用                                                                                                     | 对齐工作流：动前谈理解，动后谈 diff                                                                              |
+| `kf-autoresearch`           | —                 | 准     | Pipeline + Loop，自动调用 kf-model-router                                                                                                          | Karpathy 自主 ML 实验：改 train.py→5分钟训练→验证val_bpb→循环                                                 |
+| `kf-model-router`           | 模型路由           | 省     | **自动触发**：所有技能启动时自动检查并切换模型                                                                                               | 模型智能路由：计划 pro，执行 flash，用户无感                                                                     |
+| `kf-prd-generator`          | `/prd-generator` | 快     | 自动调用 kf-alignment（产出后 Hook 对齐）；被 `/夯` Pre-Stage 自动调用                                                                           | SDD Excel → PRD 生成器                                                                                          |
+| `kf-triple-collaboration`   | triple             | 夯     | 内部 spawn（轻量版 `/夯`）                                                                                                                       | 三方协作评审                                                                                                     |
+| `kf-ui-prototype-generator` | —                 | 快     | 被 `/夯` Stage 2/5 自动调用                                                                                                                      | UI 原型 HTML 生成                                                                                                |
+| `kf-image-editor`           | —                 | 快     | 被 `/夯` Stage 2/5 自动调用                                                                                                                      | AI 自然语言 P 图，Nano Banana MCP                                                                                |
+| `kf-kb-envoy`               | —                 | 准     | 独立                                                                                                                                               | Knowledge Base Envoy：知识库相关/raw/ → 知识库相关/wiki/ → CLAUDE.md 知识库全生命周期管理                                            |
+| `kf-skill-design-expert`    | —                 | 稳     | 独立，包含 Harness Engineering 评审体系                                                                                                            | Skill 设计专家 + 五根铁律审计                                                                                    |
+| `kf-token-tracker`         | `/token-tracker` | 准     | 被 `/夯` agent 按需自动调用                                                                                                                      | Token全量追踪 + 技能调用链路追踪 + 成本估算                                                                      |
+| `kf-doc-consistency`        | —                 | 准/省  | Pipeline + Reviewer，被 kf-add-skill 自动调用                                                                                                      | 文档全局一致性自检                                                                                               |
+| `kf-add-skill`              | —                 | 稳     | 关键词搜索→下载安装→同步所有文档+SKILL.md，自动触发一致性检查                                                                                    | 技能安装管家：搜索安装+文档全自动同步                                                                            |
+| `kf-langextract`            | —                 | 准     | Pipeline + Tool Wrapper + Generator，调用 lx.extract()                                                                                             | LLM 驱动结构化提取（非结构化文本→JSON/CSV/YAML），带 source grounding                                           |
+| `lambda-lang`               | λ                 | 省     | **自动注入**：多 Agent 并发时注入 Λ 通信协议（3x 压缩）；被 `/夯`、`/triple` 自动调用                                                   | Agent-to-Agent 原生语言，340+ 原子，7 域（a2a/evo/code/...），握手 `@v2.0#h`                                   |
+| `claude-code-pro`           | ccp                | 省     | **自动触发**：多 Agent spawn 前 CCP 智能调度（不 spawn 则省 10K-15K token）；完成回调替代轮询（省 80-97%）；被 `/夯`、`/triple` 自动调用 | Token 高效调度：知道何时不 spawn Agent，回调替代轮询                                                             |
 
 ### 上游技能（非自建，不加 kf- 前缀）
 
-| 技能 | 来源 | 说明 |
-|------|------|------|
-| `gspowers` | fshaan | SOP 流程导航 |
-| `gstack` | garrytan | 产品流程框架 |
-| `astra-skill` | Agents365-ai | Academic paper search — Semantic Scholar via Ai2 Asta MCP |
-| `atlassian-mcp` | atlassian-mcp | Atlassian Jira/Confluence integration |
+| 技能                                   | 来源                                                 | 说明                                                                                                                                  |
+| -------------------------------------- | ---------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------- |
+| `gspowers`                           | fshaan                                               | SOP 流程导航                                                                                                                          |
+| `gstack`                             | garrytan                                             | 产品流程框架                                                                                                                          |
+| `astra-skill`                        | Agents365-ai                                         | Academic paper search — Semantic Scholar via Ai2 Asta MCP                                                                            |
+| `atlassian-mcp`                      | atlassian-mcp                                        | Atlassian Jira/Confluence integration                                                                                                 |
 | **jeffallan/claude-skills** (66) | [jeffallan](https://github.com/jeffallan/claude-skills) | 第三方技能合集，分 10 类：12 语言、7 后端、7 前端/移动、5 基础设施、8 API/架构、5 质量/测试、5 DevOps、3 安全、6 数据/ML、8 平台/专业 |
 
 ## 目录结构
@@ -79,10 +78,9 @@
     ├── kf-kb-envoy/       # Knowledge Base Envoy
     ├── kf-reverse-spec/   # 存量代码→Spec 逆向
     ├── kf-skill-design-expert/ # Skill 设计
-    ├── kf-skill-monitor/     # 技能调用追踪 + Token成本
+    ├── kf-token-tracker/    # Token全量追踪 + 技能调用链路
     ├── kf-add-skill/         # 技能安装管家
     ├── kf-doc-consistency/   # 文档一致性自检
-    ├── kf-markdown-to-docx-skill/ # MD→DOCX
     ├── kf-scrapling/          # Web 爬虫 + 反反爬
     ├── kf-opencli/            # OpenCLI — 100+ 平台 CLI 数据直取
     ├── kf-grant-research/    # 课题申报研究助手
@@ -109,36 +107,35 @@ claude
 
 ## 常用触发词
 
-| 触发词 | 技能 | 原则 | 自动调用 |
-|--------|------|------|---------|
-| `/go` / `/导航` / `/开始` | kf-go | 快 | — |
-| `/夯 [任务]` | kf-multi-team-compete | 夯 | 自动调用 11 个子技能 |
-| `spec coding` / `写spec文档` | kf-spec | 快 | 自动调用 kf-alignment + kf-model-router |
-| `/对齐` / `说下你的理解` | kf-alignment | 懂 | 被多个技能自动调用 |
-| `/review-graph` | kf-code-review-graph | 省 | 被 `/夯` 自动调用 |
-| `/web-search [问题]` | kf-web-search | 准 | 被 `/夯` agent 按需自动调用 |
-| `/browser-ops` | kf-browser-ops | 测的准 | 被 `/夯` 自动调用 |
-| `/gspowers` | gspowers | 稳 | Pipeline 引擎被 `/夯` 集成 |
-| `/prd-generator` | kf-prd-generator | 快 | 自动调用 kf-alignment |
-| `triple [任务]` | kf-triple-collaboration | 夯 | 轻量版 `/夯` |
-| `模型路由` / `省模式` | kf-model-router | 省 | **全自动**，用户无感 |
-| `Harness 评审` / `五根铁律审计` | kf-skill-design-expert | 稳 | 全路径扫描，评分矩阵 + 缺陷分级 |
-| `/skill-monitor` / `技能监控` / `使用率` / `token成本` | kf-skill-monitor | 准 | 技能调用追踪 + Token成本追踪 |
-| `P图` / `改图` / `修图` / `去水印` | kf-image-editor | 快 | AI 自然语言 P 图，被 `/夯` Stage 2/5 调用 |
-| `摄入文件` / `ingest` / `lint` / `检查知识库` / `更新知识库` | kf-kb-envoy | 准 | Knowledge Base Envoy：raw/ → wiki/ → CLAUDE.md 知识库管理 |
-| `自动实验` / `ai实验` / `实验跑一夜` / `autoresearch` | kf-autoresearch | 准 | Karpathy 自主 ML 实验：改代码→训练→验证→循环 |
-| `转docx` / `markdown转word` | kf-markdown-to-docx-skill | — | Markdown → DOCX 转换 |
-| `装技能` / `安装技能` / `添加技能` / `搜索技能` | kf-add-skill | 稳 | 技能安装管家：搜索→安装→文档全同步→一致性检查 |
-| `一致性` / `文档自检` / `doc consistency` | kf-doc-consistency | 准/省 | 文档全局一致性自检，被 kf-add-skill 自动调用 |
-| `爬虫` / `抓取` / `scrape` / `反反爬` | kf-scrapling | 准 | Web 爬虫，被 `/夯` Stage 1/2/3 按需调用 |
-| `热榜` / `平台抓取` / `CLI数据` / `opencli` | kf-opencli | 准 | 100+ 平台 CLI 数据直取，被 `/夯` Stage 1/2/3 按需调用 |
-| `论文` / `查论文` / `学术搜索` / `文献` | asta-skill | 准 | Semantic Scholar 学术论文搜索，需配置 ASTA_API_KEY |
-| `提取` / `结构化提取` / `parse` / `langextract` | kf-langextract | 准 | LLM 驱动结构化提取：非结构化文本→JSON/CSV/YAML，source grounding |
-| `逆向` / `存量代码` / `代码扫描` / `逆向工程` | kf-reverse-spec | 准/省 | 存量代码→Spec/文档 逆向流水线 |
-| `课题申报` / `科研项目` / `国自然` / `研究计划` | kf-grant-research | 准 | 课题申报研究助手：论文搜索→分析→gap→申报材料 |
-| `UI原型` / `原型生成` / `prototype` | kf-ui-prototype-generator | 快 | 被 `/夯` Stage 2/5 自动调用 |
-| `ccp` / `智能调度` / `回调` | claude-code-pro | 省 | Token 高效调度：不 spawn 则省 10K-15K token |
-| `λ` / `lambda` / `!ta ct` / `@v2.0#h` / `agent通信` | lambda-lang | 省 | Agent 间 Lambda 压缩通信，自动注入 |
+| 触发词                                                                 | 技能                      | 原则   | 自动调用                                                          |
+| ---------------------------------------------------------------------- | ------------------------- | ------ | ----------------------------------------------------------------- |
+| `/go` / `/导航` / `/开始`                                        | kf-go                     | 快     | —                                                                |
+| `/夯 [任务]`                                                         | kf-multi-team-compete     | 夯     | 自动调用 11 个子技能                                              |
+| `spec coding` / `写spec文档`                                       | kf-spec                   | 快     | 自动调用 kf-alignment + kf-model-router                           |
+| `/对齐` / `说下你的理解`                                           | kf-alignment              | 懂     | 被多个技能自动调用                                                |
+| `/review-graph`                                                      | kf-code-review-graph      | 省     | 被 `/夯` 自动调用                                               |
+| `/web-search [问题]`                                                 | kf-web-search             | 准     | 被 `/夯` agent 按需自动调用                                     |
+| `/browser-ops`                                                       | kf-browser-ops            | 测的准 | 被 `/夯` 自动调用                                               |
+| `/gspowers`                                                          | gspowers                  | 稳     | Pipeline 引擎被 `/夯` 集成                                      |
+| `/prd-generator`                                                     | kf-prd-generator          | 快     | 自动调用 kf-alignment                                             |
+| `triple [任务]`                                                      | kf-triple-collaboration   | 夯     | 轻量版 `/夯`                                                    |
+| `模型路由` / `省模式`                                              | kf-model-router           | 省     | **全自动**，用户无感                                        |
+| `Harness 评审` / `五根铁律审计`                                    | kf-skill-design-expert    | 稳     | 全路径扫描，评分矩阵 + 缺陷分级                                   |
+| `/token-tracker` / `/skill-monitor` / `技能监控` / `使用率` / `token成本` | kf-token-tracker | 准     | Token全量追踪 + 技能调用追踪 + 成本估算                           |
+| `P图` / `改图` / `修图` / `去水印`                             | kf-image-editor           | 快     | AI 自然语言 P 图，被 `/夯` Stage 2/5 调用                       |
+| `摄入文件` / `ingest` / `lint` / `检查知识库` / `更新知识库` | kf-kb-envoy               | 准     | Knowledge Base Envoy：知识库相关/raw/ → 知识库相关/wiki/ → CLAUDE.md 知识库管理       |
+| `自动实验` / `ai实验` / `实验跑一夜` / `autoresearch`          | kf-autoresearch           | 准     | Karpathy 自主 ML 实验：改代码→训练→验证→循环                   |
+| `装技能` / `安装技能` / `添加技能` / `搜索技能`                | kf-add-skill              | 稳     | 技能安装管家：搜索→安装→文档全同步→一致性检查                  |
+| `一致性` / `文档自检` / `doc consistency`                        | kf-doc-consistency        | 准/省  | 文档全局一致性自检，被 kf-add-skill 自动调用                      |
+| `爬虫` / `抓取` / `scrape` / `反反爬`                          | kf-scrapling              | 准     | Web 爬虫，被 `/夯` Stage 1/2/3 按需调用                         |
+| `热榜` / `平台抓取` / `CLI数据` / `opencli`                    | kf-opencli                | 准     | 100+ 平台 CLI 数据直取，被 `/夯` Stage 1/2/3 按需调用           |
+| `论文` / `查论文` / `学术搜索` / `文献`                        | asta-skill                | 准     | Semantic Scholar 学术论文搜索，需配置 ASTA_API_KEY                |
+| `提取` / `结构化提取` / `parse` / `langextract`                | kf-langextract            | 准     | LLM 驱动结构化提取：非结构化文本→JSON/CSV/YAML，source grounding |
+| `逆向` / `存量代码` / `代码扫描` / `逆向工程`                  | kf-reverse-spec           | 准/省  | 存量代码→Spec/文档 逆向流水线                                    |
+| `课题申报` / `科研项目` / `国自然` / `研究计划`                | kf-grant-research         | 准     | 课题申报研究助手：论文搜索→分析→gap→申报材料                   |
+| `UI原型` / `原型生成` / `prototype`                              | kf-ui-prototype-generator | 快     | 被 `/夯` Stage 2/5 自动调用                                     |
+| `ccp` / `智能调度` / `回调`                                      | claude-code-pro           | 省     | Token 高效调度：不 spawn 则省 10K-15K token                       |
+| `λ` / `lambda` / `!ta ct` / `@v2.0#h` / `agent通信`         | lambda-lang               | 省     | Agent 间 Lambda 压缩通信，自动注入                                |
 
 ## 自动调用链速览
 
@@ -169,16 +166,16 @@ claude
 
 ## 全局依赖
 
-| 工具 | 安装命令 | 说明 |
-|------|---------|------|
-| Claude Code | `irm https://claude.ai/install.ps1 \| iex` | 主界面 |
-| Node.js | `winget install OpenJS.NodeJS.LTS` | 运行环境 |
-| ruflo | `npm install -g ruflo` | 多 Agent + 记忆 |
-| lean-ctx | 见 INSTALL.md | 上下文压缩引擎，90+ 压缩模式 + CCP |
-| OpenCLI | `npm install -g @jackwener/opencli` | 100+ 平台 CLI 数据提取 |
-| context-mode | `npm install -g context-mode` | 会话连续性 + 压缩存活（MCP + hooks） |
-| claude-mem | `npm install -g claude-mem && claude-mem install` | 跨会话持久记忆（SQLite + Chroma 向量库），自动记忆工具调用和决策 |
-| uv | `npm install -g uv` 或 `curl -LsSf https://astral.sh/uv/install.sh | sh` | Python 包管理器（kf-autoresearch 依赖） |
+| 工具         | 安装命令                                                             | 说明                                                             |
+| ------------ | -------------------------------------------------------------------- | ---------------------------------------------------------------- |
+| Claude Code  | `irm https://claude.ai/install.ps1 \| iex`                          | 主界面                                                           |
+| Node.js      | `winget install OpenJS.NodeJS.LTS`                                 | 运行环境                                                         |
+| ruflo        | `npm install -g ruflo`                                             | 多 Agent + 记忆                                                  |
+| lean-ctx     | 见 INSTALL.md                                                        | 上下文压缩引擎，90+ 压缩模式 + CCP                               |
+| OpenCLI      | `npm install -g @jackwener/opencli`                                | 100+ 平台 CLI 数据提取                                           |
+| context-mode | `npm install -g context-mode`                                      | 会话连续性 + 压缩存活（MCP + hooks）                             |
+| claude-mem   | `npm install -g claude-mem && claude-mem install`                  | 跨会话持久记忆（SQLite + Chroma 向量库），自动记忆工具调用和决策 |
+| uv           | `npm install -g uv` 或 `curl -LsSf https://astral.sh/uv/install.sh | sh`                                                              |
 
 ## 项目隔离
 
@@ -188,10 +185,10 @@ claude
 
 ## 更多信息
 
-- [AICoding原则.docx](docs/AICoding原则.docx) — 修炼总纲
-- [AICoding.md](AICoding.md) — 单文件入口（给 AI 看）
-- [INSTALL.md](docs/INSTALL.md) — AI 安装指南
-- [MANUAL.md](docs/MANUAL.md) — 用户使用手册
+- [AICoding原则.docx](知识库相关/docs/AICoding原则.docx) — 修炼总纲
+- [安装配置文档相关/AICoding.md](安装配置文档相关/AICoding.md) — 单文件入口（给 AI 看）
+- [INSTALL.md](知识库相关/docs/INSTALL.md) — AI 安装指南
+- [MANUAL.md](知识库相关/docs/MANUAL.md) — 用户使用手册
 - [memory/MEMORY.md](memory/MEMORY.md) — 跨会话记忆索引
 - [memory/harness-audit-history.md](memory/harness-audit-history.md) — Harness 评审历史
 
@@ -201,3 +198,63 @@ claude
 # 全路径五根铁律审计
 node .claude/helpers/harness-audit.cjs --all --verbose
 ```
+
+
+
+# kf-kb-envoy— LLM Wiki Schema
+
+## 问答行为（自动触发）
+
+当用户问问题时，按以下流程处理：
+
+```
+用户问题
+  ↓
+判断是否涉及知识库领域
+  ↓
+是 → 优先查 知识库相关/wiki/（先读 concepts/index.md → 再读相关页面）
+否 → 正常回答
+  ↓
+需要更多细节 → 再读 知识库相关/raw/ 源文件
+```
+
+## 知识库结构
+
+```
+知识库相关/raw/      ← 不可变的原始文件（人类放入，LLM 只读）
+知识库相关/wiki/     ← LLM 生成和维护的结构化知识库
+```
+
+### 知识库相关/raw/ 目录规则
+
+- **放入即不可修改**：文件放入后不能编辑，只增不删
+- **支持格式**：.md, .txt, .docx, .pdf, .xlsx, .pptx, .jpg
+
+### 知识库相关/wiki/ 目录规则
+
+| 子目录     | 内容       | 命名规范             |
+| ---------- | ---------- | -------------------- |
+| concepts/  | 概念页     | 英文名词，一页一概念 |
+| entities/  | 实体页     | 实体名称             |
+| processes/ | 流程文档   | 动词开头             |
+| rules/     | 决策规则   | 名词性               |
+| meta/      | 元信息     | 与内容对应           |
+| sources/   | 源文档摘要 | `s_文件名.md` 前缀 |
+
+### 知识库相关/wiki/ 写作规范
+
+1. **每个概念一个独立 .md 文件**
+2. **首段 = 一句话摘要**
+3. **使用 `[[wiki-link]]` 交叉引用**
+4. **断言标注来源**：`来源: 知识库相关/raw/...`
+5. **发现矛盾时**：更新相关页面，注明处理结论
+
+## 日常操作
+
+| 你说                           | 我会做                                                   |
+| ------------------------------ | -------------------------------------------------------- |
+| 问问题（涉及知识库领域）       | 自动查 知识库相关/wiki/ 再回答                                      |
+| "摄入这个文件" / "ingest"      | 读 知识库相关/raw/ 新文件 → 更新 wiki 页 → 更新 index → 追加 log |
+| "做 lint 检查" / "检查知识库"  | 扫描 知识库相关/wiki/ 找矛盾页/孤立页/过期断言/死链                 |
+| "做分析报告" / "关于 X 的报告" | 查 知识库相关/wiki/ + 知识库相关/raw/ → 生成结构化分析报告                    |
+| "更新知识库"                   | 扫描 知识库相关/raw/ 新文件做 ingest → 跑 lint → 报告状态         |

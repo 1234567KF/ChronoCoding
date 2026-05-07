@@ -103,7 +103,7 @@
 
 ---
 
-## 4. docs/INSTALL.md
+## 4. 知识库相关/docs/INSTALL.md
 
 ### 4a. 全局依赖表（如果新技能需要新依赖）
 
@@ -131,7 +131,7 @@ ls .claude/skills/<skill-name>/SKILL.md    # 应存在
 
 ---
 
-## 5. docs/MANUAL.md
+## 5. 知识库相关/docs/MANUAL.md
 
 ### 5a. 功能触发速查表
 

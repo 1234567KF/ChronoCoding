@@ -140,7 +140,7 @@ if [ "$SKIP_PIPELINE" = false ]; then
     echo ""
     echo -e "${YELLOW}[4/5] 安装 Pipeline 扩展...${NC}"
 
-    PIPELINE_SOURCE="$PROJECT_ROOT/gspowers-pipeline-patch"
+    PIPELINE_SOURCE="$PROJECT_ROOT/.claude/skills/kf-gspowers-pipeline-patch"
     PIPELINE_TARGET="$SCRIPT_DIR/skills/gspowers/references"
 
     if [ -d "$PIPELINE_SOURCE" ]; then

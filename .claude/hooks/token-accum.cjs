@@ -89,7 +89,7 @@ function readTokenTotals(transcriptPath) {
 }
 
 // ── Push token totals + activity message to monitor ──
-async function pushToMonitor(sessionId, totals, isNewMessage) {
+async function pushToMonitor(sessionId, totals, isNewMessage, prevTokens) {
   try {
     const health = await fetch(`${MONITOR_URL}/api/health`);
     if (!health.ok) return;
@@ -98,7 +98,12 @@ async function pushToMonitor(sessionId, totals, isNewMessage) {
   const now = new Date().toISOString();
   const cost = totals.cost;
 
-  // 1. Add an activity message (0-token, for the detail log timeline)
+  // 1. Compute delta from previous run — these are the REAL new tokens since last POST
+  //    This makes per-message token counts meaningful in the dashboard.
+  const deltaIn = prevTokens ? Math.max(0, totals.totalIn - (prevTokens.in || 0)) : totals.totalIn;
+  const deltaOut = prevTokens ? Math.max(0, totals.totalOut - (prevTokens.out || 0)) : totals.totalOut;
+  const deltaCache = prevTokens ? Math.max(0, totals.totalCache - (prevTokens.cache || 0)) : totals.totalCache;
+
   if (isNewMessage) {
     try {
       await fetch(`${MONITOR_URL}/api/records`, {
@@ -111,9 +116,9 @@ async function pushToMonitor(sessionId, totals, isNewMessage) {
           messages: [{
             role: 'assistant',
             content: `${(totals.totalIn / 1000).toFixed(0)}K in / ${(totals.totalOut / 1000).toFixed(0)}K out | 缓存${(totals.totalCache / 1000).toFixed(0)}K`,
-            input_tokens: 0,
-            output_tokens: 0,
-            cache_hit: 0,
+            input_tokens: deltaIn,
+            output_tokens: deltaOut,
+            cache_hit: deltaCache,
             created_at: now,
           }],
           skillCalls: [],
@@ -227,7 +232,7 @@ async function cmdRecord() {
     const deltaIn = prevTokens ? Math.abs(totals.totalIn - prevTokens.in) : Infinity;
     const isNewMessage = deltaIn > 500;
 
-    await pushToMonitor(sessionId, totals, isNewMessage);
+    await pushToMonitor(sessionId, totals, isNewMessage, prevTokens);
   }
 
   fs.writeFileSync(PATH_CACHE, JSON.stringify({

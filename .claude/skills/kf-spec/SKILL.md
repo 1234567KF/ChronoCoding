@@ -30,7 +30,7 @@ Gather project context automatically:
 2. If historical spec documents exist, read them to avoid duplicate definitions
 3. Inspect the project's module structure to understand layering and naming conventions
 4. If user provides a UI prototype via `@file`, load it as optional visual design input — used in Step 1 for understanding page structure and interaction intent
-5. **Check if `mvp技术栈.md` exists** in `docs/` — if found, it defines the recommended MVP tech stack
+5. **Check if `mvp技术栈.md` exists** in `知识库相关/docs/` — if found, it defines the recommended MVP tech stack
 6. **If user provides an `.xlsx` file**: Detect whether it is an SDD 需求采集 Excel template. Detection criteria:
    - Contains `ReadMe` Sheet with `SDD需求采集模板` in first row
    - Contains `Sheet0-AI指令配置` or `Sheet1-项目基础信息`
@@ -57,7 +57,7 @@ Gather project context automatically:
 
 在开始需求澄清之前，先确认技术栈模式。
 
-查阅 `docs/mvp技术栈.md`（如存在），了解推荐的 MVP 技术栈。
+查阅 `知识库相关/docs/mvp技术栈.md`（如存在），了解推荐的 MVP 技术栈。
 
 询问用户：
 
@@ -469,4 +469,4 @@ Step 5 确认 Spec v1.0 后 MUST 将摘要写入 `memory/spec-generation-log.md`
 | `assets/tasks-template.md` | Step 6 | Task list template |
 | `assets/task-decomposition-example.md` | Step 6 | Task decomposition reference example |
 | `assets/sdd-excel-mapping-guide.md` | Context Collection | SDD Excel Sheet → Spec/PRD 映射指南 |
-| `docs/mvp技术栈.md` | Step 0 | MVP 推荐技术栈（如存在） |
+| `知识库相关/docs/mvp技术栈.md` | Step 0 | MVP 推荐技术栈（如存在） |

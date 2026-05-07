@@ -1,12 +1,12 @@
 // Auto-generated proxy - Blue Team refactor
 // Real file: ./hooks/auto-memory-hook.mjs
-import { spawn } from 'child_process';
+// Uses child_process to avoid ESM top-level await require() issue
+import { spawnSync } from 'child_process';
 import { join, dirname } from 'path';
 import { fileURLToPath } from 'url';
-
 const __dirname = dirname(fileURLToPath(import.meta.url));
-const realFile = join(__dirname, 'hooks', 'auto-memory-hook.mjs');
-
-spawn(process.argv[0], [realFile, ...process.argv.slice(2)], {
-  stdio: 'inherit'
-}).on('exit', (code) => process.exit(code ?? 0));
+const result = spawnSync('node', [join(__dirname, 'hooks', 'auto-memory-hook.mjs'), ...process.argv.slice(2)], {
+  stdio: 'inherit',
+  env: { ...process.env },
+});
+process.exit(result.status ?? 0);
