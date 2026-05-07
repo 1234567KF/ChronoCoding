@@ -137,15 +137,75 @@ async function pushToMonitor(sessionId, totals, isNewMessage) {
   } catch {}
 }
 
+// ── Resolve session/transcript from stdin OR disk cache (Windows stdin fallback) ──
+function resolveFromCache() {
+  if (!fs.existsSync(PATH_CACHE)) return null;
+  try {
+    const cached = JSON.parse(fs.readFileSync(PATH_CACHE, 'utf-8'));
+    const tp = cached.transcript_path;
+    if (tp && fs.existsSync(tp)) {
+      return {
+        transcriptPath: tp,
+        sessionId: cached.session_id || '',
+        prevTokens: cached.last_tokens || null,
+      };
+    }
+  } catch {}
+  return null;
+}
+
+function resolveSessionId() {
+  // Try session-state.json (written by monitor-session.cjs start)
+  const statePath = path.join(PROJECT_ROOT, '.claude-flow', 'data', 'session-state.json');
+  if (fs.existsSync(statePath)) {
+    try {
+      const state = JSON.parse(fs.readFileSync(statePath, 'utf-8'));
+      if (state.sessionId) return state.sessionId;
+    } catch {}
+  }
+  // Fallback: try env vars
+  return process.env.CLAUDE_SESSION_ID || process.env.CLAUDE_FLOW_SESSION_ID || '';
+}
+
+function resolveTranscriptPath(sessionId) {
+  // Infer from known Claude Code transcript location
+  const home = process.env.USERPROFILE || process.env.HOME || '';
+  const projectName = path.basename(PROJECT_ROOT);
+  const inferred = path.join(home, '.claude', 'projects', `D--${projectName}`, `${sessionId}.jsonl`);
+  if (fs.existsSync(inferred)) return inferred;
+  return null;
+}
+
 // ── record: PostToolUse — 保存 transcript_path + 推送 token ──
 async function cmdRecord() {
+  // 1. Try stdin (works on macOS/Linux, unreliable on Windows)
   const raw = await readStdin();
-  if (!raw.trim()) process.exit(0);
-  let input;
-  try { input = JSON.parse(raw); } catch { process.exit(0); }
+  let input = {};
+  try { if (raw.trim()) input = JSON.parse(raw); } catch {}
 
-  const transcriptPath = input.transcript_path;
+  let transcriptPath = input.transcript_path || '';
+  let sessionId = input.session_id || '';
+
+  // 2. Fallback: read from disk cache (Windows stdin workaround)
+  if (!transcriptPath || !fs.existsSync(transcriptPath)) {
+    const cached = resolveFromCache();
+    if (cached) {
+      transcriptPath = cached.transcriptPath;
+      if (!sessionId) sessionId = cached.sessionId;
+    }
+  }
+
+  // 3. Fallback: resolve session ID from disk/env
+  if (!sessionId) sessionId = resolveSessionId();
+
+  // 4. Fallback: infer transcript path from session ID + known location
+  if ((!transcriptPath || !fs.existsSync(transcriptPath)) && sessionId) {
+    const inferred = resolveTranscriptPath(sessionId);
+    if (inferred) transcriptPath = inferred;
+  }
+
   if (!transcriptPath || !fs.existsSync(transcriptPath)) process.exit(0);
+  if (!sessionId) process.exit(0);
 
   const dir = path.dirname(PATH_CACHE);
   if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
@@ -161,7 +221,6 @@ async function cmdRecord() {
 
   // Read cumulative tokens from transcript
   const totals = readTokenTotals(transcriptPath);
-  const sessionId = input.session_id || '';
 
   if (totals && sessionId && totals.count > 0) {
     // Only add a message when tokens changed by >500

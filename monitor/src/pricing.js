@@ -28,4 +28,4 @@ function calcCost(model, tokensIn, tokensOut, cacheHit) {
   };
 }
 
-module.exports = { MODEL_PRICES, calcCost };
+module.exports = { MODEL_PRICES, MODEL_ALIASES, calcCost };

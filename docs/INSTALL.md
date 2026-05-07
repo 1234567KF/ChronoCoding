@@ -1241,6 +1241,7 @@ D:\your-project\
 | `逆向` / `存量代码` / `代码扫描` / `逆向工程` | 存量代码→Spec/文档 逆向流水线 | kf-reverse-spec |
 | `一致性` / `文档自检` / `doc consistency` | 文档全局一致性自检 | kf-doc-consistency |
 | `P图` / `改图` / `修图` / `去水印` | AI 自然语言 P 图 | kf-image-editor |
+| `摄入文件` / `ingest` / `lint` / `检查知识库` / `更新知识库` | Knowledge Base Envoy：知识库全生命周期管理 | kf-kb-envoy |
 | `自动实验` / `ai实验` / `实验跑一夜` / `autoresearch` | Karpathy 自主 ML 实验：改模型→训练→验证→循环 | kf-autoresearch |
 | `spec coding` / `写spec文档` | Spec 驱动开发 | kf-spec |
 | `/go` / `/导航` / `/开始` | 工作流导航 | kf-go |

@@ -19,6 +19,7 @@ const PROJECT_ROOT = require('path').resolve(__dirname, '..', '..');
 const STATE_PATH = require('path').join(PROJECT_ROOT, '.claude-flow', 'data', 'session-state.json');
 const TRACE_PATH = require('path').join(PROJECT_ROOT, '.claude-flow', 'data', 'skill-traces.jsonl');
 const TRANSCRIPT_CACHE = require('path').join(PROJECT_ROOT, '.claude-flow', 'data', 'transcript-path.json');
+const PENDING_DIR = require('path').join(PROJECT_ROOT, '.claude-flow', 'data', 'pending-sessions');
 const fs = require('fs');
 const path = require('path');
 
@@ -91,32 +92,46 @@ async function cmdStart() {
   // Write JSONL trace for watcher (兜底，不依赖 POST)
   writeTrace({ sessionId, model, phase: 'start', note: '会话开始' });
 
-  // Push to monitor (fire & forget)
+  // Push to monitor (fire & forget), save pending on failure
+  let pushed = false;
   try {
     const health = await fetch(`${MONITOR_URL}/api/health`);
-    if (!health.ok) return;
-  } catch { return; }
+    if (health.ok) {
+      await fetch(`${MONITOR_URL}/api/records`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          sessionId,
+          title: `会话 ${sessionId.slice(0, 16)}`,
+          model,
+          messages: [{
+            role: 'assistant',
+            content: '会话开始',
+            input_tokens: 0,
+            output_tokens: 0,
+            cache_hit: 0,
+            created_at: now,
+          }],
+          skillCalls: [],
+        }),
+      });
+      pushed = true;
+    }
+  } catch {}
 
-  try {
-    await fetch(`${MONITOR_URL}/api/records`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
+  // Fallback: save to pending-sessions/ so monitor can import on startup
+  if (!pushed) {
+    try {
+      if (!fs.existsSync(PENDING_DIR)) fs.mkdirSync(PENDING_DIR, { recursive: true });
+      fs.writeFileSync(path.join(PENDING_DIR, `${sessionId}.json`), JSON.stringify({
         sessionId,
         title: `会话 ${sessionId.slice(0, 16)}`,
         model,
-        messages: [{
-          role: 'assistant',
-          content: '会话开始',
-          input_tokens: 0,
-          output_tokens: 0,
-          cache_hit: 0,
-          created_at: now,
-        }],
-        skillCalls: [],
-      }),
-    });
-  } catch {}
+        startedAt: now,
+        phase: 'start',
+      }, null, 2), 'utf-8');
+    } catch {}
+  }
 }
 
 async function cmdEnd() {
@@ -173,24 +188,47 @@ async function cmdEnd() {
   // Write JSONL trace for watcher (兜底，不依赖 POST)
   writeTrace({ sessionId, model, phase: 'end', note: '会话结束', tokensIn, tokensOut, cacheRead });
 
-  // Push final totals + cost via PATCH (不重复追加消息)
+  // Push final totals + cost via PATCH, save pending on failure
+  let pushed = false;
   try {
     const health = await fetch(`${MONITOR_URL}/api/health`);
-    if (!health.ok) return;
-  } catch { return; }
+    if (health.ok) {
+      await fetch(`${MONITOR_URL}/api/conversations/${encodeURIComponent(sessionId)}/tokens`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          total_input_tokens: tokensIn,
+          total_output_tokens: tokensOut,
+          total_cost: cost ? cost.total_cost : 0,
+          ended_at: now,
+        }),
+      });
+      pushed = true;
+    }
+  } catch {}
 
-  try {
-    await fetch(`${MONITOR_URL}/api/conversations/${encodeURIComponent(sessionId)}/tokens`, {
-      method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
+  // Fallback: save end data to pending-sessions/
+  if (!pushed) {
+    try {
+      if (!fs.existsSync(PENDING_DIR)) fs.mkdirSync(PENDING_DIR, { recursive: true });
+      const pendingPath = path.join(PENDING_DIR, `${sessionId}.json`);
+      let pending = {};
+      if (fs.existsSync(pendingPath)) {
+        try { pending = JSON.parse(fs.readFileSync(pendingPath, 'utf-8')); } catch {}
+      }
+      Object.assign(pending, {
+        sessionId,
+        model: model || pending.model,
+        startedAt: startedAt || pending.startedAt,
         total_input_tokens: tokensIn,
         total_output_tokens: tokensOut,
         total_cost: cost ? cost.total_cost : 0,
         ended_at: now,
-      }),
-    });
-  } catch {}
+        phase: 'end',
+      });
+      fs.writeFileSync(pendingPath, JSON.stringify(pending, null, 2), 'utf-8');
+    } catch {}
+  }
 }
 
 /**

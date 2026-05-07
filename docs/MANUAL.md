@@ -97,6 +97,7 @@ claude
 | `模型路由` / `省模式`     | 🆕 模型智能路由                   | kf-model-router      |
 | `spec coding`             | 🆕 Spec 驱动开发                   | kf-spec       |
 | `P图` / `改图` / `修图` / `去水印` | 🆕 AI 自然语言 P 图，无需打开编辑器  | kf-image-editor |
+| `摄入文件` / `ingest` / `lint` / `检查知识库` / `更新知识库` | 🆕 知识库全生命周期管理（raw/ → wiki/ → CLAUDE.md） | kf-kb-envoy |
 | `一致性` / `文档自检` / `doc consistency` | 🆕 文档全局一致性自检，新增技能后自动触发 | kf-doc-consistency |
 | `逆向` / `存量代码` / `代码扫描` / `逆向工程` | 🆕 存量代码→Spec/文档 逆向流水线 | kf-reverse-spec |
 | `自动实验` / `ai实验` / `实验跑一夜` / `autoresearch` | 🆕 Karpathy 自主 ML 实验：AI 整夜跑实验 | kf-autoresearch |
@@ -167,6 +168,7 @@ Agent 共享（在同一个项目内的 agents 共享记忆）
     │       ├── kf-reverse-spec/  # 存量代码→Spec 逆向
 │       ├── kf-ui-prototype-generator/ # UI 原型
 │       ├── kf-image-editor/      # AI 自然语言 P 图
+│       ├── kf-kb-envoy/          # Knowledge Base Envoy
     │       ├── kf-add-skill/      # 技能安装管家
 │       ├── kf-doc-consistency/   # 文档一致性自检
 │       ├── kf-go/                # 工作流导航

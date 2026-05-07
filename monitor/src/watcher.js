@@ -17,6 +17,7 @@ function resolveModel(raw) {
 const PROJECT_ROOT = path.resolve(__dirname, '..', '..');
 const TRACE_PATH = path.join(PROJECT_ROOT, '.claude-flow', 'data', 'skill-traces.jsonl');
 const SESSION_STATE_PATH = path.join(PROJECT_ROOT, '.claude-flow', 'data', 'session-state.json');
+const PENDING_DIR = path.join(PROJECT_ROOT, '.claude-flow', 'data', 'pending-sessions');
 const CURSOR_PATH = path.join(PROJECT_ROOT, '.claude-flow', 'data', 'watcher-cursor.json');
 
 /* ---------- cursor ---------- */
@@ -147,17 +148,67 @@ function importSessionState() {
 /* ---------- start watcher ---------- */
 let _interval = null;
 
+function importPendingSessions() {
+  if (!fs.existsSync(PENDING_DIR)) return 0;
+  try {
+    const db = getDB();
+    const files = fs.readdirSync(PENDING_DIR).filter(f => f.endsWith('.json'));
+    let imported = 0;
+    for (const file of files) {
+      try {
+        const data = JSON.parse(fs.readFileSync(path.join(PENDING_DIR, file), 'utf-8'));
+        if (!data.sessionId) continue;
+        const existing = db.prepare('SELECT id FROM conversations WHERE id = ?').get(data.sessionId);
+        if (!existing) {
+          db.prepare(
+            `INSERT INTO conversations (id, session_id, title, model, started_at, total_input_tokens, total_output_tokens, total_cost, ended_at)
+             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`
+          ).run(
+            data.sessionId, data.sessionId,
+            data.title || `会话 ${data.sessionId.slice(0, 16)}`,
+            data.model || 'unknown',
+            data.startedAt || new Date().toISOString(),
+            data.total_input_tokens || 0,
+            data.total_output_tokens || 0,
+            data.total_cost || 0,
+            data.ended_at || null
+          );
+          console.log(`[watcher] Imported pending session: ${data.sessionId}`);
+        } else if (data.phase === 'end') {
+          db.prepare(
+            `UPDATE conversations SET total_input_tokens=?, total_output_tokens=?, total_cost=?, ended_at=? WHERE id=?`
+          ).run(data.total_input_tokens || 0, data.total_output_tokens || 0, data.total_cost || 0, data.ended_at || null, data.sessionId);
+          console.log(`[watcher] Updated pending session: ${data.sessionId}`);
+        }
+        fs.unlinkSync(path.join(PENDING_DIR, file));
+        imported++;
+      } catch (e) {
+        console.error(`[watcher] Pending sync error for ${file}: ${e.message}`);
+      }
+    }
+    return imported;
+  } catch (e) {
+    console.error(`[watcher] Pending sync error: ${e.message}`);
+    return 0;
+  }
+}
+
 function startWatcher(intervalMs = 10000) {
   // import once immediately
   importSessionState();
   importTraces();
+  importPendingSessions();
 
   _interval = setInterval(() => {
     try {
       importSessionState();
       const n = importTraces();
+      const p = importPendingSessions();
       if (n > 0) {
         console.log(`[watcher] imported ${n} trace(s) from skill-traces.jsonl`);
+      }
+      if (p > 0) {
+        console.log(`[watcher] imported ${p} pending session(s)`);
       }
     } catch (err) {
       console.error(`[watcher] error: ${err.message}`);

@@ -44,6 +44,7 @@ router.get('/stats/skills', (req, res) => {
      JOIN messages m ON sc.message_id = m.id
      JOIN conversations c ON m.conversation_id = c.id
      WHERE c.started_at >= ?
+       AND sc.skill_type != 'subagent'
      GROUP BY sc.skill_name
      ORDER BY call_count DESC`
   ).all(since);

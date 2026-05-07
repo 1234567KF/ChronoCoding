@@ -3,7 +3,9 @@
  * monitor-hooks — 技能调用数据推送到 Monitor Dashboard
  *
  * Usage (CLI hook):
- *   node monitor-hooks.cjs push              # 推最新一条 skill-trace 到 monitor
+ *   node monitor-hooks.cjs start              # 记录 subagent 开始 trace
+ *   node monitor-hooks.cjs end                # 记录 subagent 结束 trace
+ *   node monitor-hooks.cjs push               # 推最新一条 skill-trace 到 monitor
  *   node monitor-hooks.cjs push --all         # 推所有未推送的 trace
  *   node monitor-hooks.cjs status             # 检查 monitor 连接
  *   node monitor-hooks.cjs replay <file>      # 从 JSONL 文件重放
@@ -40,9 +42,10 @@ function writeCursor(offset) {
 
 // ── Push to monitor ──────────────────────────────────────────────────
 async function pushTrace(entry) {
+  const agentLabel = entry.phase ? `${entry.agent || entry.skill} (${entry.phase})` : (entry.skill || 'unknown');
   const record = {
     sessionId: entry.trace_id || `trace_${Date.now()}`,
-    title: entry.skill || 'unknown',
+    title: agentLabel,
     model: entry.model_used || 'unknown',
     messages: [{
       role: 'assistant',
@@ -152,6 +155,120 @@ async function cmdReplay(filePath) {
   process.exit(0);
 }
 
+// ── Subagent lifecycle traces ──────────────────────────────────────────
+
+/**
+ * parseHookStdin — 从 hook stdin 解析 subagent 信息
+ */
+function parseStdin() {
+  try {
+    const buf = require('fs').readFileSync(0, 'utf-8').trim();
+    if (buf) return JSON.parse(buf);
+  } catch {}
+  return {};
+}
+
+/**
+ * getCurrentModel — 获取当前实际使用的模型名
+ * 优先级：1) ~/.claude.json lastModelUsage（最准确，/model 切换后生效）
+ *         2) settings.json model（备选，可能过期）
+ *         3) 环境变量 CLAUDE_MODEL
+ */
+function getCurrentModel() {
+  // 1. 从 ~/.claude.json 读取实际模型使用记录
+  try {
+    const home = require('os').homedir();
+    const claudeConfigPath = path.join(home, '.claude.json');
+    if (fs.existsSync(claudeConfigPath)) {
+      const cfg = JSON.parse(fs.readFileSync(claudeConfigPath, 'utf-8'));
+      const projects = cfg.projects || {};
+      // 匹配当前项目
+      for (const [key, val] of Object.entries(projects)) {
+        if (PROJECT_ROOT.endsWith(key) || key.includes(PROJECT_ROOT.replace(/[:/\\]/g, '').slice(-20))) {
+          const usage = val.lastModelUsage;
+          if (usage) {
+            const ids = Object.keys(usage);
+            if (ids.length > 0) {
+              let latest = 0, latestId = ids[0];
+              for (const id of ids) {
+                const ts = usage[id]?.lastUsedAt ? new Date(usage[id].lastUsedAt).getTime() : 0;
+                if (ts > latest) { latest = ts; latestId = id; }
+              }
+              if (latest > 0) return latestId;
+            }
+          }
+          break;
+        }
+      }
+    }
+  } catch {}
+
+  // 2. 从 settings.json 读取（备选）
+  try {
+    const settingsPath = path.join(PROJECT_ROOT, '.claude', 'settings.json');
+    if (fs.existsSync(settingsPath)) {
+      const s = JSON.parse(fs.readFileSync(settingsPath, 'utf-8'));
+      return s.model || null;
+    }
+  } catch {}
+
+  // 3. 环境变量
+  return process.env.CLAUDE_MODEL || null;
+}
+
+function writeTrace({ phase, agent, team, model, note }) {
+  try {
+    const agentName = agent || process.env.CLAUDE_AGENT_NAME || 'subagent';
+    const ts = Date.now();
+    const dir = require('path').dirname(TRACE_PATH);
+    if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+    const entry = {
+      trace_id: `sa_${agentName}_${ts}`,
+      span_id: `sa_${phase}_${ts}`,
+      timestamp: new Date().toISOString(),
+      agent: agentName,
+      team: team || process.env.CLAUDE_TEAM_NAME || 'unknown',
+      skill: agentName,             // 使用 agent 真实名称（如 red-team），而非硬编码 subagent-start
+      skill_type: 'subagent',       // 标记为生命周期事件，区别于真实技能调用
+      trigger: 'hook',
+      call_level: 0,
+      phase,                        // 'start' 或 'end'
+      result: phase === 'end' ? 'success' : 'running',
+      duration_ms: 0,
+      model_used: model || getCurrentModel() || 'unknown',  // 从 ~/.claude.json 读实际模型
+      tokens_in: 0,
+      tokens_out: 0,
+      cache_hit: 0,
+      note: note || `${phase} subagent: ${agentName}`,
+    };
+    fs.appendFileSync(TRACE_PATH, JSON.stringify(entry) + '\n');
+  } catch {}
+}
+
+function cmdStart() {
+  const input = parseStdin();
+  writeTrace({
+    phase: 'start',
+    agent: input.agent || input.name,
+    team: input.team,
+    model: input.model,
+    note: input.note || input.title || `subagent ${(input.agent || input.name || '').slice(0, 20)} 开始`,
+  });
+  process.exit(0);
+}
+
+function cmdEnd() {
+  const input = parseStdin();
+  writeTrace({
+    phase: 'end',
+    agent: input.agent || input.name,
+    team: input.team,
+    model: input.model,
+    note: input.note || input.title || `subagent ${(input.agent || input.name || '').slice(0, 20)} 结束`,
+  });
+  process.exit(0);
+}
+
 // ── Main ─────────────────────────────────────────────────────────────
 const cmd = process.argv[2];
 const args = process.argv.slice(3);
@@ -159,6 +276,12 @@ const args = process.argv.slice(3);
 process.exitCode = 0;
 (async () => {
   switch (cmd) {
+    case 'start':
+      cmdStart();
+      break;
+    case 'end':
+      cmdEnd();
+      break;
     case 'push':
       await cmdPush(args.includes('--all'));
       break;
@@ -169,9 +292,11 @@ process.exitCode = 0;
       await cmdReplay(args[0] || TRACE_PATH);
       break;
     default:
-      console.log('Usage: node monitor-hooks.cjs <push|status|replay>');
+      console.log('Usage: node monitor-hooks.cjs <start|end|push|status|replay>');
+      console.log('  start        Record subagent start trace');
+      console.log('  end          Record subagent end trace');
       console.log('  push         Push latest pending traces to monitor');
-    console.log('  push --all   Push ALL traces (reset cursor)');
+      console.log('  push --all   Push ALL traces (reset cursor)');
       console.log('  status       Check monitor connection and trace count');
       console.log('  replay <file> Replay traces from a JSONL file');
       process.exit(0);

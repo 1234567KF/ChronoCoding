@@ -27,6 +27,7 @@
 | `kf-triple-collaboration` | triple | 夯 | 内部 spawn（轻量版 `/夯`） | 三方协作评审 |
 | `kf-ui-prototype-generator` | — | 快 | 被 `/夯` Stage 2/5 自动调用 | UI 原型 HTML 生成 |
 | `kf-image-editor` | — | 快 | 被 `/夯` Stage 2/5 自动调用 | AI 自然语言 P 图，Nano Banana MCP |
+| `kf-kb-envoy` | — | 准 | 独立 | Knowledge Base Envoy：raw/ → wiki/ → CLAUDE.md 知识库全生命周期管理 |
 | `kf-skill-design-expert` | — | 稳 | 独立，包含 Harness Engineering 评审体系 | Skill 设计专家 + 五根铁律审计 |
 | `kf-skill-monitor` | `/skill-monitor` | 准 | 被 `/夯` agent 按需自动调用 | 技能调用追踪 + Token成本追踪 |
 | `kf-doc-consistency` | — | 准/省 | Pipeline + Reviewer，被 kf-add-skill 自动调用 | 文档全局一致性自检 |
@@ -75,6 +76,7 @@
     ├── kf-triple-collaboration/ # 三方协作
     ├── kf-ui-prototype-generator/ # UI 原型
     ├── kf-image-editor/   # AI 自然语言 P 图
+    ├── kf-kb-envoy/       # Knowledge Base Envoy
     ├── kf-reverse-spec/   # 存量代码→Spec 逆向
     ├── kf-skill-design-expert/ # Skill 设计
     ├── kf-skill-monitor/     # 技能调用追踪 + Token成本
@@ -123,6 +125,7 @@ claude
 | `Harness 评审` / `五根铁律审计` | kf-skill-design-expert | 稳 | 全路径扫描，评分矩阵 + 缺陷分级 |
 | `/skill-monitor` / `技能监控` / `使用率` / `token成本` | kf-skill-monitor | 准 | 技能调用追踪 + Token成本追踪 |
 | `P图` / `改图` / `修图` / `去水印` | kf-image-editor | 快 | AI 自然语言 P 图，被 `/夯` Stage 2/5 调用 |
+| `摄入文件` / `ingest` / `lint` / `检查知识库` / `更新知识库` | kf-kb-envoy | 准 | Knowledge Base Envoy：raw/ → wiki/ → CLAUDE.md 知识库管理 |
 | `自动实验` / `ai实验` / `实验跑一夜` / `autoresearch` | kf-autoresearch | 准 | Karpathy 自主 ML 实验：改代码→训练→验证→循环 |
 | `转docx` / `markdown转word` | kf-markdown-to-docx-skill | — | Markdown → DOCX 转换 |
 | `装技能` / `安装技能` / `添加技能` / `搜索技能` | kf-add-skill | 稳 | 技能安装管家：搜索→安装→文档全同步→一致性检查 |

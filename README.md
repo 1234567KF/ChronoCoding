@@ -17,7 +17,7 @@
   <img src="assets/posters/宣传海报_浅色.png" alt="AI编程智驾 宣传海报" width="900">
 </p>
 
-**AI编程智驾** 是一套完整的 AI 编程工作台，遵循七大原则，集成 Claude Code、gspowers SOP 导航、claude-flow 多 Agent 并行执行，21 个自建 kf- 系列技能覆盖从 PRD 到 Spec 到编码到审查的全链路。
+**AI编程智驾** 是一套完整的 AI 编程工作台，遵循七大原则，集成 Claude Code、gspowers SOP 导航、claude-flow 多 Agent 并行执行，22 个自建 kf- 系列技能覆盖从 PRD 到 Spec 到编码到审查的全链路。
 
 ---
 
@@ -223,6 +223,7 @@ git clone https://github.com/fshaan/gspowers.git ~/.claude/skills/gspowers
 | `热榜` / `平台抓取` / `CLI数据` / `opencli` | 100+ 平台 CLI 数据直取 | kf-opencli |
 | `/browser-ops` | 浏览器自动化测试 | kf-browser-ops |
 | `P图` / `改图` / `修图` / `去水印` | AI 自然语言 P 图 | kf-image-editor |
+| `摄入文件` / `ingest` / `lint` / `检查知识库` / `更新知识库` | Knowledge Base Envoy：知识库全生命周期管理 | kf-kb-envoy |
 | `转docx` / `markdown转word` | Markdown → DOCX 转换 | kf-markdown-to-docx-skill |
 | `Harness 评审` / `五根铁律审计` | Skill 质量审计 | kf-skill-design-expert |
 | `/skill-monitor` / `技能监控` / `使用率` / `token成本` | 技能调用追踪 + Token成本追踪 | kf-skill-monitor |
@@ -299,6 +300,7 @@ AI编程智驾/
 │       ├── kf-go/                  # 工作流导航
 │       ├── kf-grant-research/      # 课题申报研究助手
 │       ├── kf-image-editor/        # AI 自然语言 P 图
+│       ├── kf-kb-envoy/            # Knowledge Base Envoy
 │       ├── kf-opencli/             # OpenCLI — 100+ 平台 CLI 数据直取
 │       ├── kf-reverse-spec/        # 存量代码→Spec 逆向
 │       ├── kf-scrapling/           # Web 爬虫 + 反反爬
