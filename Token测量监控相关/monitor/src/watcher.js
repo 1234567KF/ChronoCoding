@@ -11,7 +11,10 @@ const { calcCost, MODEL_PRICES, MODEL_ALIASES } = require('./pricing');
 
 function resolveModel(raw) {
   if (!raw) return null;
-  return MODEL_ALIASES[raw] || raw;
+  const known = MODEL_ALIASES[raw];
+  if (known) return known;
+  if (MODEL_PRICES[raw]) return raw;
+  return raw || null;
 }
 
 const PROJECT_ROOT = path.resolve(__dirname, '..', '..');
@@ -59,14 +62,12 @@ function importTraces() {
       let entry;
       try { entry = JSON.parse(line); } catch { continue; }
       if (!entry || !entry.skill) continue;
-      // Skip session-start/session-end traces — handled by importSessionState()
       if (entry.skill_type === 'session') continue;
-      // Skip subagent lifecycle events (start/end) — hook events, not actual skill calls
       if (entry.skill_type === 'subagent') continue;
 
       const convId = entry.trace_id || `trace_${Date.now()}`;
       const now = entry.timestamp || new Date().toISOString();
-      const model = resolveModel(entry.model_used) || 'unknown';
+      const model = resolveModel(entry.model_used) || entry.model_used || 'deepseek-v4-pro';
 
       // upsert conversation
       const existing = db.prepare('SELECT id FROM conversations WHERE id = ?').get(convId);
@@ -75,11 +76,14 @@ function importTraces() {
           `INSERT INTO conversations (id, session_id, title, model, started_at)
            VALUES (?, ?, ?, ?, ?)`
         ).run(convId, convId, entry.agent || entry.skill || 'unknown', model, now);
-      } else if (model && model !== 'unknown') {
+      } else if (model) {
         db.prepare('UPDATE conversations SET model = ? WHERE id = ?').run(model, convId);
       }
 
+      // 总输入 = 未缓存(token_in) + 缓存命中(cache_hit) — 相加关系
+      const totalInput = (entry.tokens_in || 0) + (entry.cache_hit || 0);
       const cost = calcCost(model, entry.tokens_in || 0, entry.tokens_out || 0, entry.cache_hit || 0);
+
       const msg = insertMsg.run(
         convId, 'assistant', entry.note || '',
         entry.tokens_in || 0, entry.tokens_out || 0,
@@ -96,7 +100,7 @@ function importTraces() {
         entry.result === 'success' ? 'success' : entry.result === 'failure' ? 'error' : 'running'
       );
 
-      // update conversation totals
+      // update conversation totals — 使用总输入 token（含缓存）
       db.prepare(
         `UPDATE conversations SET
           total_input_tokens = total_input_tokens + ?,
@@ -105,7 +109,7 @@ function importTraces() {
           ended_at = ?
          WHERE id = ?`
       ).run(
-        entry.tokens_in || 0, entry.tokens_out || 0,
+        totalInput, entry.tokens_out || 0,
         cost?.total_cost || 0, now, convId
       );
 
@@ -127,7 +131,7 @@ function importSessionState() {
 
     const db = getDB();
     const existing = db.prepare('SELECT id FROM conversations WHERE id = ?').get(state.sessionId);
-    if (existing) return false; // already recorded
+    if (existing) return false;
 
     const now = state.startedAt || new Date().toISOString();
     db.prepare(
@@ -166,7 +170,7 @@ function importPendingSessions() {
           ).run(
             data.sessionId, data.sessionId,
             data.title || `会话 ${data.sessionId.slice(0, 16)}`,
-            data.model || 'unknown',
+            data.model || 'deepseek-v4-pro',
             data.startedAt || new Date().toISOString(),
             data.total_input_tokens || 0,
             data.total_output_tokens || 0,
@@ -194,7 +198,6 @@ function importPendingSessions() {
 }
 
 function startWatcher(intervalMs = 10000) {
-  // import once immediately
   importSessionState();
   importTraces();
   importPendingSessions();

@@ -108,8 +108,9 @@ const MODEL_PRICING = {
 
 function calcCost(tokensIn, tokensOut, cacheHit, model) {
   const p = MODEL_PRICING[model] || MODEL_PRICING["sonnet"];
+  // Anthropic 格式: tokensIn=未缓存新token, cacheHit=缓存命中token, 两者相加=总输入
+  const uncachedIn = tokensIn || 0;
   const cachedTokens = cacheHit || 0;
-  const uncachedIn = Math.max(0, tokensIn - cachedTokens);
   return {
     input_cost: (uncachedIn / 1000000) * p.input,
     cache_cost: (cachedTokens / 1000000) * p.cache_read,
@@ -342,7 +343,8 @@ function showStatus() {
   if (totalIn || totalOut) {
     console.log("\nToken Usage:");
     console.log("  Input: " + totalIn.toLocaleString() + " | Output: " + totalOut.toLocaleString() + " | Cache Hit: " + totalCache.toLocaleString());
-    console.log("  Cache Rate: " + (totalIn > 0 ? (totalCache / totalIn * 100).toFixed(1) : 0) + "%");
+    const totalInputAll = totalIn + totalCache;
+    console.log("  Cache Rate: " + (totalInputAll > 0 ? (totalCache / totalInputAll * 100).toFixed(1) : 0) + "%");
   }
   
   console.log("\nRecent (last 15):");
@@ -393,7 +395,8 @@ function showCost() {
   Object.entries(byModel).sort((a, b) => b[1].calls - a[1].calls).forEach(([model, d]) => {
     const cost = calcCost(d.tokensIn, d.tokensOut, d.cacheHit, model);
     totalCost += cost.total_cost;
-    const cachePct = d.tokensIn > 0 ? (d.cacheHit / d.tokensIn * 100).toFixed(1) : "0";
+    const totalIn = d.tokensIn + d.cacheHit;
+    const cachePct = totalIn > 0 ? (d.cacheHit / totalIn * 100).toFixed(1) : "0";
     console.log("| " + model + " | " + d.calls + " | " + d.tokensIn.toLocaleString() + " | " + d.tokensOut.toLocaleString() + " | " + d.cacheHit.toLocaleString() + " | " + cachePct + "% | ¥" + cost.total_cost.toFixed(4) + " |");
   });
   console.log("\nTotal estimated cost: ¥" + totalCost.toFixed(4));
@@ -490,8 +493,9 @@ function generateReport() {
   md += "| Total Input Tokens | " + totalIn.toLocaleString() + " |\n";
   md += "| Total Output Tokens | " + totalOut.toLocaleString() + " |\n";
   md += "| Cache Hit Tokens | " + totalCache.toLocaleString() + " |\n";
-  md += "| Cache Hit Rate | " + (totalIn > 0 ? (totalCache / totalIn * 100).toFixed(1) : 0) + "% |\n";
-  md += "| Effective Input (uncached) | " + Math.max(0, totalIn - totalCache).toLocaleString() + " |\n\n";
+  const totalAll = totalIn + totalCache;
+  md += "| Cache Hit Rate | " + (totalAll > 0 ? (totalCache / totalAll * 100).toFixed(1) : 0) + "% |\n";
+  md += "| Effective Input (uncached) | " + totalIn.toLocaleString() + " |\n\n";
   
   // Skill type breakdown
   md += "## Skill Type Breakdown\n\n| Type | Calls | Unique Skills | Input Tok | Output Tok | Cache Hit |\n|---|---|---|---|---|---|\n";
@@ -513,7 +517,8 @@ function generateReport() {
   // Skill frequency with token detail
   md += "## Skill Frequency\n\n| Skill | Type | Calls | Agents | OK | Fail | Input Tok | Output Tok | Cache Hit | Cache% |\n|---|---|---|---|---|---|---|---|---|---|\n";
   sorted.forEach(([skill, d]) => {
-    const cachePct = d.tokIn > 0 ? (d.cacheHit / d.tokIn * 100).toFixed(1) : "0";
+    const totalTokIn = d.tokIn + d.cacheHit;
+    const cachePct = totalTokIn > 0 ? (d.cacheHit / totalTokIn * 100).toFixed(1) : "0";
     md += "| " + skill + " | " + d.type + " | " + d.count + " | " + d.agents.size + " | " + d.success + " | " + d.fail + " | " + d.tokIn.toLocaleString() + " | " + d.tokOut.toLocaleString() + " | " + d.cacheHit.toLocaleString() + " | " + cachePct + "% |\n";
   });
   
@@ -548,7 +553,7 @@ function generateReport() {
     trace_id: traceId, start: startTime, end: endTime, duration_min: durMin,
     agents: agents.length, calls: entries.length, success_rate: entries.length > 0 ? Math.round(okCount / entries.length * 100) : 0,
     skills_used: skills.length, skills_installed: inv.total,
-    token_total: { input: totalIn, output: totalOut, cache_hit: totalCache, cache_rate: totalIn > 0 ? (totalCache / totalIn * 100).toFixed(1) + "%" : "0%" },
+    token_total: { input: totalIn + totalCache, output: totalOut, cache_hit: totalCache, cache_rate: (totalIn + totalCache) > 0 ? (totalCache / (totalIn + totalCache) * 100).toFixed(1) + "%" : "0%" },
     kf_called: entries.filter(e => e.skill_type === "kf-custom").length,
     general_called: entries.filter(e => e.skill_type === "general").length,
     top: sorted.slice(0, 5).map(([s, d]) => ({ skill: s, count: d.count, type: d.type })),

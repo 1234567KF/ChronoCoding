@@ -14,7 +14,7 @@ function saveRecord({ sessionId, title, model, messages, skillCalls }) {
   // Normalize model name for display consistency
   const resolvedModel = resolveModel(model);
 
-  let totalInput = 0, totalOutput = 0, totalCost = 0;
+  let totalInput = 0, totalOutput = 0, totalCost = 0, totalCache = 0;
 
   const insertMsg = db.prepare(
     `INSERT INTO messages (conversation_id, role, content, input_tokens, output_tokens, cache_hit, input_cost, output_cost, created_at)
@@ -74,8 +74,11 @@ function saveRecord({ sessionId, title, model, messages, skillCalls }) {
         }
       }
 
-      totalInput += msg.input_tokens || 0;
+      // 总输入 = 新增token + 缓存命中token（两者是相加关系）
+      const msgTotalIn = (msg.input_tokens || 0) + (msg.cache_hit || 0);
+      totalInput += msgTotalIn;
       totalOutput += msg.output_tokens || 0;
+      totalCache += msg.cache_hit || 0;
       totalCost += cost?.total_cost || 0;
     }
 
@@ -97,14 +100,15 @@ function saveRecord({ sessionId, title, model, messages, skillCalls }) {
         `UPDATE token_daily_stats SET
           total_input = total_input + ?,
           total_output = total_output + ?,
+          cache_hit_input = cache_hit_input + ?,
           total_cost = total_cost + ?
          WHERE date = ?`
-      ).run(totalInput, totalOutput, totalCost, today);
+      ).run(totalInput, totalOutput, totalCache, totalCost, today);
     } else {
       db.prepare(
-        `INSERT INTO token_daily_stats (date, total_input, total_output, total_cost)
-         VALUES (?, ?, ?, ?)`
-      ).run(today, totalInput, totalOutput, totalCost);
+        `INSERT INTO token_daily_stats (date, total_input, total_output, cache_hit_input, total_cost)
+         VALUES (?, ?, ?, ?, ?)`
+      ).run(today, totalInput, totalOutput, totalCache, totalCost);
     }
   });
 

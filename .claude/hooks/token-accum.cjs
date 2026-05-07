@@ -26,14 +26,22 @@ const MODEL_PRICES = {
 const MODEL_ALIASES = {
   'pro':   'deepseek-v4-pro',
   'flash': 'deepseek-v4-flash',
+  'deepseek-v4-pro': 'deepseek-v4-pro',
+  'deepseek-v4-flash': 'deepseek-v4-flash',
 };
 
+/**
+ * 计算 Token 成本 — Anthropic/DeepSeek 格式:
+ *   tokensIn  = 本次新增的未缓存 token（全价）
+ *   cacheHit  = 命中缓存的 token（缓存价）
+ *   两者是相加关系，不是包含关系。
+ */
 function calcCost(model, tokensIn, tokensOut, cacheHit) {
   const resolved = MODEL_ALIASES[model] || model;
   const p = MODEL_PRICES[resolved];
   if (!p) return null;
-  const cachedIn = Math.min(cacheHit || 0, tokensIn);
-  const uncachedIn = Math.max(0, tokensIn - cachedIn);
+  const uncachedIn = tokensIn || 0;
+  const cachedIn = cacheHit || 0;
   const inputCost  = (uncachedIn / 1_000_000) * p.input;
   const cacheCost  = (cachedIn / 1_000_000) * p.cache_read;
   const outputCost = (tokensOut / 1_000_000) * p.output;
@@ -42,6 +50,9 @@ function calcCost(model, tokensIn, tokensOut, cacheHit) {
     cache_cost:  cacheCost,
     output_cost: outputCost,
     total_cost:  inputCost + cacheCost + outputCost,
+    total_input_tokens: uncachedIn + cachedIn,
+    uncached_tokens: uncachedIn,
+    cached_tokens: cachedIn,
   };
 }
 
@@ -98,9 +109,12 @@ async function pushToMonitor(sessionId, totals, isNewMessage, prevTokens) {
   const now = new Date().toISOString();
   const cost = totals.cost;
 
+  // 总输入 = 未缓存 token + 缓存命中 token（两者是相加关系，不是包含关系）
+  const totalInputAll = totals.totalIn + totals.totalCache;
+
   // 1. Compute delta from previous run — these are the REAL new tokens since last POST
-  //    This makes per-message token counts meaningful in the dashboard.
-  const deltaIn = prevTokens ? Math.max(0, totals.totalIn - (prevTokens.in || 0)) : totals.totalIn;
+  const prevInAll = prevTokens ? (prevTokens.in || 0) + (prevTokens.cache || 0) : 0;
+  const deltaIn = prevTokens ? Math.max(0, totalInputAll - prevInAll) : totalInputAll;
   const deltaOut = prevTokens ? Math.max(0, totals.totalOut - (prevTokens.out || 0)) : totals.totalOut;
   const deltaCache = prevTokens ? Math.max(0, totals.totalCache - (prevTokens.cache || 0)) : totals.totalCache;
 
@@ -115,10 +129,10 @@ async function pushToMonitor(sessionId, totals, isNewMessage, prevTokens) {
           model: totals.model || 'unknown',
           messages: [{
             role: 'assistant',
-            content: `${(totals.totalIn / 1000).toFixed(0)}K in / ${(totals.totalOut / 1000).toFixed(0)}K out | 缓存${(totals.totalCache / 1000).toFixed(0)}K`,
-            input_tokens: deltaIn,
+            content: `${(totalInputAll / 1000).toFixed(0)}K in (缓存${(totals.totalCache / 1000).toFixed(0)}K) / ${(totals.totalOut / 1000).toFixed(0)}K out`,
+            input_tokens: deltaIn - deltaCache,     // 仅未缓存的新输入
             output_tokens: deltaOut,
-            cache_hit: deltaCache,
+            cache_hit: deltaCache,                   // 缓存命中（相加关系）
             created_at: now,
           }],
           skillCalls: [],
@@ -133,7 +147,7 @@ async function pushToMonitor(sessionId, totals, isNewMessage, prevTokens) {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        total_input_tokens: totals.totalIn,
+        total_input_tokens: totalInputAll,
         total_output_tokens: totals.totalOut,
         total_cost: cost ? cost.total_cost : 0,
         ended_at: now,

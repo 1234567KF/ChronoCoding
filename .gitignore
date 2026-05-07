@@ -68,4 +68,6 @@ md2docx工具箱/
 
 
 # Generated monitoring reports (kf-token-tracker output)
-token测评/
+**/token-usage-report.md
+**/comprehensive-report.json
+**/savings-report.json
