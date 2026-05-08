@@ -19,6 +19,7 @@ const path = require('path');
 const DATA_DIR = path.resolve(__dirname, '..', '数据', 'lean-ctx');
 
 const TEST_CASES = [
+  // ── git ──
   {
     id: 'git-status',
     category: 'git',
@@ -41,11 +42,19 @@ const TEST_CASES = [
     description: 'Git 差异统计（最近5次提交）',
   },
   {
+    id: 'git-diff',
+    category: 'git',
+    rawCmd: 'git diff HEAD~3',
+    ctxCmd: 'lean-ctx -c "git diff HEAD~3"',
+    description: 'Git 差异全文（最近3次提交）',
+  },
+  // ── fs ──
+  {
     id: 'ls-skills',
     category: 'fs',
     rawCmd: 'ls -R .claude/skills/',
     ctxCmd: 'lean-ctx -c "ls -R .claude/skills/"',
-    description: '技能目录树',
+    description: '技能目录树（递归）',
   },
   {
     id: 'ls-claude',
@@ -55,19 +64,70 @@ const TEST_CASES = [
     description: '.claude 目录列表',
   },
   {
-    id: 'cat-md',
+    id: 'ls-node-modules',
+    category: 'fs',
+    rawCmd: 'ls "Token测量监控相关/monitor/node_modules/" 2>/dev/null || echo "(no node_modules)"',
+    ctxCmd: 'lean-ctx -c "ls \\"Token测量监控相关/monitor/node_modules/\\" 2>/dev/null || echo \\"(no node_modules)\\""',
+    description: 'node_modules 目录列表（大量输出）',
+  },
+  // ── file-read ──
+  {
+    id: 'cat-claude-md',
     category: 'file-read',
     rawCmd: 'cat .claude/CLAUDE.md',
     ctxCmd: 'lean-ctx -c "cat .claude/CLAUDE.md"',
-    description: '读取 CLAUDE.md',
+    description: '读取 CLAUDE.md（~200行）',
+  },
+  {
+    id: 'cat-settings',
+    category: 'file-read',
+    rawCmd: 'cat .claude/settings.json',
+    ctxCmd: 'lean-ctx -c "cat .claude/settings.json"',
+    description: '读取 settings.json（JSON）',
+  },
+  {
+    id: 'cat-large-skill',
+    category: 'file-read',
+    rawCmd: 'cat ".claude/helpers/hooks/token-tracker.cjs"',
+    ctxCmd: 'lean-ctx -c "cat \\".claude/helpers/hooks/token-tracker.cjs\\""',
+    description: '读取大文件 token-tracker.cjs（~600行）',
+  },
+  // ── test ──
+  {
+    id: 'npm-ls',
+    category: 'build',
+    rawCmd: 'npm ls --depth=0 2>&1 || echo "(no npm)"',
+    ctxCmd: 'lean-ctx -c "npm ls --depth=0 2>&1 || echo \\"(no npm)\\""',
+    description: 'npm 包列表',
+  },
+  {
+    id: 'node-version',
+    category: 'build',
+    rawCmd: 'node --version && npm --version 2>&1',
+    ctxCmd: 'lean-ctx -c "node --version && npm --version 2>&1"',
+    description: 'Node/npm 版本信息',
+  },
+  // ── other ──
+  {
+    id: 'env-vars',
+    category: 'other',
+    rawCmd: 'env | head -30',
+    ctxCmd: 'lean-ctx -c "env | head -30"',
+    description: '环境变量（前30行）',
   },
 ];
 
 // ── 参数解析 ──────────────────────────────────────────
 const args = process.argv.slice(2);
-const RUNS = parseInt(args[args.indexOf('--runs') + 1]) || 3;
-const SKILL = args[args.indexOf('--skill') + 1] || 'lean-ctx';
-const OUTPUT = args[args.indexOf('--output') + 1] || null;
+const runsIdx = args.indexOf('--runs');
+const RUNS = runsIdx >= 0 ? parseInt(args[runsIdx + 1]) : 3;
+const skillIdx = args.indexOf('--skill');
+const SKILL = skillIdx >= 0 ? args[skillIdx + 1] : 'lean-ctx';
+const outputIdx = args.indexOf('--output');
+const OUTPUT = outputIdx >= 0 ? args[outputIdx + 1] : null;
+
+// repo root = 3 levels up from benchmark/
+const REPO_ROOT = path.resolve(__dirname, '..', '..', '..');
 
 // ── 工具函数 ──────────────────────────────────────────
 function runCommand(cmd, timeout = 30000) {
@@ -77,7 +137,7 @@ function runCommand(cmd, timeout = 30000) {
       encoding: 'utf-8',
       timeout,
       maxBuffer: 50 * 1024 * 1024, // 50MB
-      cwd: path.resolve(__dirname, '..', '..', '..', '..'),
+      cwd: REPO_ROOT,
       stdio: ['pipe', 'pipe', 'pipe'],
     });
     return { output, stderr: '', durationMs: Date.now() - start, success: true };

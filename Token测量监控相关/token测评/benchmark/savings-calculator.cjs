@@ -148,13 +148,15 @@ function decomposeSavings(calls) {
     }
   }
 
-  // ── 3. CLI 压缩估算 ──
-  // 约 10% 的未缓存输入来自 CLI 输出，压缩比约 5:1
+  // ── 3. CLI 压缩估算（cli-benchmark.cjs 实测, 2026-05-08）──
+  // benchmark 实测：git/ls 输出已紧凑→lean-ctx pass-through(0%节省)
+  // 主要节省来自文件读取: cat CLAUDE.md 95.9%, cat settings.json 78.9%
+  // 保守假设: 5% 未缓存输入来自文件读取, 压缩率 87%
   const totalUncachedIn = calls.reduce((s, c) => s + c.input_tokens, 0);
-  const cliFraction = 0.10;
-  const compressionRatio = 5;
-  const cliTokensActual = Math.round(totalUncachedIn * cliFraction);
-  const cliTokensBaseline = Math.round(cliTokensActual * compressionRatio);
+  const fileReadFraction = 0.05;    // 估算: 5% Bash调用是文件读取
+  const fileCompressionRate = 0.87; // benchmark实测: 文件读取平均压缩率
+  const cliTokensActual = Math.round(totalUncachedIn * fileReadFraction);
+  const cliTokensBaseline = Math.round(cliTokensActual / (1 - fileCompressionRate));
   const cliTokensSaved = cliTokensBaseline - cliTokensActual;
   const cliCostSaved = (cliTokensSaved / 1_000_000) * pPro.input;
 
@@ -202,7 +204,7 @@ function decomposeSavings(calls) {
         saving: modelRouterSaving,
       },
       cliCompression: {
-        description: 'CLI输出压缩 (lean-ctx) — 无压缩时CLI输出约多占 5x token',
+        description: 'CLI输出压缩 (lean-ctx) — benchmark实测: 文件读取省87%, git/ls已紧凑→0%',
         tokensSaved: cliTokensSaved,
         costSaved: cliCostSaved,
       },
