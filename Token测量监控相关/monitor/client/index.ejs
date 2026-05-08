@@ -42,7 +42,7 @@ function renderList(json) {
     const model = c.model ? esc(c.model) : '<span style="color:#999">-</span>';
     const time = new Date(c.started_at).toLocaleString('zh-CN');
     const baseline = c.total_baseline_cost || 0;
-    const saving = baseline - (c.total_cost || 0);
+    const saving = baseline > 0.0001 ? (baseline - (c.total_cost || 0)) : 0;
     const savingStr = saving > 0.0001 ? '<span style="color:#2e7d32;font-weight:600">¥' + saving.toFixed(4) + '</span>' : '<span style="color:#999">-</span>';
     return '<tr onclick="location=\'/conversations/' + c.id + '\'" style="cursor:pointer">' +
       '<td><strong>' + esc(c.title || '(无标题)') + '</strong></td>' +

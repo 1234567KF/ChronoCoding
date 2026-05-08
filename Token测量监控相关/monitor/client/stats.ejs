@@ -47,7 +47,7 @@ async function loadStats() {
     '</div>' +
     '<div class="card">' +
       '<div class="stat-value">' + (tData.summary.total_cost ? '¥' + tData.summary.total_cost.toFixed(4) : '¥0') + '</div>' +
-      '<div class="stat-label">实际花费 (' + range + ') | 基线 ¥' + baseline.toFixed(4) + ' | 节省 ¥' + saving.toFixed(4) + ' (' + savingPct + '%)</div>' +
+      '<div class="stat-label">实际花费 (' + range + ') ' + (baseline > 0.0001 ? ' | 基线 ¥' + baseline.toFixed(4) + ' | 节省 ¥' + saving.toFixed(4) + ' (' + savingPct + '%)' : ' | 基线 (旧数据无基线)') + '</div>' +
     '</div>';
 
   // Chart

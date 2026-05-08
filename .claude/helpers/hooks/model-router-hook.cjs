@@ -146,9 +146,11 @@ function main() {
     console.error(
       `[model-router] skill=${skillName} rec="${recommended}" router=${hasModelRouter}`
     );
-    console.log(
-      `<!-- model-router: "${skillName}" recommended="${recommended}" has-model-router=${hasModelRouter} -->`
-    );
+    // Output actionable model routing instruction (NOT an HTML comment — must be visible to the model)
+    const instruction = recommended
+      ? `[model-router] 技能 "${skillName}" 推荐模型: ${recommended}。请确保当前对话使用 ${recommended} 以获得最佳效果（计划/设计阶段），执行阶段可切换回 flash。`
+      : `[model-router] 技能 "${skillName}" 已集成模型路由，请按 SKILL.md 的阶段模型分配执行。`;
+    console.log(instruction);
   }
 }
 
