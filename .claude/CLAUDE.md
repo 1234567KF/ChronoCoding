@@ -43,7 +43,7 @@
 | -------------------------------------- | ---------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------- |
 | `gspowers`                           | fshaan                                               | SOP 流程导航                                                                                                                          |
 | `gstack`                             | garrytan                                             | 产品流程框架                                                                                                                          |
-| `astra-skill`                        | Agents365-ai                                         | Academic paper search — Semantic Scholar via Ai2 Asta MCP                                                                            |
+| `asta-skill`                         | Agents365-ai                                         | Academic paper search — Semantic Scholar via Ai2 Asta MCP                                                                            |
 | `atlassian-mcp`                      | atlassian-mcp                                        | Atlassian Jira/Confluence integration                                                                                                 |
 | **jeffallan/claude-skills** (66) | [jeffallan](https://github.com/jeffallan/claude-skills) | 第三方技能合集，分 10 类：12 语言、7 后端、7 前端/移动、5 基础设施、8 API/架构、5 质量/测试、5 DevOps、3 安全、6 数据/ML、8 平台/专业 |
 
