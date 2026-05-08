@@ -1,6 +1,6 @@
 # AI编程智驾 — 项目配置
 
-> 总纲：[AICoding原则.docx](知识库相关/docs/AICoding原则.docx) — AI编程修炼手册2026
+> 总纲：[AICoding原则.docx](安装或更新/docs/AICoding原则.docx) — AI编程修炼手册2026
 
 本项目是 AI 编程工作台的完整技能集合，遵循**稳、省、准、测的准、夯、快、懂**六大原则。
 
@@ -185,10 +185,10 @@ claude
 
 ## 更多信息
 
-- [AICoding原则.docx](知识库相关/docs/AICoding原则.docx) — 修炼总纲
+- [AICoding原则.docx](安装或更新/docs/AICoding原则.docx) — 修炼总纲
 - [安装或更新/AICoding.md](安装或更新/AICoding.md) — 单文件入口（给 AI 看）
-- [INSTALL.md](知识库相关/docs/INSTALL.md) — AI 安装指南
-- [MANUAL.md](知识库相关/docs/MANUAL.md) — 用户使用手册
+- [INSTALL.md](安装或更新/docs/INSTALL.md) — AI 安装指南
+- [MANUAL.md](安装或更新/docs/MANUAL.md) — 用户使用手册
 - [memory/MEMORY.md](memory/MEMORY.md) — 跨会话记忆索引
 - [memory/harness-audit-history.md](memory/harness-audit-history.md) — Harness 评审历史
 

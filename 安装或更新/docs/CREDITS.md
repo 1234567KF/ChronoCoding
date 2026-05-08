@@ -62,41 +62,52 @@ AICoding/
 
 ---
 
-## MIT License 原文
+## 许可证兼容性说明
 
-以下是各第三方项目适用的 MIT License 条款：
+### LGPL-3.0 兼容的许可证
 
-```
-MIT License
+本项目主许可证为 **LGPL-3.0**。以下第三方项目的许可证与 LGPL-3.0 兼容：
 
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
+| 项目 | 许可证 | 兼容性 |
+|------|--------|--------|
+| gspowers | MIT | 兼容 — MIT 代码可纳入 LGPL 项目 |
+| gstack | MIT | 兼容 |
+| Scrapling | BSD-3-Clause | 兼容 |
+| frontend-slides | MIT | 兼容 |
+| ruflo | MIT | 兼容 |
+| lean-ctx | MIT | 兼容 |
+| OpenCLI | MIT | 兼容 |
+| autoresearch | MIT | 兼容 |
+| asta-skill | MIT | 兼容 |
+| jeffallan/claude-skills | MIT | 兼容 |
+| caveman | MIT | 兼容 |
+| markdown-to-docx-skill | MIT | 兼容 |
+| claude-code-pro | MIT | 兼容 |
+| lambda-lang | MIT | 兼容 |
 
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
+### 需注意的许可证
 
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
-```
+| 项目 | 许可证 | 说明 |
+|------|--------|------|
+| **claude-mem** | **AGPL-3.0** | ⚠️ 强传染性网络版 copyleft。AGPL-3.0 与 LGPL-3.0 不兼容。claude-mem 作为独立工具通过 npm 全局安装，不作为项目代码库的一部分分发。用户需自行安装并遵守其 AGPL-3.0 条款。 |
+| **context-mode** | Elastic-2.0 | ⚠️ 非 OSI 批准的开源许可证。作为独立 npm 包全局安装，不作为项目代码分发。 |
+
+### 使用原则
+
+1. **本项目主许可证**：LGPL-3.0，适用于 AI编程智驾 主项目及其自研部分（kf- 系列技能等）
+2. **第三方项目**：保留各自原作者的版权声明和许可证
+3. **独立安装工具**：claude-mem（AGPL-3.0）、context-mode（Elastic-2.0）通过 npm/pip 全局独立安装，不作为项目代码库的文件分发。用户自行决定是否安装
+4. **集成使用**：各 MIT 和 BSD 开源项目在 LGPL-3.0 项目中保持兼容
+5. **商业使用**：需同时遵守各第三方项目的许可证条款。特别注意 AGPL-3.0 的 network interaction 条款
 
 ---
 
 ## 知识产权说明
 
-1. **本项目的 MIT License** 适用于 AICoding 主项目及其自研部分
+1. **本项目的 LGPL-3.0** 适用于 AICoding 主项目及其自研部分（kf- 系列技能等）
 2. **第三方项目的 License** 保留各自原作者的版权声明
-3. **集成使用** 均遵循各项目对应的 MIT License 条款
-4. 如需将本项目用于商业用途，请确保同时遵守各第三方项目的 License
+3. **集成使用**：MIT/BSD 开源项目与 LGPL-3.0 兼容；AGPL-3.0/Elastic-2.0 项目为独立安装工具，不纳入项目代码库分发
 
 ---
 
-*最后更新: 2026-05-02*
+*最后更新: 2026-05-08*

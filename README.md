@@ -3,7 +3,7 @@
     <img src="https://img.shields.io/badge/⚡_单文件入口-AICoding.md-22c55e?style=for-the-badge" alt="单文件入口">
   </a>
   <a href="LICENSE">
-    <img src="https://img.shields.io/badge/license-MIT-8b5cf6.svg?style=for-the-badge" alt="License">
+    <img src="https://img.shields.io/badge/license-LGPL--3.0-8b5cf6.svg?style=for-the-badge" alt="License">
   </a>
 </p>
 
@@ -308,7 +308,7 @@ AI编程智驾/
 ├── AICoding.md            # 单文件入口（给 AI 看）
 ├── CHANGELOG.md           # 版本记录
 ├── CONTRIBUTING.md        # 贡献指南
-├── LICENSE                # MIT 许可证
+├── LICENSE                # LGPL-3.0 许可证
 ├── assets/                # 静态资源（宣传海报、架构图）
 │   └── posters/
 │
@@ -371,4 +371,4 @@ AI编程智驾/
 
 ## 许可
 
-MIT License - 详见 [LICENSE](LICENSE)
+LGPL-3.0 - 详见 [安装或更新/LICENSE](安装或更新/LICENSE)
