@@ -389,6 +389,7 @@ C. [方案名] — [一行说明]，后果：[选 C 的后果]
      - 协调者假设基线（Phase 1.3 锁定，三队共享）
      - 本团队的角色定位（红/蓝/绿）
      - kf-alignment recording 模式指令（不提问、不阻塞、记录假设）
+     - **CRITICAL 歧义上报指令**：遇到 `[ASSUMPTION:CRITICAL]` 时 MUST 格式化为选择题（选项+后果+默认选择），写入「待澄清问题清单」章节
    ⚠️ 缓存优化：共享前缀必须逐字相同（包括空格和换行）。仅差异化后缀部分（角色+阶段+任务）。
      后续 agent 的共享前缀部分将命中 DeepSeek 服务器端缓存（¥0.025/MTok），
      仅 ~3K token 的角色+任务描述按全价计费。
@@ -397,7 +398,9 @@ C. [方案名] — [一行说明]，后果：[选 C 的后果]
      - 集成测试 agent → model: "sonnet"（flash, 执行层面）
      - 前端设计师 agent → model: "sonnet"（flash, 执行层面）
      - 协调者（本 Skill 自身）→ model: "opus"（pro, 规划+评判层面）
-4. Pipeline 自动推进：每阶段完成后自动触发下一阶段
+3.5. 等待三队 Stage 0 全部完成 → 执行 Phase 2.0 反转门控（收集 CRITICAL 问题 → 向用户提问 → 答案广播）
+     若零 CRITICAL 问题 → 自动跳过，直接进入 Stage 1
+4. Pipeline 继续推进：Stage 1→Stage 2→...→Stage 5（反转门控通过后全自动）
    每阶段完成时调用:
      node .claude/helpers/hammer-bridge.cjs agent-done --team <队名> --agent <agent名> --output <产物文件>
 5. 等待三队全部流水线完成
@@ -414,6 +417,103 @@ C. [方案名] — [一行说明]，后果：[选 C 的后果]
 3. 关键代码/架构片段
 4. 方案优势（3-5 点）
 5. 方案风险（3-5 点）
+
+---
+
+### Phase 2.0 — 反转门控（Inversion Gate）
+
+> **核心机制**：三队完成 Stage 0 需求对齐后，协调者收集各队发现的 CRITICAL 歧义，统一向用户提问。用户回答后广播回所有团队，确保信息对齐。
+
+**为什么需要反转门控**：
+- Phase 1 的任务拆解阶段，协调者只看用户输入的表层歧义，无法预判深层技术决策
+- 三队 agent 在 Stage 0 深入分析后，才会发现真正影响方案走向的歧义
+- 此时 agent 不能直接问用户（recording 模式），必须通过协调者统一收集提问
+- 三队独立分析可能产生重叠或互补的问题，合并后用户一次回答，效率最高
+
+#### 触发条件
+
+Phase 2 步骤 3（三队 spawn Stage 0 agent）完成后，等待所有 Stage 0 完成 → 进入反转门控检查。
+
+#### 问题收集流程
+
+```
+1. 读取三队的 {team}-00-alignment.md
+2. 提取各队的「待澄清问题清单」（[ASSUMPTION:CRITICAL] 级问题，每题含选项模板）
+3. 跨队去重合并：
+   - 完全相同的问题 → 合并为一个，标注"红/蓝/绿队均提出"
+   - 同一话题但不同角度 → 合并为一个，补充各队视角
+   - 队独有问题 → 保留，标注提出团队
+4. 协调者 review 合并后的问题：
+   - 检查每个问题是否有足够选项（至少 2 个）
+   - 检查每个选项是否有"后果"说明
+   - 确认默认选择合理
+   - 若问题超过 5 个 → 按影响范围排序，只保留 Top 5，其余降级为 UNCERTAIN（协调者自行决策最优默认值）
+5. 生成统一问卷，展示给用户
+```
+
+#### 问卷输出格式
+
+问卷使用 kf-alignment interactive 模式的选项模板，一次性展示所有问题：
+
+```
+## 🔄 反转门控 — 需要你的决策
+
+三队已完成需求对齐，以下 {N} 个关键决策点需要你确认（选 A/B/C，不开放回答）。
+
+若某题不回答，将采用标明的「默认选择」。
+
+---
+
+### Q1: {一句话问题}
+{红/蓝/绿队均提出 | 来自红队}
+
+A. {方案名} — {一行说明}，后果：{选 A 的后果}
+B. {方案名} — {一行说明}，后果：{选 B 的后果}
+C. {方案名} — {一行说明}，后果：{选 C 的后果}
+
+**默认选择**：B（若不回答则采用此方案）
+
+---
+
+### Q2: ...
+
+---
+
+请逐题回复（如"Q1:A, Q2:B, Q3:默认, ..."），或回复"全部默认"采用所有默认选择。
+```
+
+#### 答案回传
+
+用户回答后，协调者生成「决策广播」注入所有团队：
+
+```
+## 反转门控决策广播
+
+以下决策替代 Phase 1.3 假设基线中的对应假设，所有团队 MUST 基于此继续：
+
+| 问题 | 决策 | 影响团队 |
+|------|------|---------|
+| Q1: {问题} | 选 A: {方案名} | 红/蓝/绿 |
+| Q2: {问题} | 选 B: {方案名} | 红/蓝/绿 |
+| Q3: {问题} | 默认: {方案名} | 蓝队 |
+```
+
+决策广播在 spawn Stage 1 agent 时注入 prompt，作为「已确认约束」覆盖 Stage 0 中的对应 `[ASSUMPTION:CRITICAL]` 标记。
+
+#### 自动跳过条件
+
+以下情况跳过反转门控，直接进入 Stage 1：
+- **零问题**：三队 Stage 0 产出中均无 `[ASSUMPTION:CRITICAL]` 标记
+- **全部 LOW/UNCERTAIN**：所有歧义在 recording 模式下已由 agent 自行决策
+- **Phase 1.2 已是 RED 级且已充分澄清**：用户已在 Phase 1 回答了所有关键问题
+
+#### 门控规则
+
+- 若三队 Stage 0 存在 ≥1 个 CRITICAL 问题 → **MUST 暂停流水线**，执行反转门控
+- 用户回答前 → 禁止 spawn Stage 1 agent
+- 用户回答后 → 决策广播注入 Stage 1 prompt → 三队同时恢复执行
+
+### Gate 2.0 — 反转门控通过（含零问题自动跳过）后方可进入 Stage 1。
 
 ---
 
@@ -697,6 +797,9 @@ C. [方案名] — [一行说明]，后果：[选 C 的后果]
 - **汇总者可按需 spawn 子 agent 执行**，但对抗者始终是单一 agent，不拆分。
 - **Phase 5 对抗质疑的输出是文本报告，不包含代码修改**——代码修改由 Phase 6 汇总者执行。
 - **对抗者质疑维度固定为 8 个**（部署/边界/性能/安全/维护/扩展/成本/用户），不宜增删。
+- **反转门控在 Stage 0 完成后强制执行**——即使 Phase 1.2 已做前置澄清，Stage 0 深入分析后可能暴露新歧义。零 CRITICAL 问题时自动跳过，不阻塞流程。
+- **反转门控的问卷必须给选项**——禁止开放提问。每个问题至少 2 个选项，每个选项有后果说明，有默认选择。用户只做选择题。
+- **反转门控每人最多 3 个 CRITICAL 问题**——超过 3 个则只保留最关键的 3 个，其余降级自行决策。合并后问卷最多 5 题。
 
 ## Harness 反馈闭环（铁律 3）
 
@@ -707,6 +810,7 @@ C. [方案名] — [一行说明]，后果：[选 C 的后果]
 | Pre-Stage（条件触发） | `node .claude/helpers/harness-gate-check.cjs --skill kf-multi-team-compete --stage prestage --required-files "PRD.md" --forbidden-patterns TODO 待定` | PRD.md 缺失则阻断进入 Phase 1 |
 | Phase 1 | `node .claude/helpers/harness-gate-check.cjs --skill kf-multi-team-compete --stage phase1 --required-sections "## 任务目标" "## 评判维度及权重" --forbidden-patterns TODO 待定` | 任务规格不完整则回退 |
 | Phase 2（每队） | `node .claude/helpers/harness-gate-check.cjs --skill kf-multi-team-compete --stage <N> --team <红/蓝/绿> --required-files "{team}-0<N>-*.md" --forbidden-patterns TODO 待定` | 阶段产物缺失则阻断该团队流水线 |
+| Phase 2.0 反转门控 | 检查所有 Stage 0 产物的 CRITICAL 问题是否已向用户提问并获得回答；零问题时自动通过 | 有未回答问题则阻断进入 Stage 1 |
 | Phase 3 | `node .claude/helpers/harness-gate-check.cjs --skill kf-multi-team-compete --stage phase3 --required-sections "## 裁判评分卡" "## 排名" --forbidden-patterns TODO 待定` | 评分卡不完整则回退 |
 | Phase 4 | `node .claude/helpers/harness-gate-check.cjs --skill kf-multi-team-compete --stage phase4 --required-sections "## 初版融合方案" "## 待对抗者重点审查的疑点" --forbidden-patterns TODO 待定` | 初版方案不完整则回退 |
 | Phase 5 | `node .claude/helpers/harness-gate-check.cjs --skill kf-multi-team-compete --stage phase5 --required-sections "## 对抗者质疑报告" "## MUST-FIX 清单" --forbidden-patterns TODO 待定` | 对抗报告不完整则回退对抗 |
@@ -726,7 +830,7 @@ Phase 6 汇总者回应与执行完成后 MUST 将最终评分卡、对抗报告
 |------|---------|------|
 | `kf-model-router` | 启动时 | 自动切换模型：裁判/汇总用 pro，各队 agent 用 flash |
 | `kf-prd-generator` | Pre-Stage（条件触发） | 输入为 SDD Excel 时自动调用，生成 PRD.md 作为需求基线 |
-| `kf-alignment` | Stage 0 + Phase 3 | 动前对齐 + 裁判评分标准对齐 |
+| `kf-alignment` | Stage 0 + Phase 2.0 + Phase 3 | 动前对齐（recording）+ 反转门控问卷（interactive）+ 裁判评分标准对齐 |
 | `kf-spec` | Stage 0 | 读取 Spec/PRD 作为需求基线 |
 | `kf-web-search` | Stage 1/2/3（按需） | agent 搜索技术方案、最佳实践、测试方案、UI 参考 |
 | `kf-scrapling` | Stage 1/2/3（按需） | agent 深度网页抓取（反反爬），补充 web-search 无法访问的站点 |

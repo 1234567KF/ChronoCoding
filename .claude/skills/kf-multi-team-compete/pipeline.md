@@ -72,7 +72,10 @@ Pre-Stage     Stage 0        Stage 1        Stage 2        Stage 3        Stage 
 ```mermaid
 graph LR
     PS[Pre-Stage] --> S0[Stage 0 需求对齐]
-    S0 --> S1[Stage 1 架构设计]
+    S0 --> IG{反转门控}
+    IG -->|零问题/已回答| S1[Stage 1 架构设计]
+    IG -->|有问题| Q[向用户提问]
+    Q -->|用户回答| S1
     S1 --> S2[Stage 2 编码实现]
     S2 --> S3[Stage 3 集成测试]
     S3 --> S4[Stage 4 代码审查]
@@ -80,6 +83,8 @@ graph LR
 ```
 
 Stage 2 中的前端设计师可并行启动（与全栈开发的后端实现独立）。
+
+**反转门控**（Stage 0 → Stage 1 之间）：三队完成 Stage 0 后，协调者收集各队 `[ASSUMPTION:CRITICAL]` 问题，去重合并后向用户展示选择题问卷。用户回答后广播回所有团队，再进入 Stage 1。零问题时自动跳过。
 
 ## 三队并发模型
 
@@ -182,7 +187,9 @@ Stage 0             Stage 1          Stage 2
 | Phase | 职责 | 状态 |
 |-------|------|------|
 | Phase 1 | 任务理解与拆解（任务规格 + 假设基线锁定） | 完成 → 进入 Phase 2 |
-| Phase 2 | Swarm + Pipeline 并发执行（三队并行） | 全部完成 → 进入 Phase 3 |
+| Phase 2 | Swarm + Pipeline 并发执行（三队并行） | 全部 Stage 0 完成 → 进入 Phase 2.0 反转门控 |
+| Phase 2.0 | 反转门控（收集 CRITICAL 问题 → 问卷 → 用户回答 → 广播） | 门控通过（含零问题跳过）→ 进入 Stage 1 |
+| Phase 2续 | Stage 1-5 继续执行 | 全部完成 → 进入 Phase 3 |
 | Phase 3 | 裁判评分 | 评分完成 → 进入 Phase 4 |
 | Phase 4 | 汇总融合（初版） | 初版方案 → 进入 Phase 5 |
 | Phase 5 | 对抗质疑 | 质疑完成 → 进入 Phase 6 |
@@ -208,7 +215,9 @@ node .claude/helpers/harness-gate-check.cjs \
 | 门控 | 检查项 | 失败处理 |
 |------|--------|---------|
 | Phase 1 → Phase 2 | 任务规格 7 项完整、假设基线已锁定 | 回退 Phase 1 |
-| Phase 2 → Phase 3 | 三队全部 Stage 5 完成 | 等待未完成团队 |
+| Phase 2 → Phase 2.0 | 三队全部 Stage 0 完成 | 等待未完成团队 |
+| Phase 2.0 → Phase 2续 | 反转门控通过（零问题自动跳过 / 用户已回答所有问题） | 等待用户回答 |
+| Phase 2续 → Phase 3 | 三队全部 Stage 5 完成 | 等待未完成团队 |
 | Phase 3 → Phase 4 | 评分卡完整、排名明确 | 回退评分 |
 | Phase 4 → Phase 5 | 初版方案含「待对抗者重点审查的疑点」 | 回退融合 |
 | Phase 5 → Phase 6 | 对抗报告含 MUST-FIX 清单 | 回退对抗 |
@@ -220,10 +229,24 @@ node .claude/helpers/harness-gate-check.cjs \
 Phase 1 任务拆解
   └── 任务规格锁定 → 假设基线锁定 → Gate 通过
 
-Phase 2 并发执行
-  ├── [并行] 红队 Pipeline: Stage0→Stage1→...→Stage5
-  ├── [并行] 蓝队 Pipeline: Stage0→Stage1→...→Stage5
-  └── [并行] 绿队 Pipeline: Stage0→Stage1→...→Stage5
+Phase 2 并发执行 (Stage 0)
+  ├── [并行] 红队 Stage 0
+  ├── [并行] 蓝队 Stage 0
+  └── [并行] 绿队 Stage 0
+       │
+       └── 三队 Stage 0 全部完成
+
+Phase 2.0 反转门控
+  ├── 收集各队 CRITICAL 问题
+  ├── 去重合并 → 生成选择题问卷
+  ├── 向用户展示问卷
+  ├── 用户回答 → 决策广播回所有团队
+  └── 零问题时自动跳过
+
+Phase 2续 并发执行 (Stage 1-5)
+  ├── [并行] 红队 Pipeline: Stage1→...→Stage5
+  ├── [并行] 蓝队 Pipeline: Stage1→...→Stage5
+  └── [并行] 绿队 Pipeline: Stage1→...→Stage5
        │
        └── 每队门控: 阶段产物必须完整，否则阻塞该队
 

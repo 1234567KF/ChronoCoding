@@ -1,0 +1,17 @@
+{
+  "2026-05-07": {
+    "source": "cli-benchmark",
+    "skill": "lean-ctx",
+    "overallSavingsRate": 18.617416165158193,
+    "avgSavingsRate": -67.14268583933509,
+    "cases": 13,
+    "runsPerCase": 3,
+    "byCategory": {
+      "git": 6.904936058109147,
+      "fs": -381.316654265873,
+      "file-read": 58.2672183947891,
+      "build": 0,
+      "other": 68.67364746945898
+    }
+  }
+}

@@ -186,7 +186,7 @@ claude
 ## 更多信息
 
 - [AICoding原则.docx](知识库相关/docs/AICoding原则.docx) — 修炼总纲
-- [安装配置文档相关/AICoding.md](安装配置文档相关/AICoding.md) — 单文件入口（给 AI 看）
+- [安装或更新/AICoding.md](安装或更新/AICoding.md) — 单文件入口（给 AI 看）
 - [INSTALL.md](知识库相关/docs/INSTALL.md) — AI 安装指南
 - [MANUAL.md](知识库相关/docs/MANUAL.md) — 用户使用手册
 - [memory/MEMORY.md](memory/MEMORY.md) — 跨会话记忆索引

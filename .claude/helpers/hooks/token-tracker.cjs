@@ -25,7 +25,7 @@ const PROJECT_ROOT = path.resolve(__dirname, "../..");
 const DATA_DIR = path.join(PROJECT_ROOT, ".claude-flow", "data");
 const SKILLS_DIR = path.join(PROJECT_ROOT, ".claude", "skills");
 const LOG_PATH = path.join(DATA_DIR, "skill-traces.jsonl");
-const REPORT_PATH = path.join(PROJECT_ROOT, "Token测量监控相关", "token测评", "token-usage-report.md");
+const REPORT_PATH = path.join(PROJECT_ROOT, "监测者", "token测评", "token-usage-report.md");
 const SUMMARY_PATH = path.join(DATA_DIR, "token-usage-summary.json");
 const INVENTORY_PATH = path.join(DATA_DIR, "skill-inventory.json");
 

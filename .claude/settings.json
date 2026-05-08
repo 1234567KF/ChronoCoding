@@ -6,7 +6,7 @@
                 "hooks": [
                     {
                         "type": "command",
-                        "command": "node D:/AICoding/.claude/helpers/hook-handler.cjs pre-bash",
+                        "command": "node .claude/helpers/hook-handler.cjs pre-bash",
                         "timeout": 5000
                     },
                     {
@@ -31,7 +31,7 @@
                 "hooks": [
                     {
                         "type": "command",
-                        "command": "node D:/AICoding/.claude/helpers/hook-handler.cjs pre-edit",
+                        "command": "node .claude/helpers/hook-handler.cjs pre-edit",
                         "timeout": 5000
                     }
                 ]
@@ -41,12 +41,12 @@
                 "hooks": [
                     {
                         "type": "command",
-                        "command": "node D:/AICoding/.claude/helpers/model-router-hook.cjs",
+                        "command": "node .claude/helpers/model-router-hook.cjs",
                         "timeout": 5000
                     },
                     {
                         "type": "command",
-                        "command": "node D:/AICoding/.claude/helpers/token-tracker.cjs pre-tool",
+                        "command": "node .claude/helpers/token-tracker.cjs pre-tool",
                         "timeout": 3000
                     }
                 ]
@@ -58,7 +58,7 @@
                 "hooks": [
                     {
                         "type": "command",
-                        "command": "node D:/AICoding/.claude/hooks/token-accum.cjs record",
+                        "command": "node .claude/hooks/token-accum.cjs record",
                         "timeout": 2000
                     }
                 ]
@@ -68,17 +68,17 @@
                 "hooks": [
                     {
                         "type": "command",
-                        "command": "node D:/AICoding/.claude/helpers/hook-handler.cjs post-edit",
+                        "command": "node .claude/helpers/hook-handler.cjs post-edit",
                         "timeout": 10000
                     },
                     {
                         "type": "command",
-                        "command": "node D:/AICoding/.claude/helpers/alignment-hook.cjs check",
+                        "command": "node .claude/helpers/alignment-hook.cjs check",
                         "timeout": 5000
                     },
                     {
                         "type": "command",
-                        "command": "node D:/AICoding/.claude/helpers/harness-gate-check.cjs",
+                        "command": "node .claude/helpers/harness-gate-check.cjs",
                         "timeout": 5000
                     }
                 ]
@@ -88,7 +88,7 @@
                 "hooks": [
                     {
                         "type": "command",
-                        "command": "node D:/AICoding/.claude/helpers/hook-handler.cjs post-bash",
+                        "command": "node .claude/helpers/hook-handler.cjs post-bash",
                         "timeout": 5000
                     }
                 ]
@@ -99,17 +99,17 @@
                 "hooks": [
                     {
                         "type": "command",
-                        "command": "node D:/AICoding/.claude/helpers/hook-handler.cjs session-restore",
+                        "command": "node .claude/helpers/hook-handler.cjs session-restore",
                         "timeout": 15000
                     },
                     {
                         "type": "command",
-                        "command": "node D:/AICoding/.claude/helpers/hooks/auto-memory-hook.mjs import",
+                        "command": "node .claude/helpers/hooks/auto-memory-hook.mjs import",
                         "timeout": 8000
                     },
                     {
                         "type": "command",
-                        "command": "node D:/AICoding/.claude/hooks/monitor-session.cjs start",
+                        "command": "node .claude/hooks/monitor-session.cjs start",
                         "timeout": 3000
                     }
                 ]
@@ -120,12 +120,12 @@
                 "hooks": [
                     {
                         "type": "command",
-                        "command": "node D:/AICoding/.claude/helpers/hook-handler.cjs session-end",
+                        "command": "node .claude/helpers/hook-handler.cjs session-end",
                         "timeout": 10000
                     },
                     {
                         "type": "command",
-                        "command": "node D:/AICoding/.claude/hooks/monitor-session.cjs end",
+                        "command": "node .claude/hooks/monitor-session.cjs end",
                         "timeout": 3000
                     }
                 ]
@@ -136,7 +136,7 @@
                 "hooks": [
                     {
                         "type": "command",
-                        "command": "node D:/AICoding/.claude/helpers/auto-memory-hook.mjs sync",
+                        "command": "node .claude/helpers/auto-memory-hook.mjs sync",
                         "timeout": 10000
                     }
                 ]
@@ -148,11 +148,11 @@
                 "hooks": [
                     {
                         "type": "command",
-                        "command": "node D:/AICoding/.claude/helpers/hook-handler.cjs compact-manual"
+                        "command": "node .claude/helpers/hook-handler.cjs compact-manual"
                     },
                     {
                         "type": "command",
-                        "command": "node D:/AICoding/.claude/helpers/hook-handler.cjs session-end",
+                        "command": "node .claude/helpers/hook-handler.cjs session-end",
                         "timeout": 5000
                     }
                 ]
@@ -162,11 +162,11 @@
                 "hooks": [
                     {
                         "type": "command",
-                        "command": "node D:/AICoding/.claude/helpers/hook-handler.cjs compact-auto"
+                        "command": "node .claude/helpers/hook-handler.cjs compact-auto"
                     },
                     {
                         "type": "command",
-                        "command": "node D:/AICoding/.claude/helpers/hook-handler.cjs session-end",
+                        "command": "node .claude/helpers/hook-handler.cjs session-end",
                         "timeout": 6000
                     }
                 ]
@@ -177,12 +177,12 @@
                 "hooks": [
                     {
                         "type": "command",
-                        "command": "node D:/AICoding/.claude/helpers/hook-handler.cjs status",
+                        "command": "node .claude/helpers/hook-handler.cjs status",
                         "timeout": 3000
                     },
                     {
                         "type": "command",
-                        "command": "node D:/AICoding/.claude/hooks/monitor-hooks.cjs start",
+                        "command": "node .claude/hooks/monitor-hooks.cjs start",
                         "timeout": 3000
                     }
                 ]
@@ -193,17 +193,17 @@
                 "hooks": [
                     {
                         "type": "command",
-                        "command": "node D:/AICoding/.claude/helpers/hook-handler.cjs post-task",
+                        "command": "node .claude/helpers/hook-handler.cjs post-task",
                         "timeout": 5000
                     },
                     {
                         "type": "command",
-                        "command": "node D:/AICoding/.claude/hooks/monitor-hooks.cjs end",
+                        "command": "node .claude/hooks/monitor-hooks.cjs end",
                         "timeout": 3000
                     },
                     {
                         "type": "command",
-                        "command": "node D:/AICoding/.claude/hooks/monitor-hooks.cjs push",
+                        "command": "node .claude/hooks/monitor-hooks.cjs push",
                         "timeout": 3000
                     }
                 ]
@@ -214,7 +214,7 @@
                 "hooks": [
                     {
                         "type": "command",
-                        "command": "node D:/AICoding/.claude/helpers/hook-handler.cjs notify",
+                        "command": "node .claude/helpers/hook-handler.cjs notify",
                         "timeout": 3000
                     }
                 ]
@@ -225,7 +225,7 @@
         "allow": [
             "Bash(npx @claude-flow*)",
             "Bash(npx claude-flow*)",
-            "Bash(node D:/AICoding/.claude/*)",
+            "Bash(node .claude/*)",
             "mcp__claude-flow__:*"
         ],
         "deny": [
@@ -363,7 +363,7 @@
     },
     "mcpServers": {
         "lean-ctx": {
-            "command": "C:/Users/Administrator/AppData/Roaming/npm/node_modules/lean-ctx-bin/bin/lean-ctx.exe",
+            "command": "lean-ctx",
             "args": []
         }
     }

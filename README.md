@@ -9,93 +9,38 @@
 
 # AI编程智驾 — 让 AI 自动驾驶编程全流程
 
-> 从环境搭建到代码交付，零手动干预。只需一个文件，放进 AI IDE，全自动完成。
->
-> 总纲：[AICoding原则.docx](../知识库相关/docs/AICoding原则.docx) — **稳 · 省 · 准 · 夯 · 快 · 懂**
+> 如果你是人类，请阅读本文档了解原理。
+用法：最简单方式使用—— 一个字 夯 放在任务描述前即可。
+安装与更新：请复制下面这段话，分享给你的朋友。
+
+## 分享给朋友（一键复制）
+
+**把下面这段话复制发给朋友，他丢给任意 AI（Claude Code / Trae / Cursor / Qoder / CodeBuddy/ Antigravity/ AI Studio）即可自动完成全部安装配置：**
+
+```
+🤖 AI 请执行：
+
+访问 https://github.com/1234567KF/ChronoCoding/blob/main/AICoding.md
+严格按其中的阶段0-5完成安装配置。
+说"执行安装"从头开始，说"执行更新"升级已有安装。
+如无法访问URL请引导用户手动下载该文件。
+```
+
+> 朋友那边无需装任何东西，无需下载任何文件，只需把上面这段话粘贴给 AI。
+
+---
+
+
+
+
+<p align="center">
+  <img src="assets/posters/三角色架构图.png" alt="AI编程智驾 三角色核心架构" width="900">
+</p>
 
 <p align="center">
   <img src="assets/posters/宣传海报_浅色.png" alt="AI编程智驾 宣传海报" width="900">
 </p>
 
-## 三角色核心架构
-
-```
-                         ┌─────────────────────────────────────┐
-                         │            🔭 监测者 Monitor          │
-                         │      kf-token-tracker · Port 3456     │
-                         │  实时 Token 追踪 · 成本看板 · 自检系统  │
-                         │                                      │
-                         │   ┌─── 会话列表 ─── 统计图表 ──┐     │
-                         │   │ 实际花费 vs 基线(Pro)     │     │
-                         │   │ 节省量 · 技能调用 · 日趋势 │     │
-                         │   └──────────────────────────┘     │
-                         └──────────┬──────────────────────────┘
-                                    │ 监控 & 验证
-                    ┌───────────────┼───────────────┐
-                    ▼               ▼               ▼
-          ┌─────────────────┐ ┌─────────────────┐ ┌─────────────────┐
-          │    📋 数据采集    │ │   📊 统计分析    │ │   🖥️ 看板呈现    │
-          │ HTTP POST · 轮询 │ │ 基线对比 · 节省率│ │ EJS · Chart.js │
-          │ pending-session  │ │ token_daily     │ │ 列表 · 详情     │
-          └─────────────────┘ └─────────────────┘ └─────────────────┘
-                    ▲                               ▲
-                    │         反馈优化               │
-                    │                               │
-          ┌────────┴───────────────────────────────┴────────┐
-          │                   铁三角闭环                      │
-          │                                                   │
-          │   监测者 记录实际消耗 → 节流者 优化策略            │
-          │   → 协作者 执行并切换模型 → 监测者 验证效果        │
-          │                                                   │
-          │   「省」得明白 · 「准」得可靠 · 「夯」得有力       │
-          └───────────────────────────────────────────────────┘
-                    │                               ▲
-                    ▼                               │
-          ┌─────────────────┐ ┌─────────────────┐ ┌─────────────────┐
-          │    🏭 模型路由    │ │   🗜️ 上下文压缩  │ │   🧠 智能调度    │
-          │ Pro↔Flash 自动切 │ │ lean-ctx 87%   │ │ CCP 跳过 Spawn │
-          │ 计划/执行分模型   │ │ lambda 3x 压缩  │ │ 回调替代轮询    │
-          └─────────────────┘ └─────────────────┘ └─────────────────┘
-                    ▲                               ▲
-                    │                               │
-          ┌────────┴───────────────┬───────────────┴────────┐
-          │      🚀 节流者 Saver    │     🤝 协作者 Collaborator  │
-          │     Token 节省策略引擎   │     kf-multi-team-compete   │
-          │                        │     多 Agent 竞争评审        │
-          │  模型路由 + 压缩 +      │                            │
-          │  智能调度 = 40-67% 节省  │  红蓝绿三队 Pipeline 并发    │
-          └────────────────────────┘                            │
-                    │                              │            │
-                    └──────────────┬───────────────┘            │
-                                   ▼                            │
-                         ┌──────────────────────────────────────┘
-                         ▼
-          ┌──────────────────────────────────────────────────────┐
-          │              🎯 最终目标                              │
-          │  最低成本 · 最高质量 · 全链路自动化                   │
-          └──────────────────────────────────────────────────────┘
-```
-
-### 角色定义
-
-| 角色 | 技能 | 核心原则 | 一句话职责 |
-|------|------|---------|-----------|
-| **🔭 监测者** | `kf-token-tracker` | **准** — 测的准 | 实时追踪 Token 消耗，基线对比，看板呈现，自检保障数据准确 |
-| **🚀 节流者** | `kf-model-router` + `lean-ctx` + `CCP` + `λ` | **省** — 省的极致 | 模型路由(Pro/Flash)、上下文压缩(87%)、智能调度(跳过Spawn)、Agent通信压缩(3x) |
-| **🤝 协作者** | `kf-multi-team-compete` (夯) | **夯** — 力大砖飞 | 多 Agent 并发竞争评审，红蓝绿三队 Pipeline，自动模型切换 |
-
-### 闭环流程
-
-```
-监测者 记录基线(Pro全价) vs 实际(Flash优化)
-    → 节流者 分析节省空间，调整策略参数
-        → 协作者 执行时自动应用最优模型路由
-            → 监测者 验证节省效果，更新看板
-```
-
-**AI编程智驾** 是一套完整的 AI 编程工作台，遵循七大原则，集成 Claude Code、gspowers SOP 导航、claude-flow 多 Agent 并行执行，22 个自建 kf- 系列技能覆盖从 PRD 到 Spec 到编码到审查的全链路。
-
----
 
 ## 系统架构
 
@@ -171,22 +116,6 @@ flowchart LR
 
 ---
 
-## 分享给朋友（一键复制）
-
-**把下面这段话复制发给朋友，他丢给任意 AI（Claude Code / ChatGPT / Trae / Cursor）即可自动完成全部安装配置：**
-
-```
-🤖 AI 请执行：
-
-访问 https://github.com/1234567KF/ChronoCoding/blob/main/AICoding.md
-严格按其中的阶段0-5完成安装配置。
-说"执行安装"从头开始，说"执行更新"升级已有安装。
-如无法访问URL请引导用户手动下载该文件。
-```
-
-> 朋友那边无需装任何东西，无需下载任何文件，只需把上面这段话粘贴给 AI。
-
----
 
 ## 六字真言
 
@@ -199,6 +128,50 @@ flowchart LR
 | **快** | MVP 快速验证，多工具速出原型 | kf-prd-generator、kf-ui-prototype-generator、kf-spec、kf-image-editor、markdown-to-docx |
 | **懂** | 动前对齐，动后 diff | kf-alignment |
 
+## 项目技术路径
+
+从零到铁三角闭环，AI编程智驾的发展历程：
+
+<div style="margin: 16px auto; max-width: 760px;">
+
+<!-- 1 -->
+<div style="display: flex; align-items: stretch; margin-bottom: 12px;">
+  <div style="min-width: 8px; background: #e3f2fd; border-radius: 8px 0 0 8px;"></div>
+  <div style="flex: 1; padding: 8px 14px; background: #f5f5f5; border-radius: 0 8px 8px 0; font-size: 13px; line-height: 1.6; border-left: 3px solid #1565C0;">
+    <strong>初始集成</strong> — Claude Code API + gstack + superpowers 搭建基础框架，验证 AI 编程工作流的可行性
+  </div>
+</div>
+
+<!-- 2 -->
+<div style="display: flex; align-items: stretch; margin-bottom: 12px;">
+  <div style="min-width: 8px; background: #e8f5e9; border-radius: 8px 0 0 8px;"></div>
+  <div style="flex: 1; padding: 8px 14px; background: #f5f5f5; border-radius: 0 8px 8px 0; font-size: 13px; line-height: 1.6; border-left: 3px solid #2E7D32;">
+    <strong>流程导航</strong> — 集成 <code>gspowers</code> SOP 导航引擎，<code>gstack</code> 产品流程框架，实现标准化工作流
+  </div>
+</div>
+
+<!-- 3 -->
+<div style="display: flex; align-items: stretch; margin-bottom: 12px;">
+  <div style="min-width: 8px; background: #fff3e0; border-radius: 8px 0 0 8px;"></div>
+  <div style="flex: 1; padding: 8px 14px; background: #f5f5f5; border-radius: 0 8px 8px 0; font-size: 13px; line-height: 1.6; border-left: 3px solid #E65100;">
+    <strong>kf- 系列起步</strong> — 自建技能体系从零到 22+：
+    <div style="margin-top: 4px; font-size: 12px; color: #555;">
+      1️⃣ <strong>协作者</strong> <code>kf-multi-team-compete</code> — 多 Agent 并发竞争评审引擎<br>
+      2️⃣ <strong>节流者</strong> <code>kf-model-router</code> + <code>lean-ctx</code> + <code>CCP</code> + <code>lambda</code> — 模型路由 + 上下文压缩 + 智能调度<br>
+      3️⃣ <strong>监测者</strong> <code>kf-token-tracker</code> — 实时 Token 追踪 + 成本看板 + 自检系统
+    </div>
+  </div>
+</div>
+
+<!-- 4 -->
+<div style="display: flex; align-items: stretch; margin-bottom: 12px;">
+  <div style="min-width: 8px; background: #f3e5f5; border-radius: 8px 0 0 8px;"></div>
+  <div style="flex: 1; padding: 8px 14px; background: #f5f5f5; border-radius: 0 8px 8px 0; font-size: 13px; line-height: 1.6; border-left: 3px solid #7B1FA2;">
+    <strong>铁三角闭环</strong> — 监测者 → 节流者 → 协作者 全链路自动化，40-67% Token 节省，六大原则全覆盖
+  </div>
+</div>
+
+</div>
 
 ---
 
@@ -259,7 +232,7 @@ flowchart LR
 将整个项目给 AI 阅读，AI 自动完成所有配置：
 
 ```
-1. 将项目文件夹复制到新环境
+1. 将项目文件夯复制到新环境
 2. 在项目目录打开 Claude Code
 3. 让 AI 阅读 INSTALL.md
 4. AI 自动完成所有安装（仅需用户配置 Token）
