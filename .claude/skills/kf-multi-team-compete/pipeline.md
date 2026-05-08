@@ -62,9 +62,9 @@ Pre-Stage     Stage 0        Stage 1        Stage 2        Stage 3        Stage 
 | Pre-Stage | 协调者 | SDD Excel / 需求描述 | PRD.md | PRD.md 完整通过机械化验证 |
 | Stage 0 | 全栈开发 | PRD + 假设基线 | {team}-00-alignment.md | 产出存在即通过 |
 | Stage 1 | 全栈开发 | 对齐记录 | {team}-01-architecture.md | 架构方案无歧义 |
-| Stage 2 | 全栈开发 + 前端设计师 | 架构方案 | 代码 + {team}-02-implementation.md | 代码可编译/运行 |
-| Stage 3 | 集成测试 | 代码产物 | {team}-03-test-report.md | 核心 Happy Path 通过 |
-| Stage 4 | 集成测试 | 代码 + 测试报告 | {team}-04-review-report.md | 无 error 级别问题 |
+| Stage 2 | 全栈开发 + 前端设计师 | 架构方案 | 代码 + {team}-02-implementation.md（含 checklist 自检） | 代码可编译/运行 + checklist P0(A/B/D/J)通过 |
+| Stage 3 | 集成测试 | 代码 + checklist 自检结果 | {team}-03-test-report.md（含 checklist 测试矩阵） | Happy Path 通过 + checklist A/B/D/F/G/J 类专项测试通过 |
+| Stage 4 | 集成测试 | 代码 + 测试报告 + checklist 测试矩阵 | {team}-04-review-report.md（含 checklist 审计结论） | 无 error + checklist 审计通过（自检+测试+审查三重确认） |
 | Stage 5 | 前端设计师 | Stage 0-4 所有产物 | {team}-05-final.md | 完整方案结构 |
 
 ## 阶段 DAG

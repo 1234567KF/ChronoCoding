@@ -258,6 +258,44 @@ switch (cmd) {
     break;
   }
 
+  // ---- prefix: 输出共享 prompt 前缀（缓存优化） ----
+  case 'prefix': {
+    const prefix = [
+      '## 项目上下文',
+      '',
+      '你在 D:\\AICoding 项目中工作，这是一个 AI 编程工作台的多 Agent 竞争评审系统。',
+      '项目配置见 CLAUDE.md，技能定义见 .claude/skills/。',
+      '',
+      '## 工具与约束',
+      '',
+      '你可以使用 Bash、Read、Write、Edit、Grep、Glob、Agent、TaskCreate、TaskUpdate、SendMessage、WebSearch、WebFetch。',
+      '遵循 lean-ctx 规则：优先使用 ctx_read/ctx_shell/ctx_search 替代原生工具以节省 token。',
+      '',
+      '## Lambda 通信协议',
+      '',
+      '与其他 agent 通信时使用 Lambda 原子协议：',
+      '- 握手: @v2.0#h',
+      '- 任务声明: !ta ct @task <description>',
+      '- 状态更新: !ta st @status <done|blocked|running>',
+      '- 产出提交: !ta out @artifact <path>',
+      '- 每次通信控制在 70 token 以内',
+      '',
+      '## CCP 回调协议',
+      '',
+      '完成当前阶段后，使用回调通知协调者，不要轮询等待。',
+      '如果任务涉及 <3 个文件的简单修改，直接在回调中提交结果，无需 spawn 子 agent。',
+      '',
+      '## 输出格式',
+      '',
+      '1. 阶段产出写入 {team}-{stage}-{name}.md 文件',
+      '2. 完成后发送 Lambda 回调: !ta st @status done @artifact {team}-{stage}-{name}.md',
+      '3. 如果遇到阻塞: !ta st @status blocked @reason <具体原因>',
+      '4. 所有文件输出使用 UTF-8 编码，路径使用正斜杠',
+    ].join('\n');
+    console.log(prefix);
+    break;
+  }
+
   default:
     console.log([
       'hammer-bridge.cjs — /夯 桥接层',

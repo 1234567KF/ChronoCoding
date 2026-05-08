@@ -319,6 +319,7 @@ Spec 确认后，进入分步实施规划阶段。
 | 依赖标注 | 明确每个任务的依赖任务，构建 DAG |
 | 并行优化 | 标注可并行执行的任务组 |
 | 验收标准 | 每个任务有可量化的通过/不通过标准 |
+| **Coding Checklist** | 每个编码任务 MUST 引用 `.claude/rules/mvp-coding-checklist.md`，验收标准包含 P0 类（A/B/D/J）检查通过 |
 
 ### 6.2 输出任务清单（tasks.md）
 

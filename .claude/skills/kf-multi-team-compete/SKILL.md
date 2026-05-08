@@ -163,25 +163,34 @@ Pre-Stage     Stage 0        Stage 1        Stage 2        Stage 3        Stage 
 
 - **执行者**：全栈开发 agent
 - **输入**：Stage 1 架构方案
-- **动作**：按架构方案编码，前端设计师 agent 并行启动处理 UI 部分
-- **产出**：代码文件 + `{team}-02-implementation.md`
-- **门控**：代码可编译/运行，无语法错误
+- **动作**：
+  1. 按架构方案编码，前端设计师 agent 并行启动处理 UI 部分
+  2. **MUST** 编码完成后执行 coding checklist：`ctx_read .claude/rules/mvp-coding-checklist.md`
+  3. 逐项自检 A-J 类型（A/B/D/J 为 P0 必须检查），修复发现的问题
+- **产出**：代码文件 + `{team}-02-implementation.md`（含 checklist 自检结果）
+- **门控**：代码可编译/运行，无语法错误；checklist P0 项全部通过
 
 ### Stage 3 — 集成测试
 
 - **执行者**：集成测试 agent
-- **输入**：Stage 2 代码产物
-- **动作**：编写并运行测试用例，调用 `kf-browser-ops` 做 UI 自动化测试
-- **产出**：`{team}-03-test-report.md` — 测试覆盖、通过/失败、边界验证
-- **门控**：核心 Happy Path 测试通过方可进入 Stage 4
+- **输入**：Stage 2 代码产物 + Stage 2 checklist 自检结果
+- **动作**：
+  1. 编写并运行测试用例，调用 `kf-browser-ops` 做 UI 自动化测试
+  2. **MUST** 加载 coding checklist：`ctx_read .claude/rules/mvp-coding-checklist.md`
+  3. 按 checklist 逐类构造测试用例（A: ref解包 / B: 跨文件一致性 / C: 导航方法 / D: 模板作用域 / E: SPA路由 / F: API路径 / G: 响应结构 / H: URL构造 / I: 环境一致 / J: 导入遗漏）
+- **产出**：`{team}-03-test-report.md` — 测试覆盖、通过/失败、边界验证、checklist 测试矩阵
+- **门控**：核心 Happy Path 测试通过；checklist A/B/D/F/G/J 类专项测试通过方可进入 Stage 4
 
 ### Stage 4 — 代码审查
 
 - **执行者**：集成测试 agent
-- **输入**：Stage 2 代码 + Stage 3 测试报告
-- **动作**：调用 `kf-code-review-graph` 生成依赖图谱、涟漪效应分析、审查优先级
-- **产出**：`{team}-04-review-report.md`
-- **门控**：无 error 级别问题；warning 级别已记录并评估
+- **输入**：Stage 2 代码 + Stage 3 测试报告（含 checklist 测试矩阵）
+- **动作**：
+  1. 调用 `kf-code-review-graph` 生成依赖图谱、涟漪效应分析、审查优先级
+  2. **MUST** 核对 checklist 执行完整性：开发自检是否真实执行？测试是否覆盖了 checklist 类型？
+  3. 发现遗漏的 checklist 项 → 标记为 error，回退 Stage 2/3 修复
+- **产出**：`{team}-04-review-report.md`（含 checklist 审计结论）
+- **门控**：无 error 级别问题；warning 级别已记录并评估；checklist 审计通过（自检+测试+审查三重确认）
 
 ### Stage 5 — 方案汇总
 

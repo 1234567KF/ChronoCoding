@@ -77,6 +77,23 @@ git diff --name-only origin/main...HEAD 2>/dev/null || git diff --name-only HEAD
   - 若测试文件不存在 → 标记 🔴 测试缺失
 ```
 
+### Step 4.5: Coding Checklist 合规检查
+
+审查图谱生成后，**MUST** 加载 coding checklist 做专项审计：
+
+```
+1. ctx_read .claude/rules/mvp-coding-checklist.md
+2. 对照代码 diff，逐类检查变更是否触发 checklist 风险项：
+   A-引用取值: 检查 ref().value 使用
+   B-跨文件一致性: 新文件是否注册路由/导入依赖
+   D-模板作用域: slot v-if 过滤
+   F-API路径匹配: 前端路径 vs 后端路由
+   G-响应结构: 分页接口返回格式
+   J-导入遗漏: 使用的函数是否已 import
+3. 发现违规 → 标记为 error 级别（阻断合并）
+4. 输出 checklist 审计结果到审查报告中
+```
+
 ### Step 5: 生成审查图谱报告
 
 输出以下格式的结构化报告：
@@ -103,6 +120,19 @@ git diff --name-only origin/main...HEAD 2>/dev/null || git diff --name-only HEAD
 
 ## 测试覆盖缺口
 {缺少测试覆盖的变更文件列表}
+
+## Coding Checklist 审计
+| 类型 | 检查项 | 状态 | 发现 |
+|------|--------|------|------|
+| A | ref 解包 (.value) | ✅/🔴 | {如有违规，记录文件:行号} |
+| B | 跨文件一致性 (路由/导入) | ✅/🔴 | |
+| D | 模板作用域 (slot v-if) | ✅/🔴 | |
+| F | API 路径匹配 | ✅/🔴 | |
+| G | 响应结构假设 | ✅/🔴 | |
+| J | 导入遗漏 | ✅/🔴 | |
+| _其他_ | C/E/H/I 按场景 | ✅/⚠️ | |
+
+审计结论：通过 X/10 类，error Y 项，warning Z 项
 
 ## 审查建议
 - 建议审查顺序：{按依赖拓扑排序的审查顺序}
