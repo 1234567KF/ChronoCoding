@@ -34,18 +34,18 @@
 
 
 <p align="center">
-  <img src="assets/posters/三角色架构图.png" alt="AI编程智驾 三角色核心架构" width="900">
+  <img src="https://raw.githubusercontent.com/1234567KF/ChronoCoding/main/assets/posters/%E4%B8%89%E8%A7%92%E8%89%B2%E6%9E%B6%E6%9E%84%E5%9B%BE.png" alt="AI编程智驾 三角色核心架构" width="900">
 </p>
 
 <p align="center">
-  <img src="assets/posters/宣传海报_浅色.png" alt="AI编程智驾 宣传海报" width="900">
+  <img src="https://raw.githubusercontent.com/1234567KF/ChronoCoding/main/assets/posters/%E5%AE%A3%E4%BC%A0%E6%B5%B7%E6%8A%A5_%E6%B5%85%E8%89%B2.png" alt="AI编程智驾 宣传海报" width="900">
 </p>
 
 
 ## 系统架构
 
 <p align="center">
-  <img src="assets/posters/架构图.png" alt="AI编程智驾 系统架构图" width="900">
+  <img src="https://raw.githubusercontent.com/1234567KF/ChronoCoding/main/assets/posters/%E6%9E%B6%E6%9E%84%E5%9B%BE.png" alt="AI编程智驾 系统架构图" width="900">
 </p>
 
 ---
