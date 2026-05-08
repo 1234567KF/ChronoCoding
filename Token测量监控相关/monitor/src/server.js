@@ -55,8 +55,8 @@ function syncPendingSessions() {
         const existing = db.prepare('SELECT id FROM conversations WHERE id = ?').get(data.sessionId);
         if (!existing) {
           // Create conversation record
-          db.prepare(`INSERT INTO conversations (id, title, model, started_at, total_input_tokens, total_output_tokens, total_cost, ended_at)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?)`).run(
+          db.prepare(`INSERT INTO conversations (id, title, model, started_at, total_input_tokens, total_output_tokens, total_cost, total_baseline_cost, ended_at)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`).run(
             data.sessionId,
             data.title || `会话 ${(data.sessionId || '').slice(0, 16)}`,
             data.model || 'unknown',
@@ -64,15 +64,17 @@ function syncPendingSessions() {
             data.total_input_tokens || 0,
             data.total_output_tokens || 0,
             data.total_cost || 0,
+            data.total_baseline_cost || 0,
             data.ended_at || null
           );
           console.log('[monitor] Imported pending session:', data.sessionId);
         } else if (data.phase === 'end') {
           // Update with final totals
-          db.prepare(`UPDATE conversations SET total_input_tokens=?, total_output_tokens=?, total_cost=?, ended_at=? WHERE id=?`).run(
+          db.prepare(`UPDATE conversations SET total_input_tokens=?, total_output_tokens=?, total_cost=?, total_baseline_cost=?, ended_at=? WHERE id=?`).run(
             data.total_input_tokens || 0,
             data.total_output_tokens || 0,
             data.total_cost || 0,
+            data.total_baseline_cost || 0,
             data.ended_at || null,
             data.sessionId
           );

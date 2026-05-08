@@ -47,4 +47,23 @@ function calcCost(model, tokensIn, tokensOut, cacheHit) {
   };
 }
 
-module.exports = { MODEL_PRICES, MODEL_ALIASES, calcCost };
+/**
+ * 计算基线成本 — 全部按 Pro 定价（无技能优化的假想场景）
+ * 缓存部分同价（服务器行为），仅输入/输出按 Pro 全价
+ */
+function calcBaselineCost(tokensIn, tokensOut, cacheHit) {
+  const p = MODEL_PRICES['deepseek-v4-pro'];
+  const uncachedIn = tokensIn || 0;
+  const cachedIn = cacheHit || 0;
+  const inputCost  = (uncachedIn / 1_000_000) * p.input;
+  const cacheCost  = (cachedIn / 1_000_000) * p.cache_read;
+  const outputCost = (tokensOut / 1_000_000) * p.output;
+  return {
+    input_cost:  inputCost,
+    cache_cost:  cacheCost,
+    output_cost: outputCost,
+    total_cost:  inputCost + cacheCost + outputCost,
+  };
+}
+
+module.exports = { MODEL_PRICES, MODEL_ALIASES, calcCost, calcBaselineCost };

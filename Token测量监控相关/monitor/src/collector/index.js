@@ -1,5 +1,5 @@
 const { getDB } = require('../db');
-const { calcCost, MODEL_ALIASES } = require('../pricing');
+const { calcCost, calcBaselineCost, MODEL_ALIASES } = require('../pricing');
 
 function resolveModel(raw) {
   if (!raw) return null;
@@ -14,11 +14,11 @@ function saveRecord({ sessionId, title, model, messages, skillCalls }) {
   // Normalize model name for display consistency
   const resolvedModel = resolveModel(model);
 
-  let totalInput = 0, totalOutput = 0, totalCost = 0, totalCache = 0;
+  let totalInput = 0, totalOutput = 0, totalCost = 0, totalBaselineCost = 0, totalCache = 0;
 
   const insertMsg = db.prepare(
-    `INSERT INTO messages (conversation_id, role, content, input_tokens, output_tokens, cache_hit, input_cost, output_cost, created_at)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`
+    `INSERT INTO messages (conversation_id, role, content, input_tokens, output_tokens, cache_hit, input_cost, output_cost, baseline_cost, created_at)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
   );
   const insertSkill = db.prepare(
     `INSERT INTO skill_calls (message_id, skill_name, skill_type, input_tokens, output_tokens, duration_ms, status)
@@ -44,6 +44,8 @@ function saveRecord({ sessionId, title, model, messages, skillCalls }) {
     for (const msg of messages || []) {
       // Calc cost using unified pricing (per MTok, CNY)
       const cost = calcCost(model, msg.input_tokens || 0, msg.output_tokens || 0, msg.cache_hit || 0);
+      // Baseline: all-Pro pricing (no skill optimization scenario)
+      const baseline = calcBaselineCost(msg.input_tokens || 0, msg.output_tokens || 0, msg.cache_hit || 0);
 
       const result = insertMsg.run(
         convId, msg.role, msg.content,
@@ -51,6 +53,7 @@ function saveRecord({ sessionId, title, model, messages, skillCalls }) {
         msg.cache_hit ?? null,
         cost?.input_cost ?? null,
         cost?.output_cost ?? null,
+        baseline?.total_cost ?? null,
         msg.created_at || now
       );
       const msgId = result.lastInsertRowid;
@@ -80,6 +83,7 @@ function saveRecord({ sessionId, title, model, messages, skillCalls }) {
       totalOutput += msg.output_tokens || 0;
       totalCache += msg.cache_hit || 0;
       totalCost += cost?.total_cost || 0;
+      totalBaselineCost += baseline?.total_cost || 0;
     }
 
     // update conversation totals
@@ -88,9 +92,10 @@ function saveRecord({ sessionId, title, model, messages, skillCalls }) {
         total_input_tokens = total_input_tokens + ?,
         total_output_tokens = total_output_tokens + ?,
         total_cost = total_cost + ?,
+        total_baseline_cost = total_baseline_cost + ?,
         ended_at = ?
        WHERE id = ?`
-    ).run(totalInput, totalOutput, totalCost, now, convId);
+    ).run(totalInput, totalOutput, totalCost, totalBaselineCost, now, convId);
 
     // update daily stats
     const today = now.slice(0, 10);
@@ -101,14 +106,15 @@ function saveRecord({ sessionId, title, model, messages, skillCalls }) {
           total_input = total_input + ?,
           total_output = total_output + ?,
           cache_hit_input = cache_hit_input + ?,
-          total_cost = total_cost + ?
+          total_cost = total_cost + ?,
+          total_baseline_cost = total_baseline_cost + ?
          WHERE date = ?`
-      ).run(totalInput, totalOutput, totalCache, totalCost, today);
+      ).run(totalInput, totalOutput, totalCache, totalCost, totalBaselineCost, today);
     } else {
       db.prepare(
-        `INSERT INTO token_daily_stats (date, total_input, total_output, cache_hit_input, total_cost)
-         VALUES (?, ?, ?, ?, ?)`
-      ).run(today, totalInput, totalOutput, totalCache, totalCost);
+        `INSERT INTO token_daily_stats (date, total_input, total_output, cache_hit_input, total_cost, total_baseline_cost)
+         VALUES (?, ?, ?, ?, ?, ?)`
+      ).run(today, totalInput, totalOutput, totalCache, totalCost, totalBaselineCost);
     }
   });
 

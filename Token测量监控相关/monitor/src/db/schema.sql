@@ -6,6 +6,7 @@ CREATE TABLE IF NOT EXISTS conversations (
   total_input_tokens INTEGER DEFAULT 0,
   total_output_tokens INTEGER DEFAULT 0,
   total_cost REAL DEFAULT 0,
+  total_baseline_cost REAL DEFAULT 0,
   started_at TEXT NOT NULL,
   ended_at TEXT
 );
@@ -20,6 +21,7 @@ CREATE TABLE IF NOT EXISTS messages (
   cache_hit INTEGER,
   input_cost REAL,
   output_cost REAL,
+  baseline_cost REAL,
   created_at TEXT NOT NULL DEFAULT (datetime('now'))
 );
 
@@ -40,6 +42,7 @@ CREATE TABLE IF NOT EXISTS token_daily_stats (
   total_output INTEGER DEFAULT 0,
   cache_hit_input INTEGER DEFAULT 0,
   total_cost REAL DEFAULT 0,
+  total_baseline_cost REAL DEFAULT 0,
   skill_breakdown TEXT DEFAULT '{}'
 );
 

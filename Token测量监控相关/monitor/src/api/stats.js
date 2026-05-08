@@ -11,7 +11,7 @@ router.get('/stats/tokens', (req, res) => {
   const since = new Date(Date.now() - days * 86400000).toISOString().slice(0, 10);
 
   const daily = db.prepare(
-    `SELECT date, total_input, total_output, cache_hit_input, total_cost
+    `SELECT date, total_input, total_output, cache_hit_input, total_cost, total_baseline_cost
      FROM token_daily_stats WHERE date >= ? ORDER BY date ASC`
   ).all(since);
 
@@ -19,7 +19,8 @@ router.get('/stats/tokens', (req, res) => {
     `SELECT
        COALESCE(SUM(total_input), 0) as total_input,
        COALESCE(SUM(total_output), 0) as total_output,
-       COALESCE(SUM(total_cost), 0) as total_cost
+       COALESCE(SUM(total_cost), 0) as total_cost,
+       COALESCE(SUM(total_baseline_cost), 0) as total_baseline_cost
      FROM token_daily_stats WHERE date >= ?`
   ).get(since);
 

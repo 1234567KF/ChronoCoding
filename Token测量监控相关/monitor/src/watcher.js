@@ -7,7 +7,7 @@
 const fs = require('fs');
 const path = require('path');
 const { getDB } = require('./db');
-const { calcCost, MODEL_PRICES, MODEL_ALIASES } = require('./pricing');
+const { calcCost, calcBaselineCost, MODEL_PRICES, MODEL_ALIASES } = require('./pricing');
 
 function resolveModel(raw) {
   if (!raw) return null;
@@ -48,8 +48,8 @@ function importTraces() {
 
   const db = getDB();
   const insertMsg = db.prepare(
-    `INSERT INTO messages (conversation_id, role, content, input_tokens, output_tokens, cache_hit, input_cost, output_cost, created_at)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`
+    `INSERT INTO messages (conversation_id, role, content, input_tokens, output_tokens, cache_hit, input_cost, output_cost, baseline_cost, created_at)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
   );
   const insertSkill = db.prepare(
     `INSERT INTO skill_calls (message_id, skill_name, skill_type, input_tokens, output_tokens, duration_ms, status)
@@ -83,12 +83,14 @@ function importTraces() {
       // 总输入 = 未缓存(token_in) + 缓存命中(cache_hit) — 相加关系
       const totalInput = (entry.tokens_in || 0) + (entry.cache_hit || 0);
       const cost = calcCost(model, entry.tokens_in || 0, entry.tokens_out || 0, entry.cache_hit || 0);
+      const baseline = calcBaselineCost(entry.tokens_in || 0, entry.tokens_out || 0, entry.cache_hit || 0);
 
       const msg = insertMsg.run(
         convId, 'assistant', entry.note || '',
         entry.tokens_in || 0, entry.tokens_out || 0,
         entry.cache_hit ?? null,
         cost?.input_cost ?? null, cost?.output_cost ?? null,
+        baseline?.total_cost ?? null,
         now
       );
 
@@ -106,11 +108,12 @@ function importTraces() {
           total_input_tokens = total_input_tokens + ?,
           total_output_tokens = total_output_tokens + ?,
           total_cost = total_cost + ?,
+          total_baseline_cost = total_baseline_cost + ?,
           ended_at = ?
          WHERE id = ?`
       ).run(
         totalInput, entry.tokens_out || 0,
-        cost?.total_cost || 0, now, convId
+        cost?.total_cost || 0, baseline?.total_cost || 0, now, convId
       );
 
       imported++;
@@ -165,8 +168,8 @@ function importPendingSessions() {
         const existing = db.prepare('SELECT id FROM conversations WHERE id = ?').get(data.sessionId);
         if (!existing) {
           db.prepare(
-            `INSERT INTO conversations (id, session_id, title, model, started_at, total_input_tokens, total_output_tokens, total_cost, ended_at)
-             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`
+            `INSERT INTO conversations (id, session_id, title, model, started_at, total_input_tokens, total_output_tokens, total_cost, total_baseline_cost, ended_at)
+             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
           ).run(
             data.sessionId, data.sessionId,
             data.title || `会话 ${data.sessionId.slice(0, 16)}`,
@@ -175,13 +178,14 @@ function importPendingSessions() {
             data.total_input_tokens || 0,
             data.total_output_tokens || 0,
             data.total_cost || 0,
+            data.total_baseline_cost || 0,
             data.ended_at || null
           );
           console.log(`[watcher] Imported pending session: ${data.sessionId}`);
         } else if (data.phase === 'end') {
           db.prepare(
-            `UPDATE conversations SET total_input_tokens=?, total_output_tokens=?, total_cost=?, ended_at=? WHERE id=?`
-          ).run(data.total_input_tokens || 0, data.total_output_tokens || 0, data.total_cost || 0, data.ended_at || null, data.sessionId);
+            `UPDATE conversations SET total_input_tokens=?, total_output_tokens=?, total_cost=?, total_baseline_cost=?, ended_at=? WHERE id=?`
+          ).run(data.total_input_tokens || 0, data.total_output_tokens || 0, data.total_cost || 0, data.total_baseline_cost || 0, data.ended_at || null, data.sessionId);
           console.log(`[watcher] Updated pending session: ${data.sessionId}`);
         }
         fs.unlinkSync(path.join(PENDING_DIR, file));

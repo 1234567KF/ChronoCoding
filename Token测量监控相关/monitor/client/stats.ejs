@@ -30,20 +30,25 @@ async function loadStats() {
   // Token stats
   const tRes = await fetch('/api/stats/tokens?range=' + range);
   const tData = await tRes.json();
-  document.getElementById('summaryCards').innerHTML = `
-    <div class="card">
-      <div class="stat-value">${(tData.summary.total_input / 1000).toFixed(1)}K</div>
-      <div class="stat-label">总输入 Token (${range})</div>
-    </div>
-    <div class="card">
-      <div class="stat-value">${(tData.summary.total_output / 1000).toFixed(1)}K</div>
-      <div class="stat-label">总输出 Token (${range})</div>
-    </div>
-    <div class="card">
-      <div class="stat-value">${tData.summary.total_cost ? '¥' + tData.summary.total_cost.toFixed(4) : '¥0'}</div>
-      <div class="stat-label">输出总花费 (${range})</div>
-    </div>
-  `;
+
+  const baseline = tData.summary.total_baseline_cost || 0;
+  const actual = tData.summary.total_cost || 0;
+  const saving = baseline - actual;
+  const savingPct = baseline > 0 ? (saving / baseline * 100).toFixed(1) : '0.0';
+
+  document.getElementById('summaryCards').innerHTML =
+    '<div class="card">' +
+      '<div class="stat-value">' + (tData.summary.total_input / 1000).toFixed(1) + 'K</div>' +
+      '<div class="stat-label">总输入 Token (' + range + ')</div>' +
+    '</div>' +
+    '<div class="card">' +
+      '<div class="stat-value">' + (tData.summary.total_output / 1000).toFixed(1) + 'K</div>' +
+      '<div class="stat-label">总输出 Token (' + range + ')</div>' +
+    '</div>' +
+    '<div class="card">' +
+      '<div class="stat-value">' + (tData.summary.total_cost ? '¥' + tData.summary.total_cost.toFixed(4) : '¥0') + '</div>' +
+      '<div class="stat-label">实际花费 (' + range + ') | 基线 ¥' + baseline.toFixed(4) + ' | 节省 ¥' + saving.toFixed(4) + ' (' + savingPct + '%)</div>' +
+    '</div>';
 
   // Chart
   const ctx = document.getElementById('tokenChart').getContext('2d');
@@ -51,27 +56,35 @@ async function loadStats() {
   tokenChart = new Chart(ctx, {
     type: 'line',
     data: {
-      labels: tData.daily.map(d => d.date.slice(5)),
+      labels: tData.daily.map(function(d) { return d.date.slice(5); }),
       datasets: [
-        { label: '输入 Token', data: tData.daily.map(d => d.total_input), borderColor: '#1565c0', fill: false, tension: 0.3 },
-        { label: '输出 Token', data: tData.daily.map(d => d.total_output), borderColor: '#c62828', fill: false, tension: 0.3 },
+        { label: '输入 Token', data: tData.daily.map(function(d) { return d.total_input; }), borderColor: '#1565c0', fill: false, tension: 0.3 },
+        { label: '输出 Token', data: tData.daily.map(function(d) { return d.total_output; }), borderColor: '#c62828', fill: false, tension: 0.3 },
+        { label: '实际花费 (¥)', data: tData.daily.map(function(d) { return +(d.total_cost * 1000).toFixed(1); }), borderColor: '#ff8f00', fill: false, tension: 0.3, yAxisID: 'y1' },
+        { label: '基线花费 (¥)', data: tData.daily.map(function(d) { return +((d.total_baseline_cost || 0) * 1000).toFixed(1); }), borderColor: '#999', borderDash: [5,5], fill: false, tension: 0.3, yAxisID: 'y1' },
       ]
     },
-    options: { responsive: true, plugins: { legend: { position: 'top' } } }
+    options: {
+      responsive: true,
+      plugins: { legend: { position: 'top' } },
+      scales: {
+        y1: { position: 'right', grid: { display: false }, title: { display: true, text: '花费 (¥×1000)' } }
+      }
+    }
   });
 
   // Skill stats
   const sRes = await fetch('/api/stats/skills?range=' + range);
   const sData = await sRes.json();
-  document.getElementById('skillBody').innerHTML = sData.data.map(s => `
-    <tr>
-      <td><strong>${esc(s.skill_name)}</strong></td>
-      <td>${s.call_count}</td>
-      <td>${s.total_input?.toLocaleString() || 0}</td>
-      <td>${s.total_output?.toLocaleString() || 0}</td>
-    </tr>
-  `).join('');
+  document.getElementById('skillBody').innerHTML = sData.data.map(function(s) {
+    return '<tr>' +
+      '<td><strong>' + esc(s.skill_name) + '</strong></td>' +
+      '<td>' + s.call_count + '</td>' +
+      '<td>' + (s.total_input?.toLocaleString() || 0) + '</td>' +
+      '<td>' + (s.total_output?.toLocaleString() || 0) + '</td>' +
+      '</tr>';
+  }).join('');
 }
-function esc(s) { const d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
+function esc(s) { var d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
 loadStats();
 </script>

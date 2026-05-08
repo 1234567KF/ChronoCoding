@@ -24,6 +24,26 @@ function initDB() {
     }
   } catch {}
 
+  // Migration: add baseline_cost columns
+  try {
+    const msgCols = db.pragma('table_info(messages)');
+    if (!msgCols.some(c => c.name === 'baseline_cost')) {
+      db.exec('ALTER TABLE messages ADD COLUMN baseline_cost REAL');
+    }
+  } catch {}
+  try {
+    const convCols = db.pragma('table_info(conversations)');
+    if (!convCols.some(c => c.name === 'total_baseline_cost')) {
+      db.exec('ALTER TABLE conversations ADD COLUMN total_baseline_cost REAL DEFAULT 0');
+    }
+  } catch {}
+  try {
+    const statsCols = db.pragma('table_info(token_daily_stats)');
+    if (!statsCols.some(c => c.name === 'total_baseline_cost')) {
+      db.exec('ALTER TABLE token_daily_stats ADD COLUMN total_baseline_cost REAL DEFAULT 0');
+    }
+  } catch {}
+
   return db;
 }
 
