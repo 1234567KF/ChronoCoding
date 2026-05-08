@@ -19,7 +19,7 @@
 | `kf-opencli`                | —                 | 准     | 被 `/夯` Stage 1/2/3 按需自动调用                                                                                                                | OpenCLI — 100+ 平台 CLI 数据直取（知乎/B站/微博/GitHub/Reddit/HN/arXiv），补充 web-search 和 scrapling 中间地带 |
 | `kf-grant-research`         | —                 | 准     | Pipeline + Inversion + Generator，调用 asta-skill + kf-scrapling + kf-web-search                                                                   | 课题申报研究助手：顶刊搜索→论文分析→研究空白→申报材料                                                         |
 | `kf-reverse-spec`           | —                 | 准/省  | Pipeline，调用 kf-alignment + kf-web-search + kf-code-review-graph                                                                                 | 存量代码→Spec/文档 逆向流水线                                                                                   |
-| `kf-multi-team-compete`     | **`/夯`**  | 夯     | **主入口**，自动调用 11 个技能 + Pipeline 引擎                                                                                               | 红蓝绿队多 Agent 并发竞争评审                                                                                    |
+| `kf-multi-team-compete`     | **`/夯`**  | 夯     | **主入口**，自动调用 12 个技能 + Pipeline 引擎                                                                                               | 红蓝绿队多 Agent 并发竞争评审                                                                                    |
 | `kf-alignment`              | `/对齐`          | 懂     | 被 kf-spec、`/夯`、kf-prd-generator 自动调用                                                                                                     | 对齐工作流：动前谈理解，动后谈 diff                                                                              |
 | `kf-autoresearch`           | —                 | 准     | Pipeline + Loop，自动调用 kf-model-router                                                                                                          | Karpathy 自主 ML 实验：改 train.py→5分钟训练→验证val_bpb→循环                                                 |
 | `kf-model-router`           | 模型路由           | 省     | **自动触发**：所有技能启动时自动检查并切换模型                                                                                               | 模型智能路由：计划 pro，执行 flash，用户无感                                                                     |
@@ -33,6 +33,7 @@
 | `kf-doc-consistency`        | —                 | 准/省  | Pipeline + Reviewer，被 kf-add-skill 自动调用                                                                                                      | 文档全局一致性自检                                                                                               |
 | `kf-add-skill`              | —                 | 稳     | 关键词搜索→下载安装→同步所有文档+SKILL.md，自动触发一致性检查                                                                                    | 技能安装管家：搜索安装+文档全自动同步                                                                            |
 | `kf-langextract`            | —                 | 准     | Pipeline + Tool Wrapper + Generator，调用 lx.extract()                                                                                             | LLM 驱动结构化提取（非结构化文本→JSON/CSV/YAML），带 source grounding                                           |
+| `kf-exa-code`              | /exa-code          | 准     | 被 `/夯` Stage 1/2/4 按需调用；降级链 kf-web-search → kf-scrapling                                                                              | Exa Code 引擎：知识缺口检测→Exa MCP 代码搜索→极简返回，面向 API/库/SDK 知识断层                               |
 | `lambda-lang`               | λ                 | 省     | **自动注入**：多 Agent 并发时注入 Λ 通信协议（3x 压缩）；被 `/夯`、`/triple` 自动调用                                                   | Agent-to-Agent 原生语言，340+ 原子，7 域（a2a/evo/code/...），握手 `@v2.0#h`                                   |
 | `claude-code-pro`           | ccp                | 省     | **自动触发**：多 Agent spawn 前 CCP 智能调度（不 spawn 则省 10K-15K token）；完成回调替代轮询（省 80-97%）；被 `/夯`、`/triple` 自动调用 | Token 高效调度：知道何时不 spawn Agent，回调替代轮询                                                             |
 
@@ -81,6 +82,7 @@
     ├── kf-token-tracker/    # Token全量追踪 + 技能调用链路
     ├── kf-add-skill/         # 技能安装管家
     ├── kf-doc-consistency/   # 文档一致性自检
+    ├── kf-exa-code/      # Exa Code — Web 规模代码上下文引擎
     ├── kf-scrapling/          # Web 爬虫 + 反反爬
     ├── kf-opencli/            # OpenCLI — 100+ 平台 CLI 数据直取
     ├── kf-grant-research/    # 课题申报研究助手
@@ -136,6 +138,7 @@ claude
 | `UI原型` / `原型生成` / `prototype`                              | kf-ui-prototype-generator | 快     | 被 `/夯` Stage 2/5 自动调用                                     |
 | `ccp` / `智能调度` / `回调`                                      | claude-code-pro           | 省     | Token 高效调度：不 spawn 则省 10K-15K token                       |
 | `λ` / `lambda` / `!ta ct` / `@v2.0#h` / `agent通信`         | lambda-lang               | 省     | Agent 间 Lambda 压缩通信，自动注入                                |
+| `exa-code` / `查代码示例` / `找API用法` / `代码搜索` / `查库文档` | kf-exa-code        | 准     | 自动知识缺口检测 + Exa MCP 代码搜索 + 极简返回；被 `/夯` Stage 1/2/4 按需调用 |
 
 ## 自动调用链速览
 
@@ -158,6 +161,7 @@ claude
        ├─ kf-web-search  ← 技术资料搜索（Stage 1/2/3 按需）
        ├─ kf-scrapling  ← 深度网页抓取（Stage 1/2/3 按需，反反爬）
        ├─ kf-opencli    ← 平台数据 CLI 直取（Stage 1/2/3 按需，100+ 平台）
+       ├─ kf-exa-code  ← 代码知识检索（Stage 1/2/4 按需，查 API/库/SDK 用法）
        ├─ kf-ui-prototype-generator ← UI 原型（Stage 2/5）
        ├─ kf-image-editor ← AI P 图（Stage 2/5）
        ├─ kf-browser-ops ← 自动化测试（Stage 3）

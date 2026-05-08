@@ -91,6 +91,7 @@ claude
 | `/review-graph`           | 🆕 代码审查依赖图谱               | kf-code-review-graph |
 | `/web-search [问题]`      | 🆕 多引擎智能搜索                 | kf-web-search        |
 | `/opencli [平台] [命令]`    | 🆕 100+ 平台 CLI 数据直取        | kf-opencli           |
+| `/exa-code [查询]` / `查代码示例` / `找API用法` | 🆕 Exa Code 代码上下文引擎 | kf-exa-code          |
 | `/browser-ops`            | 🆕 浏览器自动化操作               | kf-browser-ops       |
 | `/夯 [任务]`              | 🆕 多团队竞争评审                 | kf-multi-team-compete |
 | `/对齐` / `说下你的理解`  | 🆕 对齐工作流                     | kf-alignment         |
@@ -173,7 +174,8 @@ Agent 共享（在同一个项目内的 agents 共享记忆）
 │       ├── kf-go/                # 工作流导航
 │       ├── kf-skill-design-expert/ # Skill 设计
 │       ├── kf-token-tracker/     # Token全量追踪 + 技能调用链路
-    │       ├── kf-scrapling/      # Web 爬虫 + 反反爬
+    │       ├── kf-exa-code/       # Exa Code — Web 规模代码上下文引擎
+│       ├── kf-scrapling/      # Web 爬虫 + 反反爬
     │       ├── kf-grant-research/ # 课题申报研究助手
     │       ├── kf-langextract/     # LLM 驱动结构化提取
 │       ├── asta-skill/           # 学术论文搜索

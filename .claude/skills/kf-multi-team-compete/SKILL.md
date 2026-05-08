@@ -40,6 +40,7 @@ metadata:
     - kf-web-search
     - kf-scrapling
     - kf-opencli
+    - kf-exa-code
     - kf-prd-generator
     - kf-model-router
     - kf-image-editor
@@ -155,7 +156,7 @@ Pre-Stage     Stage 0        Stage 1        Stage 2        Stage 3        Stage 
 
 - **执行者**：全栈开发 agent
 - **输入**：Stage 0 对齐记录
-- **动作**：设计数据模型、API 契约、组件树、路由方案；**可调用 `kf-web-search` 搜索技术方案和最佳实践，`kf-scrapling` 深度抓取参考实现，`kf-opencli` 从特定平台（GitHub/知乎/Reddit/arXiv/HackerNews）结构化直取技术资料**
+- **动作**：设计数据模型、API 契约、组件树、路由方案；**可调用 `kf-web-search` 搜索技术方案和最佳实践，`kf-scrapling` 深度抓取参考实现，`kf-exa-code` 查 API/库/SDK 代码示例，`kf-opencli` 从特定平台（GitHub/知乎/Reddit/arXiv/HackerNews）结构化直取技术资料**
 - **产出**：`{team}-01-architecture.md` — 架构图、模块划分、技术选型理由
 - **门控**：架构方案无歧义，关键决策点已标注
 
@@ -240,8 +241,8 @@ Stage0 → Stage1 → Stage2 → Stage3 → Stage4 → Stage5
 
 | Agent | 流水线阶段 | 联动 | 模型 |
 |-------|-----------|------|------|
-| **全栈开发** | Stage 0-2（对齐→架构→编码） | `kf-spec`、`kf-alignment`、`kf-web-search`（按需搜索技术方案）、`kf-scrapling`（按需深度数据采集）、`kf-opencli`（按需平台数据直取） | `sonnet`（flash） |
-| **集成测试** | Stage 3-4（测试→审查） | `kf-browser-ops`、`kf-code-review-graph`、`kf-web-search`（按需搜索测试方案）、`kf-opencli`（按需浏览器自动化） | `sonnet`（flash） |
+| **全栈开发** | Stage 0-2（对齐→架构→编码） | `kf-spec`、`kf-alignment`、`kf-web-search`（按需搜索技术方案）、`kf-scrapling`（按需深度数据采集）、`kf-exa-code`（按需查 API/库/SDK 代码示例）、`kf-opencli`（按需平台数据直取） | `sonnet`（flash） |
+| **集成测试** | Stage 3-4（测试→审查） | `kf-browser-ops`、`kf-code-review-graph`、`kf-web-search`（按需搜索测试方案）、`kf-exa-code`（按需验证 API 用法正确性）、`kf-opencli`（按需浏览器自动化） | `sonnet`（flash） |
 | **前端设计师** | Stage 2 UI 并行 + Stage 5 方案汇总 | `kf-ui-prototype-generator`、`kf-web-search`（按需搜索 UI 参考）、`kf-scrapling`（按需抓取设计参考）、`kf-opencli`（按需平台设计素材） | `sonnet`（flash） |
 | **对抗者** | Phase 5 对抗质疑（单一 agent，不拆分） | — | `opus`（pro） |
 | **裁判** | Phase 3 评分（单一 agent，不拆分） | `kf-alignment` | `sonnet`（flash） |
@@ -835,6 +836,7 @@ Phase 6 汇总者回应与执行完成后 MUST 将最终评分卡、对抗报告
 | `kf-web-search` | Stage 1/2/3（按需） | agent 搜索技术方案、最佳实践、测试方案、UI 参考 |
 | `kf-scrapling` | Stage 1/2/3（按需） | agent 深度网页抓取（反反爬），补充 web-search 无法访问的站点 |
 | `kf-opencli` | Stage 1/2/3（按需） | agent 平台数据 CLI 直取（100+ 平台：知乎/B站/GitHub/Reddit/HN/arXiv 等），补充 web-search 和 scrapling 的中间地带 |
+| `kf-exa-code` | Stage 1/2/4（按需） | agent 代码知识检索：查 API/库/SDK 用法，编码遇到知识断层时自动触发 |
 | `kf-ui-prototype-generator` | Stage 2 + Stage 5 | 前端设计师 UI 原型生成 |
 | `kf-browser-ops` | Stage 3 | 集成测试 agent 自动化测试 |
 | `kf-code-review-graph` | Stage 4 | 代码审查依赖图谱 |

@@ -295,6 +295,7 @@ git log --oneline -3
 | `kf-add-skill` | — | 稳 | Pipeline + Inversion | kf-model-router、kf-skill-design-expert、kf-doc-consistency | kf-grant-research（自动调用）、用户手动 | pro |
 | `kf-grant-research` | — | 准 | Pipeline + Inversion + Generator | asta-skill、kf-scrapling、kf-web-search、kf-alignment、kf-add-skill、kf-model-router | 用户手动 | pro |
 | `kf-langextract` | — | 准 | Pipeline + Tool Wrapper + Generator | kf-model-router | 用户手动 | flash |
+| `kf-exa-code` | /exa-code | 准 | Pipeline + Tool Wrapper + Inversion | kf-model-router、kf-web-search（降级）、kf-scrapling（降级） | kf-multi-team-compete（按需）、kf-spec（编码时）、kf-reverse-spec（逆向时） | flash |
 
 ### 上游技能（gstack / gspowers）
 
@@ -329,8 +330,8 @@ git log --oneline -3
   │   ├─ 红队 Pipeline
   │   │   ├─ Stage 0: kf-alignment + kf-spec（需求对齐）
   │   │   ├─ Stage 1: 架构设计
-  │   │   ├─ Stage 2: kf-ui-prototype-generator（UI）+ kf-image-editor（P图）+ kf-web-search（查资料）+ kf-scrapling（爬虫）+ kf-opencli（平台数据直取）
-  │   │   ├─ Stage 3: kf-browser-ops（自动化测试）+ kf-opencli（平台数据验证）+ kf-scrapling（深度抓取）
+  │   │   ├─ Stage 2: kf-ui-prototype-generator（UI）+ kf-image-editor（P图）+ kf-web-search（查资料）+ kf-scrapling（爬虫）+ kf-exa-code（查 API/库/SDK 用法）+ kf-opencli（平台数据直取）
+  │   │   ├─ Stage 3: kf-browser-ops（自动化测试）+ kf-exa-code（验证 API 用法）+ kf-opencli（平台数据验证）+ kf-scrapling（深度抓取）
   │   │   ├─ Stage 4: kf-code-review-graph（代码审查）
   │   │   └─ Stage 5: kf-image-editor（方案配图）+ 方案汇总
   │   ├─ 蓝队 Pipeline（同上，稳健工程视角）
@@ -351,6 +352,7 @@ git log --oneline -3
 | kf-web-search 是否可被自动调用？ | **是。** kf-multi-team-compete agent 按需自动调用搜索资料 |
 | kf-browser-ops 是否可被自动调用？ | **是。** kf-multi-team-compete Stage 3 自动调用做 UI 测试 |
 | kf-opencli 是否可被自动调用？ | **是。** kf-multi-team-compete Stage 1/2/3 按需自动调用，直取 100+ 平台结构化数据 |
+| kf-exa-code 是否可被自动调用？ | **是。** kf-multi-team-compete Stage 1/2/4 按需自动调用查 API/库/SDK 用法；kf-spec 编码阶段自动触发；kf-reverse-spec 逆向阶段自动触发 |
 | kf-alignment 是否可被自动调用？ | **是。** kf-spec、kf-multi-team-compete、kf-prd-generator 均自动调用 |
 | gspowers Pipeline 与 `/夯` 的关系？ | Pipeline 引擎被融入 `/夯` 作为团队内部流水线编排引擎 |
 | kf-prd-generator 是否可被自动调用？ | **是。** `/夯` 输入 SDD Excel 时 Pre-Stage 自动调用生成 PRD.md |
