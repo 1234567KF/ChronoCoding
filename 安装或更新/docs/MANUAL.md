@@ -80,7 +80,6 @@ claude
 | `架构评审`                | 多 Agent 系统架构评估 + 三方对抗 | ruflo    |
 | `QA团队` / `测试评审`   | 多 Agent 测试质量评审 + 三方对抗 | ruflo    |
 | `三方调研` / `research` | 多 Agent 通用研究任务            | ruflo    |
-| `triple [任务]`           | 通用三方协作（任意任务）         | ruflo    |
 | `/gspowers`               | 启动 SOP 流程导航                | gspowers |
 | `/office-hours`           | YC 式产品拷问                    | gspowers |
 | `/brainstorm`             | 苏格拉底式设计细化               | gspowers |
@@ -94,6 +93,7 @@ claude
 | `/exa-code [查询]` / `查代码示例` / `找API用法` | 🆕 Exa Code 代码上下文引擎 | kf-exa-code          |
 | `/browser-ops`            | 🆕 浏览器自动化操作               | kf-browser-ops       |
 | `/夯 [任务]`              | 🆕 多团队竞争评审                 | kf-multi-team-compete |
+| `triple [任务]`           | 🆕 通用三方协作（轻量版 `/夯`）   | kf-triple-collaboration |
 | `/对齐` / `说下你的理解`  | 🆕 对齐工作流                     | kf-alignment         |
 | `模型路由` / `省模式`     | 🆕 模型智能路由                   | kf-model-router      |
 | `spec coding`             | 🆕 Spec 驱动开发                   | kf-spec       |

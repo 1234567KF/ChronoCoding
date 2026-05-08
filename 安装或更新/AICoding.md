@@ -289,6 +289,7 @@ git log --oneline -3
 | `kf-triple-collaboration` | triple | 夯 | 内部 spawn | 同 kf-multi-team-compete（轻量版） | 用户手动 | pro+flash |
 | `kf-ui-prototype-generator` | — | 快 | 独立（被动技能） | 无 | kf-multi-team-compete Stage 2/5 自动调用 | flash |
 | `kf-image-editor` | — | 快 | 独立（被动技能） | 无 | kf-multi-team-compete Stage 2/5 自动调用 | flash |
+| `kf-kb-envoy` | — | 准 | 独立 | 无 | 用户手动 | flash |
 | `kf-skill-design-expert` | — | 稳 | 独立 | 无 | 用户手动 | pro |
 | `kf-token-tracker` | `/token-tracker` | 准 | 独立（被动技能） | kf-model-router | kf-multi-team-compete agent 按需自动调用、用户手动 | flash |
 | `kf-doc-consistency` | — | 准/省 | Pipeline + Reviewer | kf-model-router | kf-add-skill（自动）、用户手动 | flash |
