@@ -191,7 +191,6 @@ flowchart LR
 | [claude-mem](https://github.com/thedotmack/claude-mem) | thedotmack | AGPL-3.0 | 跨会话持久记忆（SQLite + Chroma 向量库） |
 | [OpenCLI](https://github.com/jackwener/OpenCLI) | jackwener | MIT | 100+ 平台 CLI 数据直取，AI 原生浏览器自动化 |
 | [autoresearch](https://github.com/karpathy/autoresearch) | karpathy | MIT | 自主 ML 实验：AI 整夜改模型→训练→验证→循环 |
-| [asta-skill](https://github.com/Agents365-ai/asta-skill) | Agents365-ai | MIT | 学术论文搜索 — Semantic Scholar via Ai2 Asta MCP |
 | [jeffallan/claude-skills](https://github.com/jeffallan/claude-skills) | jeffallan | MIT | 66 个 Claude Code 第三方技能：语言/后端/前端/基础设施/API/测试/DevOps/安全/数据ML/平台 |
 
 详见 [CREDITS.md](../知识库相关/docs/CREDITS.md) 完整致谢。
@@ -281,7 +280,6 @@ git clone https://github.com/fshaan/gspowers.git ~/.claude/skills/gspowers
 | `逆向` / `存量代码` / `代码扫描` / `逆向工程` | 存量代码→Spec/文档 逆向流水线 | kf-reverse-spec |
 | `装技能` / `安装技能` / `添加技能` / `搜索技能` | 技能安装管家 | kf-add-skill |
 | `课题申报` / `科研项目` / `国自然` / `研究计划` | 课题申报研究助手 | kf-grant-research |
-| `论文` / `查论文` / `学术搜索` / `文献` | Semantic Scholar 学术论文搜索 | asta-skill |
 | `提取` / `结构化提取` / `parse` / `langextract` | LLM 驱动结构化提取，非结构化文本→JSON/CSV/YAML | kf-langextract |
 
 ---
@@ -341,7 +339,6 @@ AI编程智驾/
 │       ├── kf-reverse-spec/        # 存量代码→Spec 逆向
 │       ├── kf-scrapling/           # Web 爬虫 + 反反爬
 │       ├── kf-langextract/         # LLM 驱动结构化提取
-│       ├── asta-skill/             # 学术论文搜索
 │       ├── gspowers/               # SOP 导航（上游）
 │       └── gstack/                 # 产品流程（上游）
 │

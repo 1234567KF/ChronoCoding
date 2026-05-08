@@ -294,7 +294,7 @@ git log --oneline -3
 | `kf-token-tracker` | `/token-tracker` | 准 | 独立（被动技能） | kf-model-router | kf-multi-team-compete agent 按需自动调用、用户手动 | flash |
 | `kf-doc-consistency` | — | 准/省 | Pipeline + Reviewer | kf-model-router | kf-add-skill（自动）、用户手动 | flash |
 | `kf-add-skill` | — | 稳 | Pipeline + Inversion | kf-model-router、kf-skill-design-expert、kf-doc-consistency | kf-grant-research（自动调用）、用户手动 | pro |
-| `kf-grant-research` | — | 准 | Pipeline + Inversion + Generator | asta-skill、kf-scrapling、kf-web-search、kf-alignment、kf-add-skill、kf-model-router | 用户手动 | pro |
+| `kf-grant-research` | — | 准 | Pipeline + Inversion + Generator | kf-scrapling、kf-web-search、kf-alignment、kf-add-skill、kf-model-router | 用户手动 | pro |
 | `kf-langextract` | — | 准 | Pipeline + Tool Wrapper + Generator | kf-model-router | 用户手动 | flash |
 | `kf-exa-code` | /exa-code | 准 | Pipeline + Tool Wrapper + Inversion | kf-model-router、kf-web-search（降级）、kf-scrapling（降级） | kf-multi-team-compete（按需）、kf-spec（编码时）、kf-reverse-spec（逆向时） | flash |
 
@@ -305,7 +305,7 @@ git log --oneline -3
 | `gspowers` | fshaan | 独立 | 无（但其 Pipeline 扩展被 kf-multi-team-compete 集成） | SOP 流程导航 |
 | `gspowers` Pipeline 扩展 | fshaan | **被集成** | **被 kf-multi-team-compete 融入**作为团队内部流水线引擎 | 阶段编排 + 产物交接 |
 | `gstack` 系列 | garrytan | 独立（内部有自身技能链） | 与 kf- 系列隔离 | 产品流程框架（office-hours/plan/review/ship/qa） |
-| `asta-skill` | Agents365-ai | 独立（纯指令包） | 无 | 学术论文搜索 — Semantic Scholar via Ai2 Asta MCP |
+| ~~`asta-skill`~~ (已移除) | Agents365-ai | — | — | 目录为空，功能未就绪，已移除 |
 | **jeffallan/claude-skills** (66) | jeffallan | 独立（按需加载） | 无 | 第三方技能合集：12 语言、7 后端、7 前端/移动、5 基础设施、8 API/架构、5 质量/测试、5 DevOps、3 安全、6 数据/ML、8 平台/专业 |
 
 ### 主入口 `/夯` 的完整调用链

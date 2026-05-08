@@ -78,7 +78,6 @@ AICoding/
 | lean-ctx | MIT | 兼容 |
 | OpenCLI | MIT | 兼容 |
 | autoresearch | MIT | 兼容 |
-| asta-skill | MIT | 兼容 |
 | jeffallan/claude-skills | MIT | 兼容 |
 | caveman | MIT | 兼容 |
 | markdown-to-docx-skill | MIT | 兼容 |

@@ -17,7 +17,7 @@
 | `kf-browser-ops`            | `/browser-ops`   | 测的准 | 被 `/夯` Stage 3 自动调用                                                                                                                        | 浏览器自动化测试，Playwright 复现 bug                                                                            |
 | `kf-scrapling`              | —                 | 准     | 被 `/夯` Stage 1/2/3 按需自动调用                                                                                                                | Web 爬虫+反反爬，深度数据采集，替代/补充 web-search                                                              |
 | `kf-opencli`                | —                 | 准     | 被 `/夯` Stage 1/2/3 按需自动调用                                                                                                                | OpenCLI — 100+ 平台 CLI 数据直取（知乎/B站/微博/GitHub/Reddit/HN/arXiv），补充 web-search 和 scrapling 中间地带 |
-| `kf-grant-research`         | —                 | 准     | Pipeline + Inversion + Generator，调用 asta-skill + kf-scrapling + kf-web-search                                                                   | 课题申报研究助手：顶刊搜索→论文分析→研究空白→申报材料                                                         |
+| `kf-grant-research`         | —                 | 准     | Pipeline + Inversion + Generator，调用 kf-scrapling + kf-web-search + kf-add-skill                                                                   | 课题申报研究助手：顶刊搜索→论文分析→研究空白→申报材料                                                         |
 | `kf-reverse-spec`           | —                 | 准/省  | Pipeline，调用 kf-alignment + kf-web-search + kf-code-review-graph                                                                                 | 存量代码→Spec/文档 逆向流水线                                                                                   |
 | `kf-multi-team-compete`     | **`/夯`**  | 夯     | **主入口**，自动调用 12 个技能 + Pipeline 引擎                                                                                               | 红蓝绿队多 Agent 并发竞争评审                                                                                    |
 | `kf-alignment`              | `/对齐`          | 懂     | 被 kf-spec、`/夯`、kf-prd-generator 自动调用                                                                                                     | 对齐工作流：动前谈理解，动后谈 diff                                                                              |
@@ -43,7 +43,7 @@
 | -------------------------------------- | ---------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------- |
 | `gspowers`                           | fshaan                                               | SOP 流程导航                                                                                                                          |
 | `gstack`                             | garrytan                                             | 产品流程框架                                                                                                                          |
-| `asta-skill`                         | Agents365-ai                                         | Academic paper search — Semantic Scholar via Ai2 Asta MCP                                                                            |
+| ~~`asta-skill`~~ (removed)          | Agents365-ai                                         | Academic paper search — Semantic Scholar via Ai2 Asta MCP (目录为空，已移除)                                                         |
 | `atlassian-mcp`                      | atlassian-mcp                                        | Atlassian Jira/Confluence integration                                                                                                 |
 | **jeffallan/claude-skills** (66) | [jeffallan](https://github.com/jeffallan/claude-skills) | 第三方技能合集，分 10 类：12 语言、7 后端、7 前端/移动、5 基础设施、8 API/架构、5 质量/测试、5 DevOps、3 安全、6 数据/ML、8 平台/专业 |
 
@@ -90,7 +90,6 @@
     ├── lean-ctx/             # 上下文压缩引擎，90+ 压缩模式 + CCP
     ├── lambda-lang/          # Agent-to-Agent 原生语言（340+ 原子，7 域，3x 压缩）
     ├── claude-code-pro/      # Token 高效调度（智能跳过 + 回调替代轮询）
-    ├── asta-skill/           # 学术论文搜索（Semantic Scholar / Ai2 Asta MCP）
     ├── atlassian-mcp/        # Atlassian Jira/Confluence integration
     ├── gspowers/              # SOP 导航（上游）
     ├── gstack/               # 产品流程（上游）
@@ -131,7 +130,7 @@ claude
 | `一致性` / `文档自检` / `doc consistency`                        | kf-doc-consistency        | 准/省  | 文档全局一致性自检，被 kf-add-skill 自动调用                      |
 | `爬虫` / `抓取` / `scrape` / `反反爬`                          | kf-scrapling              | 准     | Web 爬虫，被 `/夯` Stage 1/2/3 按需调用                         |
 | `热榜` / `平台抓取` / `CLI数据` / `opencli`                    | kf-opencli                | 准     | 100+ 平台 CLI 数据直取，被 `/夯` Stage 1/2/3 按需调用           |
-| `论文` / `查论文` / `学术搜索` / `文献`                        | asta-skill                | 准     | Semantic Scholar 学术论文搜索，需配置 ASTA_API_KEY                |
+| `论文` / `查论文` / `学术搜索` / `文献`                        | kf-web-search (fallback)  | 准     | 学术论文搜索 — 通过 kf-web-search 查询 Semantic Scholar            |
 | `提取` / `结构化提取` / `parse` / `langextract`                | kf-langextract            | 准     | LLM 驱动结构化提取：非结构化文本→JSON/CSV/YAML，source grounding |
 | `逆向` / `存量代码` / `代码扫描` / `逆向工程`                  | kf-reverse-spec           | 准/省  | 存量代码→Spec/文档 逆向流水线                                    |
 | `课题申报` / `科研项目` / `国自然` / `研究计划`                | kf-grant-research         | 准     | 课题申报研究助手：论文搜索→分析→gap→申报材料                   |

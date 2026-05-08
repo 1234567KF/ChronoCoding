@@ -3,7 +3,7 @@ name: kf-grant-research
 description: |
   Use when the user wants to prepare research grant proposals — search top journals for papers by keyword, understand and critique them, identify research gaps, and generate structured grant application materials.
   Triggers: "课题申报", "项目申报", "科研项目", "grant", "研究计划", "课题", "申报书", "顶刊论文分析", "research proposal", "国自然", "国家自然科学基金", "教育部课题".
-  Calls asta-skill (Semantic Scholar academic search), kf-scrapling (deep web scraping for PDF/extended info), kf-web-search (supplementary searches), and kf-add-skill (install any missing tools). Integrates with kf-alignment for before/after alignment.
+  Calls kf-web-search (academic paper search via web), kf-scrapling (deep web scraping for PDF/extended info), and kf-add-skill (install any missing tools). Integrates with kf-alignment for before/after alignment.
 allowed-tools:
   - Bash
   - Read
@@ -19,7 +19,6 @@ metadata:
   steps: "4"
   integrated-skills:
     - kf-model-router
-    - asta-skill
     - kf-scrapling
     - kf-web-search
     - kf-alignment
@@ -97,13 +96,13 @@ Save state to `.kf/grant-state.json`.
 
 ## Phase 2 — Search & Gather (Execution)
 
-### 2a. Call asta-skill for academic paper search
+### 2a. Search academic papers via kf-web-search
 
-Use `asta-skill` (loaded skill) to search Semantic Scholar:
+Use `kf-web-search` to search Semantic Scholar for academic papers:
 
-1. `search_papers_by_relevance(keyword=<topic>, publication_date_range=<time_range>, venues=<target_journals>)`
-2. Present results as a table: title, year, venue, citation count, TLDR
-3. If results < expected coverage, try broader terms or fall back to `kf-web-search`
+1. Search `site:semanticscholar.org <topic> <time_range>` for recent papers
+2. For each candidate paper, fetch details from Semantic Scholar API
+3. Present results as a table: title, year, venue, citation count, TLDR
 
 **Gate**: At least 10 papers collected (or fewer with user confirmation). Do NOT proceed to 2b until user reviews initial results.
 
@@ -318,7 +317,7 @@ Output a structured summary:
 
 ## Gotchas
 
-- asta-skill requires `ASTA_API_KEY` and the Asta MCP server to be registered. If the MCP server is not visible, fall back to `kf-web-search` for paper discovery.
+- kf-web-search is used for academic paper discovery (search Semantic Scholar via web search).
 - Semantic Scholar does NOT provide full PDF text for most papers. For deep content analysis, rely on `snippet_search` (500-word passages) and `abstract`. Do NOT fabricate content.
 - kf-scrapling can be used for open-access PDF scraping, but many top journals are paywalled — warn the user if full-text is unavailable.
 - Chinese users: respond in Chinese for analysis and grant materials; keep paper titles and technical terms in original language.
