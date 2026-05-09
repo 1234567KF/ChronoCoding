@@ -1,0 +1,713 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>AI编程智驾 · 铁三角架构</title>
+<style>
+/* ============================================================
+   RESET & BASE
+   ============================================================ */
+*,.::before,.::after{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --bg:#0a0a0a;
+  --bg2:#0f0f0f;
+  --card-bg:rgba(14,14,14,0.78);
+  --green:#22c55e;
+  --green-light:#4ade80;
+  --green-dark:#166534;
+  --green-glow:rgba(34,197,94,0.6);
+  --teal:#2dd4bf;
+  --text:#e8e8e8;
+  --text-dim:#888;
+  --text-muted:#666;
+  --border:rgba(34,197,94,0.12);
+  --radius:16px;
+  --font:'Inter','Segoe UI','PingFang SC','Microsoft YaHei',system-ui,-apple-system,sans-serif;
+
+  /* animated custom property for conic border */
+  @property --angle{syntax:'<angle>';initial-value:0deg;inherits:false}
+  --angle:0deg;
+}
+html,body{
+  height:100%;width:100%;
+  font-family:var(--font);
+  background:var(--bg);
+  color:var(--text);
+  overflow:hidden;
+  -webkit-font-smoothing:antialiased;
+}
+
+/* ============================================================
+   GRID BACKGROUND
+   ============================================================ */
+body::before{
+  content:'';position:fixed;inset:0;
+  background:
+    linear-gradient(rgba(34,197,94,0.025) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(34,197,94,0.025) 1px,transparent 1px);
+  background-size:48px 48px;
+  z-index:0;pointer-events:none;
+}
+
+/* ============================================================
+   CANVAS
+   ============================================================ */
+#canvas{
+  position:fixed;top:0;left:0;width:100%;height:100%;
+  z-index:1;pointer-events:none;
+}
+
+/* ============================================================
+   AMBIENT ORBS
+   ============================================================ */
+.orb{
+  position:fixed;border-radius:50%;pointer-events:none;z-index:0;
+  filter:blur(80px);opacity:0.12;
+  animation:orbFloat 8s ease-in-out infinite alternate;
+}
+.orb-1{width:600px;height:600px;background:radial-gradient(circle,#22c55e,transparent 70%);top:-10%;left:-5%}
+.orb-2{width:500px;height:500px;background:radial-gradient(circle,#2dd4bf,transparent 70%);bottom:-8%;right:-3%;animation-delay:-3s}
+.orb-3{width:400px;height:400px;background:radial-gradient(circle,#4ade80,transparent 70%);bottom:30%;left:40%;animation-delay:-5s;opacity:0.08}
+@keyframes orbFloat{
+  0%{transform:translate(0,0) scale(1)}
+  100%{transform:translate(30px,-30px) scale(1.08)}
+}
+
+/* ============================================================
+   MAIN CONTAINER
+   ============================================================ */
+.container{
+  position:fixed;inset:0;z-index:2;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  pointer-events:none;
+}
+
+/* ============================================================
+   TITLE
+   ============================================================ */
+.header{
+  position:absolute;top:3.2%;left:50%;transform:translateX(-50%);
+  text-align:center;pointer-events:none;
+}
+.header-sub{
+  font-size:clamp(10px,0.7vw,14px);
+  letter-spacing:6px;text-transform:uppercase;
+  color:var(--green);opacity:0.5;margin-bottom:4px;
+}
+.header-main{
+  font-size:clamp(28px,3.2vw,56px);
+  font-weight:800;letter-spacing:2px;
+  background:linear-gradient(135deg,#fff 20%,var(--green-light) 60%,var(--teal) 100%);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+  background-clip:text;
+}
+.header-dash{
+  width:60px;height:2px;margin:10px auto 0;
+  background:linear-gradient(90deg,transparent,var(--green),transparent);
+  animation:dashPulse 2s ease-in-out infinite;
+}
+@keyframes dashPulse{0%,100%{opacity:.3;transform:scaleX(1)}50%{opacity:1;transform:scaleX(1.3)}}
+
+/* ============================================================
+   CARDS
+   ============================================================ */
+.card{
+  width:clamp(250px,18vw,340px);
+  pointer-events:auto;cursor:default;
+  background:var(--card-bg);
+  border:1px solid var(--border);
+  border-radius:var(--radius);
+  padding:clamp(20px,1.8vw,32px) clamp(18px,1.5vw,28px);
+  backdrop-filter:blur(24px) saturate(1.2);
+  -webkit-backdrop-filter:blur(24px) saturate(1.2);
+  box-shadow:0 8px 60px rgba(0,0,0,0.5),inset 0 1px 0 rgba(255,255,255,0.04);
+  transition:border-color .4s,box-shadow .4s,transform .3s cubic-bezier(.34,1.56,.64,1);
+}
+.card:hover{
+  border-color:var(--green);
+  box-shadow:0 0 50px rgba(34,197,94,0.12),0 0 100px rgba(34,197,94,0.05),inset 0 1px 0 rgba(74,222,128,0.08);
+  transform:translateY(-6px);
+}
+
+/* glowing border overlay */
+.card::before{
+  content:'';position:absolute;inset:-1px;
+  border-radius:calc(var(--radius)+1px);
+  background:conic-gradient(from var(--angle),transparent 20%,var(--green) 40%,transparent 50%,var(--green-light) 70%,transparent 80%);
+  -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);
+  -webkit-mask-composite:xor;
+  mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);
+  mask-composite:exclude;
+  padding:1.2px;
+  animation:borderSpin 4s linear infinite;
+  opacity:0.4;transition:opacity .4s;
+  pointer-events:none;
+}
+.card:hover::before{opacity:0.9}
+@keyframes borderSpin{to{--angle:360deg}}
+
+/* inner glow */
+.card::after{
+  content:'';position:absolute;
+  width:160px;height:160px;border-radius:50%;
+  background:radial-gradient(circle,rgba(34,197,94,0.06),transparent 70%);
+  top:50%;left:50%;transform:translate(-50%,-50%);
+  pointer-events:none;
+}
+
+/* Card wrapper + float animation */
+.card-wrapper{
+  position:absolute;
+  pointer-events:none;
+  animation:cardFloat 6s ease-in-out infinite;
+}
+@keyframes cardFloat{
+  0%,100%{margin-top:0}
+  50%{margin-top:-8px}
+}
+
+/* Equilateral triangle (60° relation) */
+[data-role="collaborator"]{
+  left:50%;top:calc(50% - 30vh);
+  transform:translate(-50%,-50%);
+  animation-delay:0s;
+}
+[data-role="throttler"]{
+  left:calc(50% - 26vh);top:calc(50% + 15vh);
+  transform:translate(-50%,-50%);
+  animation-delay:-2s;
+}
+[data-role="monitor"]{
+  left:calc(50% + 26vh);top:calc(50% + 15vh);
+  transform:translate(-50%,-50%);
+  animation-delay:-4s;
+}
+
+/* ============================================================
+   CARD INNER
+   ============================================================ */
+.card-icon{
+  width:48px;height:48px;border-radius:12px;
+  display:flex;align-items:center;justify-content:center;
+  margin-bottom:16px;
+  background:rgba(34,197,94,0.08);
+  border:1px solid rgba(34,197,94,0.15);
+  transition:background .3s,border-color .3s,box-shadow .3s;
+}
+.card:hover .card-icon{
+  background:rgba(34,197,94,0.15);
+  border-color:rgba(34,197,94,0.3);
+  box-shadow:0 0 24px rgba(34,197,94,0.12);
+}
+.card-icon svg{width:24px;height:24px;stroke:var(--green-light);fill:none}
+[data-role="collaborator"] .card-icon svg{stroke:var(--green-light)}
+[data-role="throttler"] .card-icon svg{stroke:var(--teal)}
+[data-role="monitor"] .card-icon svg{stroke:var(--green-light)}
+
+.card-title{
+  font-size:clamp(18px,1.3vw,24px);
+  font-weight:700;letter-spacing:1px;
+  margin-bottom:2px;
+}
+.card-subtitle{
+  font-size:clamp(11px,0.7vw,13px);
+  color:var(--text-muted);letter-spacing:2px;
+  text-transform:uppercase;margin-bottom:12px;
+}
+.card-engine{
+  font-size:clamp(11px,0.7vw,12.5px);
+  color:var(--green);opacity:0.7;
+  font-family:'SF Mono','Fira Code','Cascadia Code',monospace;
+  margin-bottom:10px;
+  word-break:break-all;
+}
+.card-desc{
+  font-size:clamp(12px,0.75vw,14px);
+  color:var(--text-dim);line-height:1.6;
+  margin-bottom:14px;
+}
+.card-tag{
+  display:inline-flex;align-items:center;gap:6px;
+  padding:4px 14px;border-radius:20px;
+  font-size:clamp(11px,0.65vw,12px);font-weight:600;
+  letter-spacing:2px;
+  border:1px solid rgba(34,197,94,0.2);
+  color:var(--green-light);
+  background:rgba(34,197,94,0.06);
+}
+[data-role="throttler"] .card-tag{border-color:rgba(45,212,191,0.2);color:var(--teal);background:rgba(45,212,191,0.06)}
+[data-role="monitor"] .card-tag{border-color:rgba(74,222,128,0.2);color:var(--green-light);background:rgba(74,222,128,0.06)}
+.card-stat{
+  font-size:clamp(20px,1.5vw,30px);
+  font-weight:800;
+  background:linear-gradient(135deg,var(--green-light),var(--teal));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+  background-clip:text;
+}
+
+/* ============================================================
+   FOOTER
+   ============================================================ */
+.footer{
+  position:absolute;bottom:3%;left:50%;transform:translateX(-50%);
+  text-align:center;pointer-events:none;
+}
+.footer-text{
+  font-size:clamp(11px,0.7vw,14px);
+  color:var(--text-dim);letter-spacing:3px;
+}
+.footer-text strong{color:var(--green-light);font-weight:600}
+.footer-line{
+  width:clamp(120px,15vw,240px);height:1px;margin:0 auto 6px;
+  background:linear-gradient(90deg,transparent,var(--green),transparent);
+  opacity:0.3;
+}
+.footer-savings{
+  font-size:clamp(18px,1.4vw,28px);
+  font-weight:700;letter-spacing:1px;
+  margin-top:4px;
+  background:linear-gradient(135deg,var(--green-light),var(--teal));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+  background-clip:text;
+}
+
+/* ============================================================
+   RESPONSIVE
+   ============================================================ */
+@media(max-width:768px){
+  [data-role="collaborator"]{left:50%!important;top:7%;width:clamp(200px,70vw,300px);transform:translateX(-50%);animation:none!important}
+  [data-role="throttler"]{left:50%!important;top:44%;width:clamp(200px,70vw,300px);transform:translateX(-50%);animation:none!important}
+  [data-role="monitor"]{left:50%!important;top:78%;width:clamp(200px,70vw,300px);transform:translateX(-50%);animation:none!important}
+  .card{padding:16px 20px}
+  .card-icon{width:40px;height:40px;margin-bottom:12px}
+  .card-icon svg{width:20px;height:20px}
+  .header{top:1.5%}
+  .footer{bottom:1.5%}
+  .orb{opacity:0.06 !important}
+}
+@media(max-width:480px){
+  [data-role="collaborator"]{top:4%!important;width:88vw}
+  [data-role="throttler"]{top:39%!important;width:88vw}
+  [data-role="monitor"]{top:70%!important;width:88vw}
+}
+</style>
+</head>
+<body>
+
+<!-- Ambient Orbs -->
+<div class="orb orb-1"></div>
+<div class="orb orb-2"></div>
+<div class="orb orb-3"></div>
+
+<!-- Canvas for particles & triangle -->
+<canvas id="canvas"></canvas>
+
+<!-- Container -->
+<div class="container">
+
+  <!-- Header -->
+  <div class="header">
+    <div class="header-sub">AI Coding Cockpit</div>
+    <div class="header-main">AI编程智驾</div>
+    <div class="header-dash"></div>
+  </div>
+
+  <!-- Card 1: Collaborator -->
+  <div class="card-wrapper" data-role="collaborator">
+  <div class="card">
+    <div class="card-icon">
+      <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="5" r="2.5"/>
+        <circle cx="5" cy="19" r="2.5"/>
+        <circle cx="19" cy="19" r="2.5"/>
+        <line x1="12" y1="7.5" x2="5" y2="16.5"/>
+        <line x1="12" y1="7.5" x2="19" y2="16.5"/>
+        <line x1="7.5" y1="19" x2="16.5" y2="19"/>
+      </svg>
+    </div>
+    <div class="card-title">协作者</div>
+    <div class="card-subtitle">Collaborator</div>
+    <div class="card-engine">kf-multi-team-compete</div>
+    <div class="card-desc">多 Agent 并发竞争评审引擎。红蓝绿三队竞争，裁判择优融合。</div>
+    <div class="card-tag">夯 · 竞争择优</div>
+  </div>
+  </div>
+
+  <!-- Card 2: Throttler -->
+  <div class="card-wrapper" data-role="throttler">
+  <div class="card">
+    <div class="card-icon">
+      <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="12" r="9"/>
+        <path d="M12 3v9l4 4"/>
+        <circle cx="12" cy="12" r="2" fill="currentColor"/>
+      </svg>
+    </div>
+    <div class="card-title">节流者</div>
+    <div class="card-subtitle">Throttler</div>
+    <div class="card-engine">kf-model-router + lean-ctx + CCP + λ</div>
+    <div class="card-desc">模型路由 · 上下文压缩 · 智能调度。综合 Token 节省约 80%，费用降至 1/5。</div>
+    <div class="card-tag">省 · Token 节省 80%</div>
+  </div>
+  </div>
+
+  <!-- Card 3: Monitor -->
+  <div class="card-wrapper" data-role="monitor">
+  <div class="card">
+    <div class="card-icon">
+      <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="2" y="4" width="20" height="14" rx="2"/>
+        <line x1="8" y1="22" x2="16" y2="22"/>
+        <line x1="12" y1="18" x2="12" y2="22"/>
+        <circle cx="12" cy="11" r="3"/>
+        <circle cx="12" cy="11" r="1" fill="currentColor"/>
+      </svg>
+    </div>
+    <div class="card-title">监测者</div>
+    <div class="card-subtitle">Monitor</div>
+    <div class="card-engine">kf-token-tracker</div>
+    <div class="card-desc">实时 Token 追踪 · 成本看板 · 全链路自检系统。实现"准"原则。</div>
+    <div class="card-tag">准 · 实时精准</div>
+  </div>
+  </div>
+
+  <!-- Footer -->
+  <div class="footer">
+    <div class="footer-line"></div>
+    <div class="footer-text">
+      铁三角闭环&ensp;<strong>监测者 → 节流者 → 协作者</strong>&ensp;全链路自动化
+    </div>
+    <div class="footer-savings">40–67% Token 节省 &middot; 六大原则全覆盖</div>
+  </div>
+
+</div>
+
+<script>
+(function(){
+'use strict';
+
+// ============================================================
+// SETUP
+// ============================================================
+const canvas = document.getElementById('canvas');
+const ctx = canvas.getContext('2d');
+let W, H, dpr;
+
+function resize(){
+  dpr = window.devicePixelRatio || 1;
+  W = window.innerWidth;
+  H = window.innerHeight;
+  canvas.width = W * dpr;
+  canvas.height = H * dpr;
+  canvas.style.width = W + 'px';
+  canvas.style.height = H + 'px';
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+}
+resize();
+window.addEventListener('resize', resize);
+
+// ============================================================
+// MOUSE
+// ============================================================
+const mouse = { x: -9999, y: -9999, px: -9999, py: -9999, vx: 0, vy: 0 };
+document.addEventListener('mousemove', e => {
+  mouse.px = mouse.x;
+  mouse.py = mouse.y;
+  mouse.x = e.clientX;
+  mouse.y = e.clientY;
+  mouse.vx = mouse.x - mouse.px;
+  mouse.vy = mouse.y - mouse.py;
+});
+document.addEventListener('mouseleave', () => {
+  mouse.x = -9999; mouse.y = -9999;
+});
+
+// Touch support
+document.addEventListener('touchmove', e => {
+  const t = e.touches[0];
+  mouse.x = t.clientX;
+  mouse.y = t.clientY;
+}, { passive: true });
+document.addEventListener('touchend', () => {
+  mouse.x = -9999; mouse.y = -9999;
+});
+
+// ============================================================
+// PARTICLES
+// ============================================================
+const PARTICLE_COUNT = 120;
+const CONNECTION_DIST = 130;
+const REPULSION_RADIUS = 140;
+const REPULSION_FORCE = 0.6;
+
+class Particle {
+  constructor(){
+    this.x = Math.random() * W;
+    this.y = Math.random() * H;
+    this.vx = (Math.random() - 0.5) * 0.6;
+    this.vy = (Math.random() - 0.5) * 0.6;
+    this.r = Math.random() * 2 + 0.8;
+    this.alpha = Math.random() * 0.35 + 0.08;
+    this.hue = Math.random() > 0.6 ? 150 : 142; // green hue range
+  }
+
+  update(){
+    // drift
+    this.vx += (Math.random() - 0.5) * 0.02;
+    this.vy += (Math.random() - 0.5) * 0.02;
+
+    // mouse repulsion
+    const dx = this.x - mouse.x;
+    const dy = this.y - mouse.y;
+    const dist = Math.sqrt(dx*dx + dy*dy);
+    if (dist < REPULSION_RADIUS && dist > 0.1) {
+      const force = (REPULSION_RADIUS - dist) / REPULSION_RADIUS;
+      const f = force * REPULSION_FORCE;
+      this.vx += (dx / dist) * f;
+      this.vy += (dy / dist) * f;
+    }
+
+    // mouse trail attraction (subtle)
+    if (dist < 80 && dist > 0.1) {
+      this.vx -= (dx / dist) * 0.02;
+      this.vy -= (dy / dist) * 0.02;
+    }
+
+    // damping
+    this.vx *= 0.98;
+    this.vy *= 0.98;
+
+    // clamp velocity
+    const speed = Math.sqrt(this.vx*this.vx + this.vy*this.vy);
+    if (speed > 2) {
+      this.vx = (this.vx / speed) * 2;
+      this.vy = (this.vy / speed) * 2;
+    }
+
+    this.x += this.vx;
+    this.y += this.vy;
+
+    // wrap
+    if (this.x < -10) this.x = W + 10;
+    if (this.x > W + 10) this.x = -10;
+    if (this.y < -10) this.y = H + 10;
+    if (this.y > H + 10) this.y = -10;
+  }
+
+  draw(){
+    ctx.beginPath();
+    ctx.arc(this.x, this.y, this.r, 0, Math.PI*2);
+    ctx.fillStyle = `hsla(${this.hue},80%,55%,${this.alpha})`;
+    ctx.fill();
+  }
+}
+
+const particles = [];
+for (let i = 0; i < PARTICLE_COUNT; i++) particles.push(new Particle());
+
+function drawParticleConnections(){
+  for (let i = 0; i < particles.length; i++) {
+    for (let j = i + 1; j < particles.length; j++) {
+      const dx = particles[i].x - particles[j].x;
+      const dy = particles[i].y - particles[j].y;
+      const dist = dx*dx + dy*dy;
+      if (dist < CONNECTION_DIST * CONNECTION_DIST) {
+        const alpha = (1 - Math.sqrt(dist) / CONNECTION_DIST) * 0.12;
+        ctx.beginPath();
+        ctx.moveTo(particles[i].x, particles[i].y);
+        ctx.lineTo(particles[j].x, particles[j].y);
+        ctx.strokeStyle = `rgba(74,222,128,${alpha})`;
+        ctx.lineWidth = 0.6;
+        ctx.stroke();
+      }
+    }
+  }
+}
+
+// ============================================================
+// CARD POSITIONS (read from DOM)
+// ============================================================
+const cardEls = {
+  collaborator: document.querySelector('[data-role="collaborator"]'),
+  throttler: document.querySelector('[data-role="throttler"]'),
+  monitor: document.querySelector('[data-role="monitor"]'),
+};
+
+function getCardCenters(){
+  const r = {};
+  for (const [key, el] of Object.entries(cardEls)) {
+    if (!el) continue;
+    const rect = el.getBoundingClientRect();
+    r[key] = { x: rect.left + rect.width/2, y: rect.top + rect.height/2 };
+  }
+  return r;
+}
+
+// ============================================================
+// TRIANGLE CONNECTION LINES + FLOW TRAVELERS
+// ============================================================
+const EDGES = [
+  ['collaborator','throttler'],
+  ['throttler','monitor'],
+  ['monitor','collaborator'],
+];
+
+// Gradient colors for each edge
+const EDGE_COLORS = [
+  ['rgba(34,197,94,', 'rgba(45,212,191,'],   // collab → throttler: green→teal
+  ['rgba(45,212,191,', 'rgba(74,222,128,'],  // throttler → monitor: teal→light-green
+  ['rgba(74,222,128,', 'rgba(34,197,94,'],   // monitor → collab: light-green→green
+];
+
+// Flow travelers
+const travelers = [];
+for (let e = 0; e < 3; e++) {
+  for (let t = 0; t < 4; t++) {
+    travelers.push({
+      edge: e,
+      progress: Math.random(),
+      speed: 0.0022 + Math.random() * 0.0028,
+      size: 2 + Math.random() * 1.8,
+      phase: Math.random() * Math.PI * 2,
+    });
+  }
+}
+
+function drawTriangle(){
+  const centers = getCardCenters();
+  const keys = ['collaborator','throttler','monitor'];
+  const pts = keys.map(k => centers[k]);
+  if (pts.some(p => !p)) return;
+
+  // ---- draw base glow lines ----
+  for (let i = 0; i < 3; i++) {
+    const from = pts[EDGES[i][0] === 'collaborator' ? 0 : EDGES[i][0] === 'throttler' ? 1 : 2];
+    const to   = pts[EDGES[i][1] === 'collaborator' ? 0 : EDGES[i][1] === 'throttler' ? 1 : 2];
+    if (!from || !to) continue;
+
+    const c1 = EDGE_COLORS[i][0];
+    const c2 = EDGE_COLORS[i][1];
+
+    // outer glow
+    ctx.beginPath();
+    ctx.moveTo(from.x, from.y);
+    ctx.lineTo(to.x, to.y);
+    ctx.strokeStyle = c1 + '0.08)';
+    ctx.lineWidth = 10;
+    ctx.lineCap = 'round';
+    ctx.stroke();
+
+    // mid glow
+    ctx.beginPath();
+    ctx.moveTo(from.x, from.y);
+    ctx.lineTo(to.x, to.y);
+    ctx.strokeStyle = c1 + '0.18)';
+    ctx.lineWidth = 4;
+    ctx.stroke();
+
+    // core line
+    ctx.beginPath();
+    ctx.moveTo(from.x, from.y);
+    ctx.lineTo(to.x, to.y);
+    ctx.strokeStyle = c1 + '0.45)';
+    ctx.lineWidth = 1.2;
+    ctx.stroke();
+  }
+
+  // ---- draw node glow at each card center ----
+  for (const p of pts) {
+    if (!p) continue;
+    const g = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, 30);
+    g.addColorStop(0, 'rgba(74,222,128,0.15)');
+    g.addColorStop(1, 'rgba(74,222,128,0)');
+    ctx.beginPath();
+    ctx.arc(p.x, p.y, 30, 0, Math.PI*2);
+    ctx.fillStyle = g;
+    ctx.fill();
+  }
+
+  // ---- draw traveling flow dots ----
+  const time = Date.now() / 1000;
+  for (const t of travelers) {
+    const edge = EDGES[t.edge];
+    const fi = edge[0] === 'collaborator' ? 0 : edge[0] === 'throttler' ? 1 : 2;
+    const ti = edge[1] === 'collaborator' ? 0 : edge[1] === 'throttler' ? 1 : 2;
+    const from = pts[fi];
+    const to = pts[ti];
+    if (!from || !to) continue;
+
+    // advance with slight oscillation
+    t.progress += t.speed;
+    if (t.progress > 1) {
+      t.progress -= 1;
+      t.edge = (t.edge + 1) % 3;
+    }
+
+    const px = from.x + (to.x - from.x) * t.progress;
+    const py = from.y + (to.y - from.y) * t.progress;
+    const pulse = 0.6 + 0.4 * Math.sin(time * 2 + t.phase);
+
+    // glow ball
+    const gr = ctx.createRadialGradient(px, py, 0, px, py, t.size * 5);
+    const c = EDGE_COLORS[t.edge][0];
+    gr.addColorStop(0, c + (0.7 * pulse) + ')');
+    gr.addColorStop(0.3, c + (0.2 * pulse) + ')');
+    gr.addColorStop(1, c + '0)');
+    ctx.beginPath();
+    ctx.arc(px, py, t.size * 5, 0, Math.PI*2);
+    ctx.fillStyle = gr;
+    ctx.fill();
+
+    // core dot
+    ctx.beginPath();
+    ctx.arc(px, py, t.size * 0.7, 0, Math.PI*2);
+    ctx.fillStyle = `rgba(255,255,255,${0.5 * pulse})`;
+    ctx.fill();
+  }
+}
+
+// ============================================================
+// ANIMATION LOOP
+// ============================================================
+function animate(){
+  ctx.clearRect(0, 0, W, H);
+
+  // update & draw particles
+  for (const p of particles) {
+    p.update();
+    p.draw();
+  }
+
+  // particle connections
+  drawParticleConnections();
+
+  // triangle connection lines
+  drawTriangle();
+
+  requestAnimationFrame(animate);
+}
+
+animate();
+
+// ============================================================
+// REDRAW card positions on resize
+// ============================================================
+let resizeTimeout;
+window.addEventListener('resize', () => {
+  clearTimeout(resizeTimeout);
+  resizeTimeout = setTimeout(() => {
+    // particles need repositioning on major resize
+    for (const p of particles) {
+      if (p.x > W || p.y > H) {
+        p.x = Math.random() * W;
+        p.y = Math.random() * H;
+      }
+    }
+  }, 300);
+});
+
+})();
+</script>
+</body>
+</html>

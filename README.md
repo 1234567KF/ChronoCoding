@@ -123,14 +123,14 @@ flowchart LR
 |------|------|---------|
 | **稳** | 好用不贵，长期维护 | gspowers、gstack、kf-skill-design-expert、kf-add-skill、kf-reverse-skill、kf-doc-consistency |
 | **省** | 模型搭配，稳固 ROI | kf-model-router、kf-code-review-graph、lean-ctx |
-| **准** | 多源搜索 + 反反爬 + 平台直取 + 结构化提取，精准调研 | kf-web-search、kf-scrapling、kf-opencli、markdown-to-docx、kf-go、bili-extract、harness-code-dev、observability-designer、performance-profiler、kf-langextract |
+| **准** | 多源搜索 + 反反爬 + 平台直取 + 代码搜索 + 结构化提取，精准调研 | kf-web-search、kf-scrapling、kf-opencli、kf-exa-code、markdown-to-docx、kf-go、bili-extract、harness-code-dev、observability-designer、performance-profiler、kf-langextract |
 | **夯** | 多 Agent 并发竞争碾压 | kf-multi-team-compete、kf-triple-collaboration |
 | **快** | MVP 快速验证，多工具速出原型 | kf-prd-generator、kf-ui-prototype-generator、kf-spec、kf-image-editor、markdown-to-docx |
 | **懂** | 动前对齐，动后 diff | kf-alignment |
 
 ## 项目技术路径
 
-从零到铁三角闭环，AI编程智驾的发展历程：
+从零到全面生态，AI编程智驾的发展历程展示了**协作者**的持续进化与整个系统的协同演进：
 
 <div style="margin: 16px auto; max-width: 760px;">
 
@@ -154,20 +154,62 @@ flowchart LR
 <div style="display: flex; align-items: stretch; margin-bottom: 12px;">
   <div style="min-width: 8px; background: #fff3e0; border-radius: 8px 0 0 8px;"></div>
   <div style="flex: 1; padding: 8px 14px; background: #f5f5f5; border-radius: 0 8px 8px 0; font-size: 13px; line-height: 1.6; border-left: 3px solid #E65100;">
-    <strong>kf- 系列起步</strong> — 自建技能体系从零到 22+：
+    <strong>铁三角奠基</strong> — 自建 kf- 技能体系，三大角色分工：
     <div style="margin-top: 4px; font-size: 12px; color: #555;">
-      1️⃣ <strong>协作者</strong> <code>kf-multi-team-compete</code> — 多 Agent 并发竞争评审引擎<br>
+      1️⃣ <strong>协作者</strong> <code>kf-multi-team-compete</code> — 红蓝绿三队 Agent 并发竞争评审<br>
       2️⃣ <strong>节流者</strong> <code>kf-model-router</code> + <code>lean-ctx</code> + <code>CCP</code> + <code>lambda</code> — 模型路由 + 上下文压缩 + 智能调度<br>
-      3️⃣ <strong>监测者</strong> <code>kf-token-tracker</code> — 实时 Token 追踪 + 成本看板 + 自检系统
+      3️⃣ <strong>监测者</strong> <code>kf-token-tracker</code> + <code>Monitor</code> 看板 — 实时 Token 追踪 + 成本仪表盘
     </div>
   </div>
 </div>
 
-<!-- 4 -->
+<!-- 4: 协作者进化 -->
 <div style="display: flex; align-items: stretch; margin-bottom: 12px;">
-  <div style="min-width: 8px; background: #f3e5f5; border-radius: 8px 0 0 8px;"></div>
-  <div style="flex: 1; padding: 8px 14px; background: #f5f5f5; border-radius: 0 8px 8px 0; font-size: 13px; line-height: 1.6; border-left: 3px solid #7B1FA2;">
-    <strong>铁三角闭环</strong> — 监测者 → 节流者 → 协作者 全链路自动化，40-67% Token 节省，六大原则全覆盖
+  <div style="min-width: 8px; background: #e8eaf6; border-radius: 8px 0 0 8px;"></div>
+  <div style="flex: 1; padding: 8px 14px; background: #f5f5f5; border-radius: 0 8px 8px 0; font-size: 13px; line-height: 1.6; border-left: 3px solid #283593;">
+    <strong>协作者进化 · Pipeline 驱动</strong> — 从竞争到协同，协作者能力的持续跃迁：
+    <div style="margin-top: 4px; font-size: 12px; color: #555;">
+      v1 <strong>单一 Agent</strong> → 串行编码<br>
+      v2 <strong>红蓝对决</strong> → 两 Agent 竞争评审<br>
+      v3 <strong>三队 Pipeline</strong> → gspowers 流水线引擎集成，每队 6 阶段（对齐→架构→UI→测试→审查→汇总）<br>
+      v4 <strong>工具箱扩充</strong> → 每队注入 11+ 技能（web-search + scrapling + opencli + exa-code + image-editor + browser-ops + code-review-graph + ...）<br>
+      v5 <strong>生态自治</strong> → 自安装技能 + 自检文档 + 自适应模型路由，系统自我维护
+    </div>
+  </div>
+</div>
+
+<!-- 5: 精准调研套件 -->
+<div style="display: flex; align-items: stretch; margin-bottom: 12px;">
+  <div style="min-width: 8px; background: #fce4ec; border-radius: 8px 0 0 8px;"></div>
+  <div style="flex: 1; padding: 8px 14px; background: #f5f5f5; border-radius: 0 8px 8px 0; font-size: 13px; line-height: 1.6; border-left: 3px solid #C62828;">
+    <strong>精准调研套件（准系扩充）</strong> — 数据采集从单点到矩阵：
+    <div style="margin-top: 4px; font-size: 12px; color: #555;">
+      ├─ <code>kf-web-search</code> — 多引擎搜索（基础层）<br>
+      ├─ <code>kf-scrapling</code> — 深度爬虫 + 反反爬（穿透层）<br>
+      ├─ <code>kf-opencli</code> — 100+ 平台 CLI 直取（中间层）<br>
+      ├─ <code>kf-exa-code</code> — Exa MCP 代码上下文引擎（代码层）<br>
+      ├─ <code>kf-langextract</code> — 非结构化→结构化提取（解析层）<br>
+      ├─ <code>kf-grant-research</code> — 学术课题研究助手（科研层）<br>
+      └─ <code>kf-kb-envoy</code> — 知识库全生命周期管理（沉淀层）<br>
+      <em>七层精准调研体系，覆盖搜索→穿透→直取→代码→解析→科研→沉淀全链路</em>
+    </div>
+  </div>
+</div>
+
+<!-- 6: 生态自治 -->
+<div style="display: flex; align-items: stretch; margin-bottom: 12px;">
+  <div style="min-width: 8px; background: #fff8e1; border-radius: 8px 0 0 8px;"></div>
+  <div style="flex: 1; padding: 8px 14px; background: #f5f5f5; border-radius: 0 8px 8px 0; font-size: 13px; line-height: 1.6; border-left: 3px solid #F9A825;">
+    <strong>生态自治</strong> — 系统自我维护能力成熟：
+    <div style="margin-top: 4px; font-size: 12px; color: #555;">
+      ├─ <code>kf-add-skill</code> — 关键词搜索→下载安装→文档全同步<br>
+      ├─ <code>kf-doc-consistency</code> — 文档全局一致性自动修复<br>
+      ├─ <code>kf-skill-design-expert</code> — 五根铁律质量审计<br>
+      ├─ <code>kf-model-router</code> — 模型自动切换（pro↔flash）用户无感<br>
+      ├─ <code>claude-code-pro</code> — 智能调度：不 spawn 省 10K-15K token<br>
+      └─ <code>lambda-lang</code> — Agent 间压缩通信（3x 压缩）<br>
+      <em>六项自治能力 → 铁三角进化为全自动生态系统</em>
+    </div>
   </div>
 </div>
 
@@ -281,6 +323,7 @@ git clone https://github.com/fshaan/gspowers.git ~/.claude/skills/gspowers
 | `装技能` / `安装技能` / `添加技能` / `搜索技能` | 技能安装管家 | kf-add-skill |
 | `课题申报` / `科研项目` / `国自然` / `研究计划` | 课题申报研究助手 | kf-grant-research |
 | `提取` / `结构化提取` / `parse` / `langextract` | LLM 驱动结构化提取，非结构化文本→JSON/CSV/YAML | kf-langextract |
+| `exa-code` / `查代码示例` / `找API用法` / `代码搜索` / `查库文档` | Exa Code — Web 规模代码上下文引擎，自动知识缺口检测 | kf-exa-code |
 
 ---
 
@@ -335,6 +378,7 @@ AI编程智驾/
 │       ├── kf-grant-research/      # 课题申报研究助手
 │       ├── kf-image-editor/        # AI 自然语言 P 图
 │       ├── kf-kb-envoy/            # Knowledge Base Envoy
+│       ├── kf-exa-code/            # Exa Code — Web 规模代码上下文引擎
 │       ├── kf-opencli/             # OpenCLI — 100+ 平台 CLI 数据直取
 │       ├── kf-reverse-spec/        # 存量代码→Spec 逆向
 │       ├── kf-scrapling/           # Web 爬虫 + 反反爬
