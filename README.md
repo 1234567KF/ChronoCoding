@@ -38,6 +38,10 @@
 </p>
 
 <p align="center">
+  <img src="https://cdn.jsdelivr.net/gh/1234567KF/ChronoCoding@main/assets/posters/%E4%B8%89%E8%A7%92%E8%89%B2%E6%B5%B7%E6%8A%A5_%E7%BA%A2%E9%98%9F.png" alt="AI编程智驾 三角角色彩图（红队）" width="900">
+</p>
+
+<p align="center">
   <img src="https://cdn.jsdelivr.net/gh/1234567KF/ChronoCoding@main/assets/posters/%E5%AE%A3%E4%BC%A0%E6%B5%B7%E6%8A%A5_%E6%B5%85%E8%89%B2.png" alt="AI编程智驾 宣传海报" width="900">
 </p>
 

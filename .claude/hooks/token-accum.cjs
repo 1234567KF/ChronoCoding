@@ -36,6 +36,9 @@ const MODEL_ALIASES = {
  *   cacheHit  = 命中缓存的 token（缓存价）
  *   两者是相加关系，不是包含关系。
  */
+// 基线 = DeepSeek V4 Pro 价格（人手动会选 Pro，自动路由切 Flash 才是节省）
+const BASELINE_PRICES = { input: 3, output: 6, cache_read: 0.025 };
+
 function calcCost(model, tokensIn, tokensOut, cacheHit) {
   const resolved = MODEL_ALIASES[model] || model;
   const p = MODEL_PRICES[resolved];
@@ -54,6 +57,15 @@ function calcCost(model, tokensIn, tokensOut, cacheHit) {
     uncached_tokens: uncachedIn,
     cached_tokens: cachedIn,
   };
+}
+
+function calcBaselineCost(tokensIn, tokensOut, cacheHit) {
+  const uncachedIn = tokensIn || 0;
+  const cachedIn = cacheHit || 0;
+  const inputCost  = (uncachedIn / 1_000_000) * BASELINE_PRICES.input;
+  const cacheCost  = (cachedIn / 1_000_000) * BASELINE_PRICES.cache_read;
+  const outputCost = (tokensOut / 1_000_000) * BASELINE_PRICES.output;
+  return inputCost + cacheCost + outputCost;
 }
 
 // ── Stdin read (with timeout) ──
@@ -80,22 +92,31 @@ function readTokenTotals(transcriptPath) {
   try {
     const content = fs.readFileSync(transcriptPath, 'utf-8');
     let totalIn = 0, totalOut = 0, totalCache = 0, count = 0;
-    let model = null;
+    let totalCost = 0, totalBaselineCost = 0;
+    let model = 'deepseek-v4-flash';
+    const seen = new Set(); // Dedup: transcript has 2-8x duplicates per API call
     for (const line of content.split('\n').filter(Boolean)) {
       try {
         const entry = JSON.parse(line);
         const u = entry.message?.usage;
         if (u) {
+          const m = entry.message?.model || model;
+          if (m) model = m;
+          // Dedup by (model, input, output, cache) signature
+          const sig = m + ':' + (u.input_tokens || 0) + ':' + (u.output_tokens || 0) + ':' + (u.cache_read_input_tokens || 0);
+          if (seen.has(sig)) continue;
+          seen.add(sig);
           totalIn += u.input_tokens || 0;
           totalOut += u.output_tokens || 0;
           totalCache += u.cache_read_input_tokens || 0;
+          const c = calcCost(m, u.input_tokens || 0, u.output_tokens || 0, u.cache_read_input_tokens || 0);
+          if (c) totalCost += c.total_cost;
+          totalBaselineCost += calcBaselineCost(u.input_tokens || 0, u.output_tokens || 0, u.cache_read_input_tokens || 0);
           count++;
-          if (!model && entry.message?.model) model = entry.message.model;
         }
       } catch {}
     }
-    const cost = model ? calcCost(model, totalIn, totalOut, totalCache) : null;
-    return { totalIn, totalOut, totalCache, count, model, cost };
+    return { totalIn, totalOut, totalCache, count, model, cost: { total_cost: totalCost }, baselineCost: totalBaselineCost };
   } catch { return null; }
 }
 
@@ -112,36 +133,11 @@ async function pushToMonitor(sessionId, totals, isNewMessage, prevTokens) {
   // 总输入 = 未缓存 token + 缓存命中 token（两者是相加关系，不是包含关系）
   const totalInputAll = totals.totalIn + totals.totalCache;
 
-  // 1. Compute delta from previous run — these are the REAL new tokens since last POST
-  const prevInAll = prevTokens ? (prevTokens.in || 0) + (prevTokens.cache || 0) : 0;
-  const deltaIn = prevTokens ? Math.max(0, totalInputAll - prevInAll) : totalInputAll;
-  const deltaOut = prevTokens ? Math.max(0, totals.totalOut - (prevTokens.out || 0)) : totals.totalOut;
-  const deltaCache = prevTokens ? Math.max(0, totals.totalCache - (prevTokens.cache || 0)) : totals.totalCache;
+  // 不再 POST 汇总消息（曾导致重复计数）。
+  // 明细消息由 pushNewMessages 从 transcript 逐条推送，更准确。
+  // 本函数仅负责 PATCH 累计汇总值（绝对覆盖）。
 
-  if (isNewMessage) {
-    try {
-      await fetch(`${MONITOR_URL}/api/records`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          sessionId,
-          title: '',
-          model: totals.model || 'unknown',
-          messages: [{
-            role: 'assistant',
-            content: `${(totalInputAll / 1000).toFixed(0)}K in (缓存${(totals.totalCache / 1000).toFixed(0)}K) / ${(totals.totalOut / 1000).toFixed(0)}K out`,
-            input_tokens: deltaIn - deltaCache,     // 仅未缓存的新输入
-            output_tokens: deltaOut,
-            cache_hit: deltaCache,                   // 缓存命中（相加关系）
-            created_at: now,
-          }],
-          skillCalls: [],
-        }),
-      });
-    } catch {}
-  }
-
-  // 2. PATCH cumulative totals (SET absolute values, overrides POST's ADD)
+  // 2. PATCH cumulative totals (SET absolute values)
   try {
     await fetch(`${MONITOR_URL}/api/conversations/${encodeURIComponent(sessionId)}/tokens`, {
       method: 'PATCH',
@@ -150,6 +146,7 @@ async function pushToMonitor(sessionId, totals, isNewMessage, prevTokens) {
         total_input_tokens: totalInputAll,
         total_output_tokens: totals.totalOut,
         total_cost: cost ? cost.total_cost : 0,
+        total_baseline_cost: totals.baselineCost || 0,
         ended_at: now,
       }),
     });
@@ -195,7 +192,116 @@ function resolveTranscriptPath(sessionId) {
   return null;
 }
 
-// ── record: PostToolUse — 保存 transcript_path + 推送 token ──
+// ── Push new transcript messages (user+assistant) to monitor ──
+// System messages to skip (carry cumulative session totals, not per-message usage)
+const SYSTEM_MSGS = new Set(['会话开始', '会话结束', '会话继续', '会话重启', '会话恢复']);
+
+/**
+ * DeepSeek transcript format note:
+ * User messages DON'T have usage data — only assistant messages carry usage.input_tokens,
+ * which represents the FULL prompt cost (system + history + user input).
+ * We attribute input_tokens from assistant to the preceding user message
+ * for an accurate per-role cost breakdown.
+ */
+function extractMsgText(entry) {
+  const c = entry.message?.content;
+  if (typeof c === 'string') return c.trim();
+  if (Array.isArray(c)) return c.filter(x => x.type === 'text').map(x => x.text || '').join('\n').trim();
+  return '';
+}
+
+function buildMsgList(lines) {
+  const messages = [];
+  let pendingUser = null; // user message waiting for the next assistant's usage data
+
+  for (const line of lines) {
+    try {
+      const entry = JSON.parse(line);
+      const role = entry.message?.role;
+      if (role !== 'user' && role !== 'assistant') continue;
+
+      const text = extractMsgText(entry);
+      if (!text) continue;
+      if (SYSTEM_MSGS.has(text)) continue;
+
+      const ts = entry.timestamp || entry.message?.timestamp || new Date().toISOString();
+      const m = entry.message?.model || null;
+      const model = MODEL_ALIASES[m] || m;
+
+      if (role === 'user') {
+        // Buffer user message — will get usage from the next assistant
+        pendingUser = {
+          role, content: text.length > 10000 ? text.slice(0, 10000) + '...' : text,
+          input_tokens: 0, output_tokens: 0, cache_hit: 0,
+          model: model || undefined, created_at: ts,
+        };
+      } else if (role === 'assistant') {
+        const usage = entry.message?.usage || {};
+        const hasUsage = usage.input_tokens !== undefined;
+
+        if (hasUsage && pendingUser) {
+          // DeepSeek: attribute the assistant's input_tokens to the preceding user message
+          pendingUser.input_tokens = usage.input_tokens || 0;
+          pendingUser.cache_hit = usage.cache_read_input_tokens || 0;
+          // Use the assistant's model for the user message so costing uses the correct rate
+          pendingUser.model = model || undefined;
+          messages.push(pendingUser);
+          pendingUser = null;
+          // Assistant message only carries output tokens (input already attributed)
+          messages.push({
+            role, content: text.length > 10000 ? text.slice(0, 10000) + '...' : text,
+            input_tokens: 0, output_tokens: usage.output_tokens || 0, cache_hit: 0,
+            model: model || undefined, created_at: ts,
+          });
+        } else {
+          // Flush any pending user (no usage data available)
+          if (pendingUser) { messages.push(pendingUser); pendingUser = null; }
+          messages.push({
+            role, content: text.length > 10000 ? text.slice(0, 10000) + '...' : text,
+            input_tokens: hasUsage ? (usage.input_tokens || 0) : 0,
+            output_tokens: hasUsage ? (usage.output_tokens || 0) : 0,
+            cache_hit: hasUsage ? (usage.cache_read_input_tokens || 0) : 0,
+            model: model || undefined, created_at: ts,
+          });
+        }
+      }
+    } catch {}
+  }
+  // Flush remaining pending user (no following assistant in this batch)
+  if (pendingUser) messages.push(pendingUser);
+  return messages;
+}
+
+async function pushNewMessages(sessionId, transcriptPath, cache) {
+  const prevLineCount = cache.last_imported_lines || 0;
+  let content;
+  try { content = fs.readFileSync(transcriptPath, 'utf-8'); } catch { return prevLineCount; }
+
+  const lines = content.split('\n').filter(Boolean);
+  // Cursor safety: if file shrank, reset cursor
+  if (lines.length < prevLineCount) return lines.length;
+  if (lines.length <= prevLineCount) return prevLineCount;
+
+  const newLines = lines.slice(prevLineCount);
+  const messages = buildMsgList(newLines);
+
+  if (messages.length > 0) {
+    try {
+      const health = await fetch(`${MONITOR_URL}/api/health`);
+      if (health.ok) {
+        await fetch(`${MONITOR_URL}/api/records`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ sessionId, title: '', model: '', messages, skillCalls: [] }),
+        });
+      }
+    } catch {}
+  }
+
+  return lines.length;
+}
+
+// ── record: PostToolUse — 保存 transcript_path + 推送 token + 导入用户消息 ──
 async function cmdRecord() {
   // 1. Try stdin (works on macOS/Linux, unreliable on Windows)
   const raw = await readStdin();
@@ -210,7 +316,7 @@ async function cmdRecord() {
     const cached = resolveFromCache();
     if (cached) {
       transcriptPath = cached.transcriptPath;
-      if (!sessionId) sessionId = cached.sessionId;
+      // sessionId must come from current session, not stale cache
     }
   }
 
@@ -230,11 +336,12 @@ async function cmdRecord() {
   if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
 
   // Read previous cache to detect changes
-  let prevTokens = null;
+  let prevTokens = null, prevLineCount = 0;
   if (fs.existsSync(PATH_CACHE)) {
     try {
       const prev = JSON.parse(fs.readFileSync(PATH_CACHE, 'utf-8'));
       prevTokens = prev.last_tokens;
+      prevLineCount = prev.last_imported_lines || 0;
     } catch {}
   }
 
@@ -242,18 +349,20 @@ async function cmdRecord() {
   const totals = readTokenTotals(transcriptPath);
 
   if (totals && sessionId && totals.count > 0) {
-    // Only add a message when tokens changed by >500
     const deltaIn = prevTokens ? Math.abs(totals.totalIn - prevTokens.in) : Infinity;
     const isNewMessage = deltaIn > 500;
-
     await pushToMonitor(sessionId, totals, isNewMessage, prevTokens);
   }
+
+  // Import new user/assistant messages from transcript (live, not just at session end)
+  const newLineCount = await pushNewMessages(sessionId, transcriptPath, { last_imported_lines: prevLineCount });
 
   fs.writeFileSync(PATH_CACHE, JSON.stringify({
     transcript_path: transcriptPath,
     session_id: sessionId,
     updated_at: new Date().toISOString(),
-    last_tokens: totals ? { in: totals.totalIn, out: totals.totalOut, cache: totals.totalCache, cost: totals.cost?.total_cost || 0 } : null,
+    last_tokens: totals ? { in: totals.totalIn, out: totals.totalOut, cache: totals.totalCache, cost: totals.cost?.total_cost || 0, baselineCost: totals.baselineCost || 0 } : null,
+    last_imported_lines: newLineCount,
   }));
 
   process.exit(0);
