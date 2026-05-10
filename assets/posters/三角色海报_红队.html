@@ -577,8 +577,8 @@ body::before{
     </div>
     <div class="card-title">协作者</div>
     <div class="card-subtitle">Collaborator</div>
-    <div class="card-engine">kf-multi-team-compete</div>
-    <div class="card-desc">多 Agent 并发竞争评审引擎。Team Lead 统筹，6 专家角色，Pipeline 六阶段流水线。</div>
+    <div class="card-engine">kf-multi-team-compete + kf-evolution</div>
+    <div class="card-desc">多 Agent 并发竞争评审引擎。Team Lead 统筹，6 专家角色，Pipeline 六阶段流水线，quality signals 质量门禁，进化机制持续优化。</div>
     <div class="card-tag">夯 · 竞争择优</div>
   </div>
   </div>
@@ -595,8 +595,8 @@ body::before{
     </div>
     <div class="card-title">节流者</div>
     <div class="card-subtitle">Saver / Throttler</div>
-    <div class="card-engine">kf-model-router + lean-ctx + CCP + λ + KV Cache</div>
-    <div class="card-desc">模型路由 · 上下文压缩 · 智能调度 · KV Cache 优化。综合 Token 节省约 80%，成本降至 1/5。</div>
+    <div class="card-engine">kf-model-router + kf-saver + lean-ctx + CCP + λ + KV Cache</div>
+    <div class="card-desc">模型路由 · 上下文压缩 · 智能调度 · KV Cache 优化 · 节省追踪。综合 Token 节省约 80%，成本降至 1/5。</div>
     <div class="card-tag">省 · Token 节省 80%</div>
   </div>
   </div>
@@ -615,8 +615,8 @@ body::before{
     </div>
     <div class="card-title">监测者</div>
     <div class="card-subtitle">Monitor</div>
-    <div class="card-engine">kf-token-tracker + Monitor 看板 + /api/v1/cache</div>
-    <div class="card-desc">实时 Token 追踪 · 成本仪表盘 · 缓存命中看板 · 异常自动告警。</div>
+    <div class="card-engine">kf-token-tracker + kf-monitor 看板 + 重审追踪 + /api/v1/cache</div>
+    <div class="card-desc">实时 Token 追踪 · 成本仪表盘 · 缓存命中看板 · 重审触发检测 · Quality Signals 异常告警。</div>
     <div class="card-tag">准 · 实时精准</div>
   </div>
   </div>
@@ -627,7 +627,7 @@ body::before{
     <div class="hero-footer-text">
       铁三角闭环&ensp;<strong>监测者 → 节流者 → 协作者</strong>&ensp;全链路自动化
     </div>
-    <div class="hero-footer-savings">40–83% Token 节省 &middot; 六大原则全覆盖</div>
+    <div class="hero-footer-savings">优化方案 Phase 1 完成 &middot; 40–83% Token 节省 &middot; 六大原则全覆盖</div>
   </div>
 
   <!-- Scroll hint -->
@@ -672,24 +672,24 @@ body::before{
     <td><span class="entry-skill">/夯</span> (kf-multi-team-compete)</td>
     <td><span class="trigger-badge manual">主动触发</span></td>
     <td>开发任务、代码评审、Bug 修复、架构设计</td>
-    <td>Team Lead + 6 专家 + Pipeline + 进化机制</td>
+    <td>Team Lead + 6 专家 + Pipeline + Quality Signals + 进化机制 + 条件重审</td>
     <td>Qoder · gspowers · gstack · Gos · λ-lang · CCP</td>
   </tr>
   <tr>
     <td><span class="role-name saver">节流者</span></td>
-    <td><span class="entry-skill">kf-model-router + lean-ctx + CCP + λ</span> (全自动)<br><span class="entry-skill">kf-saver</span> (可选诊断)</td>
+    <td><span class="entry-skill">kf-model-router + kf-smart-router + kf-safe-router + lean-ctx + CCP + λ</span> (全自动)<br><span class="entry-skill">kf-saver</span> (可选诊断)</td>
     <td><span class="trigger-badge auto">全自动</span></td>
-    <td>所有场景自动生效；可选 <code>节省</code> / <code>缓存分析</code> 出诊断报告</td>
-    <td>KV Cache 120x 杠杆 · 共享前缀 · 模型路由</td>
+    <td>所有场景自动生效；可选 <code>节省</code> / <code>缓存分析</code> / <code>成本优化报告</code></td>
+    <td>KV Cache 120x 杠杆 · 共享前缀 · 模型路由 · 断路器/限流 · 节省基线</td>
     <td>lean-ctx · CCP · λ-lang · DeepSeek KV Cache</td>
   </tr>
   <tr>
     <td><span class="role-name monitor-r">监测者</span></td>
-    <td><span class="entry-skill">kf-token-tracker</span> (全自动)<br><span class="entry-skill">kf-monitor</span> (手动)</td>
+    <td><span class="entry-skill">kf-token-tracker + kf-monitor</span> (全自动)<br><span class="entry-skill">重审追踪</span> (可选诊断)</td>
     <td><span class="trigger-badge both">自动+手动</span></td>
-    <td>SessionStart/Stop（自动）；查看面板、成本分析</td>
-    <td>Token 追踪 · 成本看板 · 缓存监控 · 异常告警</td>
-    <td>Symphony · Grafana · Graphify · Monitor 看板</td>
+    <td>SessionStart/Stop（自动）；查看面板、成本分析、重审记录</td>
+    <td>Token 追踪 · 成本看板 · 缓存监控 · 重审触发检测 · Quality Signals</td>
+    <td>Symphony · Grafana · Graphify · Monitor 看板 · review_reruns</td>
   </tr>
   </tbody>
   </table>
@@ -743,6 +743,8 @@ body::before{
           <li><strong>三队并发竞争</strong> — 红蓝绿队 Pipeline 六阶段，裁判择优融合</li>
           <li><strong>用户介入三级</strong> — 小改静默/中改通知/大改暂停，人机协同</li>
           <li><strong>进化机制</strong> — 个体经验积累 + 团队阵容优化，越用越强</li>
+          <li><strong>Quality Signals</strong> — 标准化质量信号发射，Pipeline 各阶段自动检验</li>
+          <li><strong>条件重审</strong> — P0/P1 缺陷密度检测，自动触发 reviewer 重审</li>
         </ul>
       </div>
 
@@ -791,6 +793,8 @@ body::before{
           <li><strong>模型智能路由</strong> — 计划任务自动切 Pro，执行任务自动切 Flash，用户无感</li>
           <li><strong>上下文压缩</strong> — lean-ctx 90+ 压缩模式，CCP 智能跳过不必要的 Agent spawn</li>
           <li><strong>成本预算控制</strong> — 会话/任务级 Token 预算，超额自动降级</li>
+          <li><strong>节省追踪 (kf-saver)</strong> — 自动记录每次 API 调用的 token 节省数据，对比基线</li>
+          <li><strong>安全路由</strong> — 密钥隔离 + 断路器 + 令牌桶限流 + 降级链，防连锁故障</li>
         </ul>
       </div>
 
@@ -840,6 +844,8 @@ body::before{
           <li><strong>缓存命中监控</strong> — <code>/api/v1/cache</code> 端点，命中率 < 30% 自动告警</li>
           <li><strong>异常检测</strong> — 缓存骤降 &lt;20% · Token 暴涨 &gt;200% · 模型比例偏离 &gt;50%</li>
           <li><strong>Symphony 兼容</strong> — REST API 标准接口，可接入外部监控体系</li>
+          <li><strong>重审触发检测</strong> — review_reruns 表 + watcher 扫描 + API + 仪表盘，独立于 Agent 自报</li>
+          <li><strong>Quality Signals</strong> — 标准化质量信号发射，自动接入监测者数据流</li>
         </ul>
       </div>
 
@@ -927,6 +933,20 @@ body::before{
           <div class="path-step-ref">→ claude-mem + context-mode</div>
         </div>
       </div>
+      <div class="path-step">
+        <span class="path-step-num">8</span>
+        <div>
+          <div class="path-step-text">节省追踪 (kf-saver)：全链路 baseline_cost 基线对比，自动记录每次 API 节省数据到 monitor DB</div>
+          <div class="path-step-ref">→ kf-saver-hook.cjs + kf-saver 技能</div>
+        </div>
+      </div>
+      <div class="path-step">
+        <span class="path-step-num">9</span>
+        <div>
+          <div class="path-step-text">安全路由 (kf-safe-router)：密钥隔离 Axios 工厂 + 三态断路器 + 令牌桶限流 + 降级链，防连锁故障</div>
+          <div class="path-step-ref">→ key-isolator.cjs + circuit-breaker.cjs + rate-limiter.cjs + degradation-chain.cjs</div>
+        </div>
+      </div>
     </div>
 
     <!-- 协作者升级路径 -->
@@ -967,6 +987,20 @@ body::before{
           <div class="path-step-ref">→ kf-evolution + expert-memory/</div>
         </div>
       </div>
+      <div class="path-step">
+        <span class="path-step-num">6</span>
+        <div>
+          <div class="path-step-text">Quality Signals 质量门禁：标准化质量信号发射 → 条件重审触发 → Pipeline 各阶段自动检验</div>
+          <div class="path-step-ref">→ quality-signals.cjs + review-rerun-check.cjs + skill-validator.cjs</div>
+        </div>
+      </div>
+      <div class="path-step">
+        <span class="path-step-num">7</span>
+        <div>
+          <div class="path-step-text">Coding Checklist 增强：A-J 类型错误检查清单强制加载，编码阶段逐项自检</div>
+          <div class="path-step-ref">→ mvp-coding-checklist.md</div>
+        </div>
+      </div>
     </div>
 
     <!-- 监测者升级路径 -->
@@ -1005,6 +1039,20 @@ body::before{
         <div>
           <div class="path-step-text">异常检测 + 自动告警：三级阈值（critical/warning/info）</div>
           <div class="path-step-ref">→ kf-monitor-bridge.cjs 桥接脚本</div>
+        </div>
+      </div>
+      <div class="path-step">
+        <span class="path-step-num">6</span>
+        <div>
+          <div class="path-step-text">重审追踪：review_reruns 表 + watcher 定时扫描 + API 端点 + 仪表盘面板，独立于 Agent 自报</div>
+          <div class="path-step-ref">→ review-rerun-check.cjs + watcher + /api/v1/review-reruns</div>
+        </div>
+      </div>
+      <div class="path-step">
+        <span class="path-step-num">7</span>
+        <div>
+          <div class="path-step-text">Quality Signals 集成：标准化质量信号发射 → 自动接入 monitor 数据流 → 仪表盘展示</div>
+          <div class="path-step-ref">→ quality-signals.cjs → monitor DB</div>
         </div>
       </div>
     </div>
