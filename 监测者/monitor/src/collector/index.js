@@ -6,116 +6,93 @@ function resolveModel(raw) {
   return MODEL_ALIASES[raw] || raw;
 }
 
-function saveRecord({ sessionId, title, model, messages, skillCalls }) {
+function saveRecord({ sessionId, title, model, messages, skillCalls, restoredFrom }) {
   const db = getDB();
   const convId = sessionId || `conv_${Date.now()}`;
   const now = new Date().toISOString();
-
-  // Normalize model name for display consistency
   const resolvedModel = resolveModel(model);
 
-  let totalInput = 0, totalOutput = 0, totalCost = 0, totalBaselineCost = 0, totalCache = 0;
-
   const insertMsg = db.prepare(
-    `INSERT INTO messages (conversation_id, role, content, input_tokens, output_tokens, cache_hit, input_cost, output_cost, baseline_cost, created_at)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+    `INSERT INTO messages (conversation_id, role, content, input_tokens, output_tokens, cache_hit, input_cost, output_cost, cache_cost, baseline_cost, model, created_at)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
   );
   const insertSkill = db.prepare(
-    `INSERT INTO skill_calls (message_id, skill_name, skill_type, input_tokens, output_tokens, duration_ms, status)
-     VALUES (?, ?, ?, ?, ?, ?, ?)`
+    `INSERT INTO skill_calls (message_id, skill_name, skill_type, input_tokens, output_tokens, duration_ms, status, agent_name, agent_team)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`
   );
 
   const tx = db.transaction(() => {
-    // upsert conversation
+    // upsert conversation (minimal — no longer the primary dimension)
     const existing = db.prepare('SELECT id FROM conversations WHERE id = ?').get(convId);
     if (!existing) {
       db.prepare(
-        `INSERT INTO conversations (id, session_id, title, model, started_at)
-         VALUES (?, ?, ?, ?, ?)`
-      ).run(convId, sessionId || convId, title || '', resolvedModel, now);
+        `INSERT INTO conversations (id, session_id, title, model, started_at, restored_from)
+         VALUES (?, ?, ?, ?, ?, ?)`
+      ).run(convId, sessionId || convId, title || '', resolvedModel, now, restoredFrom || null);
     } else {
-      // Update model if changed (e.g., model switch mid-session)
       if (resolvedModel) {
         db.prepare('UPDATE conversations SET model = ? WHERE id = ?').run(resolvedModel, convId);
+      }
+      // Update restored_from if not already set (first lineage wins)
+      if (restoredFrom && !existing.restored_from) {
+        db.prepare('UPDATE conversations SET restored_from = ? WHERE id = ?').run(restoredFrom, convId);
       }
     }
 
     let usedTopLevelSkills = false;
+    const checkDup = db.prepare(
+      `SELECT id FROM messages WHERE conversation_id = ? AND role = ? AND input_tokens = ? AND output_tokens = ? AND cache_hit = ? AND content = ? LIMIT 1`
+    );
+
     for (const msg of messages || []) {
-      // Calc cost using unified pricing (per MTok, CNY)
-      const cost = calcCost(model, msg.input_tokens || 0, msg.output_tokens || 0, msg.cache_hit || 0);
-      // Baseline: all-Pro pricing (no skill optimization scenario)
+      // Skip system-level session messages
+      const c = (msg.content || '').trim();
+      if (c === '会话开始' || c === '会话结束' || c === '会话继续' || c === '会话重启') continue;
+
+      // Dedup check: skip if identical message already exists
+      const existing = checkDup.get(convId, msg.role, msg.input_tokens || 0, msg.output_tokens || 0, msg.cache_hit ?? 0, c);
+      if (existing) continue;
+
+      // Per-message model: prefer message-level model, fall back to conversation model
+      const msgModel = resolveModel(msg.model) || resolvedModel || model || 'deepseek-v4-pro';
+      const cost = calcCost(msgModel, msg.input_tokens || 0, msg.output_tokens || 0, msg.cache_hit || 0);
       const baseline = calcBaselineCost(msg.input_tokens || 0, msg.output_tokens || 0, msg.cache_hit || 0);
 
       const result = insertMsg.run(
-        convId, msg.role, msg.content,
+        convId, msg.role, c,
         msg.input_tokens || 0, msg.output_tokens || 0,
         msg.cache_hit ?? null,
         cost?.input_cost ?? null,
         cost?.output_cost ?? null,
+        cost?.cache_cost ?? null,
         baseline?.total_cost ?? null,
+        msgModel,
         msg.created_at || now
       );
       const msgId = result.lastInsertRowid;
 
-      // Attach skill calls: per-message first; top-level only once & only to assistant
       const msgSkills = msg.skillCalls;
       if (msgSkills && msgSkills.length > 0) {
         for (const skill of msgSkills) {
-          if (skill.type === 'subagent') continue; // 跳过 subagent 生命周期事件
           insertSkill.run(msgId, skill.name, skill.type || 'local',
             skill.input_tokens || 0, skill.output_tokens || 0,
-            skill.duration_ms || null, skill.status || 'success');
+            skill.duration_ms || null, skill.status || 'success',
+            skill.agent_name || null, skill.agent_team || null);
         }
       } else if (skillCalls && skillCalls.length > 0 && !usedTopLevelSkills && msg.role === 'assistant') {
         usedTopLevelSkills = true;
         for (const skill of skillCalls) {
-          if (skill.type === 'subagent') continue; // 跳过 subagent 生命周期事件
           insertSkill.run(msgId, skill.name, skill.type || 'local',
             skill.input_tokens || 0, skill.output_tokens || 0,
-            skill.duration_ms || null, skill.status || 'success');
+            skill.duration_ms || null, skill.status || 'success',
+            skill.agent_name || null, skill.agent_team || null);
         }
       }
 
-      // 总输入 = 新增token + 缓存命中token（两者是相加关系）
-      const msgTotalIn = (msg.input_tokens || 0) + (msg.cache_hit || 0);
-      totalInput += msgTotalIn;
-      totalOutput += msg.output_tokens || 0;
-      totalCache += msg.cache_hit || 0;
-      totalCost += cost?.total_cost || 0;
-      totalBaselineCost += baseline?.total_cost || 0;
+      // Costs tracked in messages table only; conversation totals managed by PATCH handler
     }
 
-    // update conversation totals
-    db.prepare(
-      `UPDATE conversations SET
-        total_input_tokens = total_input_tokens + ?,
-        total_output_tokens = total_output_tokens + ?,
-        total_cost = total_cost + ?,
-        total_baseline_cost = total_baseline_cost + ?,
-        ended_at = ?
-       WHERE id = ?`
-    ).run(totalInput, totalOutput, totalCost, totalBaselineCost, now, convId);
-
-    // update daily stats
-    const today = now.slice(0, 10);
-    const existingStats = db.prepare('SELECT * FROM token_daily_stats WHERE date = ?').get(today);
-    if (existingStats) {
-      db.prepare(
-        `UPDATE token_daily_stats SET
-          total_input = total_input + ?,
-          total_output = total_output + ?,
-          cache_hit_input = cache_hit_input + ?,
-          total_cost = total_cost + ?,
-          total_baseline_cost = total_baseline_cost + ?
-         WHERE date = ?`
-      ).run(totalInput, totalOutput, totalCache, totalCost, totalBaselineCost, today);
-    } else {
-      db.prepare(
-        `INSERT INTO token_daily_stats (date, total_input, total_output, cache_hit_input, total_cost, total_baseline_cost)
-         VALUES (?, ?, ?, ?, ?, ?)`
-      ).run(today, totalInput, totalOutput, totalCache, totalCost, totalBaselineCost);
-    }
+    // conversation totals + daily stats managed by PATCH handler (avoids double-count)
   });
 
   tx();

@@ -1,0 +1,26 @@
+{
+  "version": 3,
+  "cost_usd": 0.48464611,
+  "cost_rmb": 3.489452,
+  "model": "deepseek-v4-pro",
+  "pricing": {
+    "label": "DS-V4-Pro",
+    "input": 3,
+    "output": 6,
+    "cache_read": 0.025
+  },
+  "input_tokens": 589694,
+  "output_tokens": 144123,
+  "cache_read_tokens": 34225280,
+  "cache_create_tokens": 0,
+  "api_calls": 269,
+  "cost_in": 1.769082,
+  "cost_out": 0.864738,
+  "cost_cache": 0.855632,
+  "savings": {
+    "tokens_saved": 0,
+    "savings_rmb": 0,
+    "savings_usd": 0
+  },
+  "updated_at": "2026-05-10T07:06:21.214Z"
+}

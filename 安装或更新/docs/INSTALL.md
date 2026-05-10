@@ -1289,6 +1289,11 @@ D:\your-project\
 | `生成UI原型` / `UI原型` / `页面原型` | UI 原型 HTML 生成 | kf-ui-prototype-generator |
 | `课题申报` / `科研项目` / `国自然` / `研究计划` | 课题申报研究助手 | kf-grant-research |
 | `提取` / `结构化提取` / `parse` / `langextract` | LLM 驱动结构化提取：非结构化文本→JSON/CSV/YAML | kf-langextract |
+| `进化` / `自我优化` / `evolve` | AI 自我优化与迭代改进：从执行历史学习，自动优化策略 | kf-evolution |
+| `监测者` / `仪表盘` / `dashboard` / `token监测` | 监测者仪表盘：Token 追踪 + 重审触发检测 + 成本分析 | kf-monitor |
+| `节省追踪` / `saver` / `成本节省` | 会话成本节省追踪：自动记录每次 API 调用的 token 节省数据 | kf-saver |
+| `λ` / `lambda` / `!ta ct` / `@v2.0#h` / `agent通信` | Agent 间 Lambda 压缩通信（3x 压缩），自动注入 | lambda-lang |
+| `ccp` / `智能调度` / `回调` | Token 高效调度：不 spawn 则省 10K-15K token | claude-code-pro |
 
 ---
 

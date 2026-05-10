@@ -80,14 +80,14 @@ git clone https://github.com/1234567KF/AutoCoding.git $env:TEMP\AICoding
 
 **下载后，你(AI)必须**：
 1. 进入项目目录：`cd $env:TEMP\AICoding` (Windows) / `cd /tmp/AICoding` (Linux/macOS)
-2. 读取 `../知识库相关/../知识库相关/docs/INSTALL.md` 文件
-3. **严格按照 ../知识库相关/../知识库相关/docs/INSTALL.md 的指令完成所有安装步骤**
+2. 读取 `../安装或更新/docs/INSTALL.md` 文件
+3. **严格按照 ../安装或更新/docs/INSTALL.md 的指令完成所有安装步骤**
 
 ---
 
-## 阶段3：按 ../知识库相关/../知识库相关/docs/INSTALL.md 完成安装
+## 阶段3：按 ../安装或更新/docs/INSTALL.md 完成安装
 
-../知识库相关/../知识库相关/docs/INSTALL.md 包含以下步骤（你逐项执行）：
+../安装或更新/docs/INSTALL.md 包含以下步骤（你逐项执行）：
 
 | 步骤 | 内容 | 自动 |
 |------|------|------|
@@ -105,7 +105,7 @@ git clone https://github.com/1234567KF/AutoCoding.git $env:TEMP\AICoding
 | 安装 superpowers | `/plugin install superpowers@claude-plugins-official` | **需用户确认** |
 | 配置权限模式 | 设置 bypassPermissions | ✓ |
 
-**执行原则（来自 ../知识库相关/../知识库相关/docs/INSTALL.md）**：
+**执行原则（来自 ../安装或更新/docs/INSTALL.md）**：
 1. 先检测，缺什么装什么
 2. Token 配置需要用户介入，提示用户提供
 3. 遇到错误自动修复，不中断（自愈式控制）
@@ -297,6 +297,13 @@ git log --oneline -3
 | `kf-grant-research` | — | 准 | Pipeline + Inversion + Generator | kf-scrapling、kf-web-search、kf-alignment、kf-add-skill、kf-model-router | 用户手动 | pro |
 | `kf-langextract` | — | 准 | Pipeline + Tool Wrapper + Generator | kf-model-router | 用户手动 | flash |
 | `kf-exa-code` | /exa-code | 准 | Pipeline + Tool Wrapper + Inversion | kf-model-router、kf-web-search（降级）、kf-scrapling（降级） | kf-multi-team-compete（按需）、kf-spec（编码时）、kf-reverse-spec（逆向时） | flash |
+| `kf-evolution` | — | 稳 | 独立 | 无 | 用户手动 | pro |
+| `kf-monitor` | — | 测的准 | 独立 | 无 | 用户手动（后台运行） | flash |
+| `kf-smart-router` | — | 省 | 独立 | 无（被 kf-model-router 按 adapter 引用） | kf-model-router | flash |
+| `kf-safe-router` | — | 省 | 独立 | 无（被 kf-model-router 按需引用安全模块） | kf-model-router | flash |
+| `kf-saver` | — | 省 | 独立 | 无（Hook 注入，自动记录） | 用户手动 | flash |
+| `lambda-lang` | λ | 省 | **自动注入** | 无 | kf-multi-team-compete、kf-triple-collaboration（自动注入） | — |
+| `claude-code-pro` | ccp | 省 | **自动触发** | 无 | kf-multi-team-compete、kf-triple-collaboration（自动调用） | — |
 
 ### 上游技能（gstack / gspowers）
 

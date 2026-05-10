@@ -1,11 +1,15 @@
 const express = require('express');
+const fs = require('fs');
 const path = require('path');
 const layouts = require('express-ejs-layouts');
 const { initDB } = require('./db');
 const { saveRecord } = require('./collector');
 const conversationsRouter = require('./api/conversations');
+const userMessagesRouter = require('./api/userMessages');
 const statsRouter = require('./api/stats');
+const symphonyRouter = require('./api/symphony');
 const { startWatcher } = require('./watcher');
+const { fetchOfficialPrices } = require('./pricing');
 
 const app = express();
 const PORT = 3456;
@@ -23,23 +27,22 @@ app.use('/static', express.static(path.join(__dirname, '../client')));
 // Init DB
 const db = initDB();
 
-// Cleanup stale data: remove old subagent lifecycle entries and unknown-model records
+// Fetch latest pricing from DeepSeek official website
+fetchOfficialPrices().then(() => {
+  console.log('[monitor] Pricing initialized');
+});
+
+// Clean up truly empty conversations (no messages AND no token data)
 try {
-  db.prepare("DELETE FROM skill_calls WHERE skill_type = 'subagent'").run();
-  db.prepare("DELETE FROM skill_calls WHERE skill_name LIKE 'subagent-%'").run();
-  // Clean up truly empty conversations (no messages AND no token data)
   db.prepare(
     "DELETE FROM conversations WHERE id NOT IN (SELECT DISTINCT conversation_id FROM messages) AND total_input_tokens = 0 AND total_output_tokens = 0"
   ).run();
-  console.log('[monitor] Cleaned up old subagent lifecycle data');
 } catch (e) {
   console.error('[monitor] Cleanup warning:', e.message);
 }
-
-// Start file watcher (兜底：轮询 skill-traces.jsonl / session-state.json)
 startWatcher(15000);
 
-// Sync pending sessions (saved by hooks when monitor was unreachable)
+// Sync pending sessions
 syncPendingSessions();
 
 function syncPendingSessions() {
@@ -54,9 +57,9 @@ function syncPendingSessions() {
         const data = JSON.parse(fs.readFileSync(path.join(pendingDir, file), 'utf-8'));
         const existing = db.prepare('SELECT id FROM conversations WHERE id = ?').get(data.sessionId);
         if (!existing) {
-          // Create conversation record
-          db.prepare(`INSERT INTO conversations (id, title, model, started_at, total_input_tokens, total_output_tokens, total_cost, total_baseline_cost, ended_at)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`).run(
+          db.prepare(`INSERT INTO conversations (id, session_id, title, model, started_at, total_input_tokens, total_output_tokens, total_cost, total_baseline_cost, ended_at)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`).run(
+            data.sessionId,
             data.sessionId,
             data.title || `会话 ${(data.sessionId || '').slice(0, 16)}`,
             data.model || 'unknown',
@@ -69,12 +72,12 @@ function syncPendingSessions() {
           );
           console.log('[monitor] Imported pending session:', data.sessionId);
         } else if (data.phase === 'end') {
-          // Update with final totals
+          const current = db.prepare('SELECT total_input_tokens, total_output_tokens, total_cost, total_baseline_cost FROM conversations WHERE id = ?').get(data.sessionId);
           db.prepare(`UPDATE conversations SET total_input_tokens=?, total_output_tokens=?, total_cost=?, total_baseline_cost=?, ended_at=? WHERE id=?`).run(
-            data.total_input_tokens || 0,
-            data.total_output_tokens || 0,
-            data.total_cost || 0,
-            data.total_baseline_cost || 0,
+            Math.max(current?.total_input_tokens || 0, data.total_input_tokens || 0),
+            Math.max(current?.total_output_tokens || 0, data.total_output_tokens || 0),
+            Math.max(current?.total_cost || 0, data.total_cost || 0),
+            Math.max(current?.total_baseline_cost || 0, data.total_baseline_cost || 0),
             data.ended_at || null,
             data.sessionId
           );
@@ -92,16 +95,16 @@ function syncPendingSessions() {
 
 // --- API Routes ---
 
-// Health check — used by hooks to detect if monitor is running
+// Health check
 app.get('/api/health', (req, res) => {
   res.json({ status: 'ok', uptime: process.uptime() });
 });
 
-// Data ingestion — called by hooks
+// Data ingestion
 app.post('/api/records', (req, res) => {
   try {
-    const { sessionId, title, model, messages, skillCalls } = req.body;
-    const convId = saveRecord({ sessionId, title, model, messages, skillCalls });
+    const { sessionId, title, model, messages, skillCalls, restoredFrom } = req.body;
+    const convId = saveRecord({ sessionId, title, model, messages, skillCalls, restoredFrom });
     res.json({ ok: true, conversationId: convId });
   } catch (err) {
     console.error('Save record error:', err.message);
@@ -115,8 +118,84 @@ app.post('/api/sync-pending', (req, res) => {
   res.json({ ok: true });
 });
 
+// Clear all historical data (DB + source files + watcher cursor)
+const PROJECT_ROOT = path.resolve(__dirname, '..', '..', '..');
+const TRACE_FILE = path.join(PROJECT_ROOT, '.claude-flow', 'data', 'skill-traces.jsonl');
+const CURSOR_FILE = path.join(PROJECT_ROOT, '.claude-flow', 'data', 'watcher-cursor.json');
+const PENDING_DIR = path.join(PROJECT_ROOT, '.claude-flow', 'data', 'pending-sessions');
+const CLEARED_FLAG_PATH = path.join(PROJECT_ROOT, '.claude-flow', 'data', 'cleared-flag.json');
+
+app.post('/api/clear', (req, res) => {
+  try {
+    // Require confirmation to prevent accidental clearing
+    if (req.body?.confirm !== true) {
+      return res.status(400).json({ error: 'Missing confirm: true', hint: 'Send { "confirm": true } to acknowledge data loss' });
+    }
+
+    // 1. Clear DB tables
+    db.prepare('DELETE FROM skill_calls').run();
+    db.prepare('DELETE FROM messages').run();
+    db.prepare('DELETE FROM token_daily_stats').run();
+    db.prepare('DELETE FROM conversations').run();
+
+    // 2. Clear trace source file — truncateSync, retry once if locked
+    try { fs.truncateSync(TRACE_FILE, 0); } catch { try { fs.truncateSync(TRACE_FILE, 0); } catch {} }
+
+    // Read trace file line count AFTER truncate attempt (for cursor safety on lock failure)
+    let traceLineCount = 0;
+    try {
+      const raw = fs.readFileSync(TRACE_FILE, 'utf-8').trim();
+      traceLineCount = raw ? raw.split('\n').filter(Boolean).length : 0;
+    } catch {}
+
+    // 3. Clear pending sessions
+    if (fs.existsSync(PENDING_DIR)) {
+      const files = fs.readdirSync(PENDING_DIR).filter(f => f.endsWith('.json'));
+      for (const f of files) fs.unlinkSync(path.join(PENDING_DIR, f));
+    }
+
+    // 4. Delete all transcript .jsonl files (prevent re-import)
+    const os = require('os');
+    const HOME_DIR = process.env.USERPROFILE || process.env.HOME || '';
+    const PROJECT_NAME = path.basename(PROJECT_ROOT);
+    const transcriptDir = HOME_DIR ? path.join(HOME_DIR, '.claude', 'projects', `D--${PROJECT_NAME}`) : null;
+    let deletedTranscriptFiles = 0;
+    if (transcriptDir && fs.existsSync(transcriptDir)) {
+      const files = fs.readdirSync(transcriptDir).filter(f => f.endsWith('.jsonl'));
+      for (const f of files) {
+        try { fs.unlinkSync(path.join(transcriptDir, f)); deletedTranscriptFiles++; } catch {}
+      }
+    }
+
+    // 5. Clean up transcriptOffsets from cursor file
+    let cursorData = {};
+    try { cursorData = JSON.parse(fs.readFileSync(CURSOR_FILE, 'utf-8')); } catch {}
+    delete cursorData.transcriptOffsets;
+    cursorData.offset = traceLineCount;
+    cursorData.updatedAt = new Date().toISOString();
+    fs.writeFileSync(CURSOR_FILE, JSON.stringify(cursorData), 'utf-8');
+
+    // 6. Remove cleared-flag (no longer needed — transcript files are gone)
+    try { if (fs.existsSync(CLEARED_FLAG_PATH)) fs.unlinkSync(CLEARED_FLAG_PATH); } catch {}
+
+    console.log(`[monitor] All data cleared, ${deletedTranscriptFiles} transcript file(s) deleted`);
+    res.json({ ok: true, deletedTranscriptFiles });
+  } catch (err) {
+    console.error('[monitor] Clear error:', err.message);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// GET /api/pricing — return current pricing info
+app.get('/api/pricing', (req, res) => {
+  const { getPricingInfo } = require('./pricing');
+  res.json(getPricingInfo());
+});
+
 app.use('/api', conversationsRouter);
+app.use('/api', userMessagesRouter);
 app.use('/api', statsRouter);
+app.use('/api', symphonyRouter);
 
 // --- Page Routes ---
 
@@ -128,14 +207,14 @@ app.get('/conversations/:id', (req, res) => {
   res.render('conversation', { convId: req.params.id, activePage: 'list' });
 });
 
+app.get('/user-messages/:id', (req, res) => {
+  res.render('userMessage', { msgId: req.params.id, activePage: 'list' });
+});
+
 app.get('/stats', (req, res) => {
   res.render('stats', { activePage: 'stats' });
 });
 
-app.get('/logs', (req, res) => {
-  res.render('logs', { activePage: 'logs' });
-});
-
 app.listen(PORT, () => {
-  console.log(`🔍 Monitor dashboard: http://localhost:${PORT}`);
+  console.log(`Monitor dashboard: http://localhost:${PORT}`);
 });

@@ -162,11 +162,11 @@ Gate: 2a~2c 均完成后进入 Stage 3。
 
 ### 3a. INSTALL.md — 触发词映射
 
-读取 `知识库相关/docs/INSTALL.md`，查找所有形如 `| \`<trigger>\` | <description> | kf-xxx |` 的行。
+读取 `安装或更新/docs/INSTALL.md`，查找所有形如 `| \`<trigger>\` | <description> | kf-xxx |` 的行。
 
 用 Grep 抽取：
 ```bash
-grep -n '| `.*` |.*| kf-' 知识库相关/docs/INSTALL.md
+grep -n '| `.*` |.*| kf-' 安装或更新/docs/INSTALL.md
 ```
 
 **检查项**：

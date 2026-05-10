@@ -8,7 +8,7 @@
 /* ============================================================
    RESET & BASE
    ============================================================ */
-*,.::before,.::after{margin:0;padding:0;box-sizing:border-box}
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
 :root{
   --bg:#0a0a0a;
   --bg2:#0f0f0f;
@@ -25,21 +25,22 @@
   --radius:16px;
   --font:'Inter','Segoe UI','PingFang SC','Microsoft YaHei',system-ui,-apple-system,sans-serif;
 
-  /* animated custom property for conic border */
   @property --angle{syntax:'<angle>';initial-value:0deg;inherits:false}
   --angle:0deg;
 }
-html,body{
-  height:100%;width:100%;
+html{
+  scroll-behavior:smooth;
+}
+body{
   font-family:var(--font);
   background:var(--bg);
   color:var(--text);
-  overflow:hidden;
+  overflow-x:hidden;
   -webkit-font-smoothing:antialiased;
 }
 
 /* ============================================================
-   GRID BACKGROUND
+   GRID BACKGROUND (fixed)
    ============================================================ */
 body::before{
   content:'';position:fixed;inset:0;
@@ -51,7 +52,7 @@ body::before{
 }
 
 /* ============================================================
-   CANVAS
+   CANVAS (fixed)
    ============================================================ */
 #canvas{
   position:fixed;top:0;left:0;width:100%;height:100%;
@@ -59,7 +60,7 @@ body::before{
 }
 
 /* ============================================================
-   AMBIENT ORBS
+   AMBIENT ORBS (fixed)
    ============================================================ */
 .orb{
   position:fixed;border-radius:50%;pointer-events:none;z-index:0;
@@ -75,9 +76,9 @@ body::before{
 }
 
 /* ============================================================
-   MAIN CONTAINER
+   HERO CONTAINER (fixed)
    ============================================================ */
-.container{
+.hero{
   position:fixed;inset:0;z-index:2;
   display:flex;flex-direction:column;align-items:center;justify-content:center;
   pointer-events:none;
@@ -123,6 +124,7 @@ body::before{
   -webkit-backdrop-filter:blur(24px) saturate(1.2);
   box-shadow:0 8px 60px rgba(0,0,0,0.5),inset 0 1px 0 rgba(255,255,255,0.04);
   transition:border-color .4s,box-shadow .4s,transform .3s cubic-bezier(.34,1.56,.64,1);
+  position:relative;overflow:visible;
 }
 .card:hover{
   border-color:var(--green);
@@ -130,7 +132,6 @@ body::before{
   transform:translateY(-6px);
 }
 
-/* glowing border overlay */
 .card::before{
   content:'';position:absolute;inset:-1px;
   border-radius:calc(var(--radius)+1px);
@@ -147,7 +148,6 @@ body::before{
 .card:hover::before{opacity:0.9}
 @keyframes borderSpin{to{--angle:360deg}}
 
-/* inner glow */
 .card::after{
   content:'';position:absolute;
   width:160px;height:160px;border-radius:50%;
@@ -157,7 +157,7 @@ body::before{
 }
 
 /* Card wrapper + float animation */
-.card-wrapper{
+.hero .card-wrapper{
   position:absolute;
   pointer-events:none;
   animation:cardFloat 6s ease-in-out infinite;
@@ -167,19 +167,18 @@ body::before{
   50%{margin-top:-8px}
 }
 
-/* Equilateral triangle (60° relation) */
 [data-role="collaborator"]{
-  left:50%;top:calc(50% - 30vh);
+  left:50%;top:calc(50% - 15vh);
   transform:translate(-50%,-50%);
   animation-delay:0s;
 }
 [data-role="throttler"]{
-  left:calc(50% - 26vh);top:calc(50% + 15vh);
+  left:calc(50% - 17vh);top:calc(50% + 15vh);
   transform:translate(-50%,-50%);
   animation-delay:-2s;
 }
 [data-role="monitor"]{
-  left:calc(50% + 26vh);top:calc(50% + 15vh);
+  left:calc(50% + 17vh);top:calc(50% + 15vh);
   transform:translate(-50%,-50%);
   animation-delay:-4s;
 }
@@ -238,32 +237,25 @@ body::before{
 }
 [data-role="throttler"] .card-tag{border-color:rgba(45,212,191,0.2);color:var(--teal);background:rgba(45,212,191,0.06)}
 [data-role="monitor"] .card-tag{border-color:rgba(74,222,128,0.2);color:var(--green-light);background:rgba(74,222,128,0.06)}
-.card-stat{
-  font-size:clamp(20px,1.5vw,30px);
-  font-weight:800;
-  background:linear-gradient(135deg,var(--green-light),var(--teal));
-  -webkit-background-clip:text;-webkit-text-fill-color:transparent;
-  background-clip:text;
-}
 
 /* ============================================================
-   FOOTER
+   HERO FOOTER + SCROLL HINT
    ============================================================ */
-.footer{
+.hero-footer{
   position:absolute;bottom:3%;left:50%;transform:translateX(-50%);
   text-align:center;pointer-events:none;
 }
-.footer-text{
+.hero-footer-text{
   font-size:clamp(11px,0.7vw,14px);
   color:var(--text-dim);letter-spacing:3px;
 }
-.footer-text strong{color:var(--green-light);font-weight:600}
-.footer-line{
+.hero-footer-text strong{color:var(--green-light);font-weight:600}
+.hero-footer-line{
   width:clamp(120px,15vw,240px);height:1px;margin:0 auto 6px;
   background:linear-gradient(90deg,transparent,var(--green),transparent);
   opacity:0.3;
 }
-.footer-savings{
+.hero-footer-savings{
   font-size:clamp(18px,1.4vw,28px);
   font-weight:700;letter-spacing:1px;
   margin-top:4px;
@@ -272,24 +264,279 @@ body::before{
   background-clip:text;
 }
 
+.scroll-hint{
+  position:absolute;bottom:1.2%;left:50%;transform:translateX(-50%);
+  display:flex;flex-direction:column;align-items:center;gap:6px;
+  pointer-events:none;opacity:0.5;
+  animation:scrollBounce 2s ease-in-out infinite;
+}
+.scroll-hint span{font-size:11px;letter-spacing:3px;color:var(--text-muted)}
+.scroll-hint svg{width:20px;height:20px;stroke:var(--green-light)}
+@keyframes scrollBounce{0%,100%{opacity:0.3;transform:translateX(-50%) translateY(0)}50%{opacity:0.7;transform:translateX(-50%) translateY(6px)}}
+
+/* ============================================================
+   DETAILS SECTION (scrollable, below hero)
+   ============================================================ */
+.details{
+  position:relative;z-index:3;
+  margin-top:100vh;
+  padding:clamp(32px,5vw,80px) clamp(16px,4vw,80px) clamp(32px,5vw,80px);
+  pointer-events:auto;
+  background:var(--bg);
+}
+.details::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:120px;
+  background:linear-gradient(to bottom,transparent,var(--bg));
+  transform:translateY(-100%);
+  pointer-events:none;
+}
+
+.details-inner{max-width:1200px;margin:0 auto}
+
+/* Section title */
+.section-title{
+  text-align:center;margin-bottom:clamp(32px,4vw,56px);
+}
+.section-title-sub{
+  font-size:clamp(10px,0.7vw,13px);letter-spacing:5px;text-transform:uppercase;
+  color:var(--green);opacity:0.5;margin-bottom:6px;
+}
+.section-title-main{
+  font-size:clamp(24px,2.6vw,42px);font-weight:800;letter-spacing:2px;
+  background:linear-gradient(135deg,#fff 20%,var(--green-light) 60%,var(--teal) 100%);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+  background-clip:text;
+}
+.section-title-dash{
+  width:80px;height:2px;margin:12px auto 0;
+  background:linear-gradient(90deg,transparent,var(--green),transparent);
+}
+
+/* ============================================================
+   OVERVIEW TABLE
+   ============================================================ */
+.overview-table-wrap{
+  overflow-x:auto;margin-bottom:clamp(40px,5vw,64px);
+  border-radius:var(--radius);
+  border:1px solid var(--border);
+  background:var(--card-bg);
+  backdrop-filter:blur(24px) saturate(1.2);
+  -webkit-backdrop-filter:blur(24px) saturate(1.2);
+  box-shadow:0 8px 60px rgba(0,0,0,0.4);
+}
+.overview-table{
+  width:100%;border-collapse:collapse;
+  font-size:clamp(12px,0.78vw,14px);
+}
+.overview-table thead th{
+  padding:16px 18px;text-align:left;font-weight:700;letter-spacing:1px;
+  color:var(--green-light);font-size:13px;text-transform:uppercase;
+  background:rgba(34,197,94,0.05);
+  border-bottom:1px solid var(--border);
+  white-space:nowrap;
+}
+.overview-table tbody td{
+  padding:14px 18px;line-height:1.5;
+  border-bottom:1px solid rgba(34,197,94,0.05);
+  color:var(--text-dim);
+  vertical-align:top;
+}
+.overview-table tbody tr:last-child td{border-bottom:none}
+.overview-table tbody tr:hover td{
+  background:rgba(34,197,94,0.03);color:var(--text);
+}
+.overview-table .role-name{
+  font-weight:700;color:var(--text);white-space:nowrap;
+  font-size:clamp(13px,0.85vw,15px);
+}
+.overview-table .role-name.collab{color:var(--green-light)}
+.overview-table .role-name.saver{color:var(--teal)}
+.overview-table .role-name.monitor-r{color:var(--green-light)}
+.overview-table .entry-skill{
+  font-family:'SF Mono','Fira Code','Cascadia Code',monospace;
+  font-size:clamp(11px,0.7vw,12.5px);color:var(--green);
+  white-space:nowrap;
+}
+.overview-table .trigger-badge{
+  display:inline-block;padding:2px 10px;border-radius:10px;
+  font-size:11px;font-weight:600;letter-spacing:1px;
+}
+.trigger-badge.auto{background:rgba(34,197,94,0.12);color:var(--green-light);border:1px solid rgba(34,197,94,0.25)}
+.trigger-badge.manual{background:rgba(45,212,191,0.1);color:var(--teal);border:1px solid rgba(45,212,191,0.25)}
+.trigger-badge.both{background:rgba(139,92,246,0.1);color:#a78bfa;border:1px solid rgba(139,92,246,0.25)}
+
+/* ============================================================
+   ROLE DETAIL CARDS
+   ============================================================ */
+.role-detail-grid{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:clamp(20px,2vw,32px);
+  margin-bottom:clamp(40px,5vw,64px);
+}
+.role-detail-card{
+  background:var(--card-bg);
+  border:1px solid var(--border);
+  border-radius:var(--radius);
+  padding:clamp(24px,2vw,36px);
+  backdrop-filter:blur(24px) saturate(1.2);
+  -webkit-backdrop-filter:blur(24px) saturate(1.2);
+  box-shadow:0 8px 60px rgba(0,0,0,0.4);
+  transition:border-color .4s,box-shadow .4s,transform .3s;
+  position:relative;
+}
+.role-detail-card:hover{
+  border-color:var(--green);
+  box-shadow:0 0 50px rgba(34,197,94,0.1),0 0 100px rgba(34,197,94,0.04);
+  transform:translateY(-4px);
+}
+.role-detail-card .rd-header{
+  display:flex;align-items:center;gap:14px;margin-bottom:24px;
+  padding-bottom:16px;border-bottom:1px solid var(--border);
+}
+.role-detail-card .rd-icon{
+  width:44px;height:44px;border-radius:10px;
+  display:flex;align-items:center;justify-content:center;
+  background:rgba(34,197,94,0.08);
+  border:1px solid rgba(34,197,94,0.15);
+  flex-shrink:0;
+}
+.role-detail-card .rd-icon svg{width:22px;height:22px;stroke:var(--green-light);fill:none}
+.role-detail-card.saver-card .rd-icon svg{stroke:var(--teal)}
+.role-detail-card .rd-title{font-size:clamp(16px,0.95vw,20px);font-weight:700;letter-spacing:1px}
+.role-detail-card .rd-subtitle{font-size:12px;color:var(--text-muted);letter-spacing:2px;text-transform:uppercase}
+
+.role-detail-card .rd-section{margin-bottom:20px}
+.role-detail-card .rd-section:last-child{margin-bottom:0}
+.role-detail-card .rd-section-title{
+  font-size:12px;font-weight:700;letter-spacing:2px;text-transform:uppercase;
+  color:var(--green);opacity:0.7;margin-bottom:8px;
+}
+.role-detail-card .rd-section ul{
+  list-style:none;padding:0;
+}
+.role-detail-card .rd-section li{
+  font-size:clamp(12px,0.72vw,13.5px);color:var(--text-dim);line-height:1.65;
+  padding:4px 0;padding-left:16px;position:relative;
+}
+.role-detail-card .rd-section li::before{
+  content:'';position:absolute;left:0;top:11px;
+  width:5px;height:5px;border-radius:50%;
+  background:var(--green);opacity:0.5;
+}
+.role-detail-card.saver-card .rd-section li::before{background:var(--teal)}
+.role-detail-card .rd-section code{
+  font-family:'SF Mono','Fira Code','Cascadia Code',monospace;
+  font-size:11px;color:var(--green);
+  background:rgba(34,197,94,0.08);
+  padding:1px 6px;border-radius:4px;
+}
+.role-detail-card .rd-section .tech-chip{
+  display:inline-block;padding:2px 8px;margin:2px 4px 2px 0;
+  border-radius:6px;font-size:11px;
+  background:rgba(34,197,94,0.06);color:var(--green-light);
+  border:1px solid rgba(34,197,94,0.15);
+}
+
+/* ============================================================
+   EFFECTS SUMMARY BAR
+   ============================================================ */
+.effects-bar{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:clamp(16px,1.5vw,24px);
+  margin-bottom:clamp(40px,5vw,64px);
+}
+.effect-stat{
+  text-align:center;padding:clamp(20px,2vw,32px) clamp(16px,1.5vw,28px);
+  background:var(--card-bg);
+  border:1px solid var(--border);
+  border-radius:var(--radius);
+  backdrop-filter:blur(24px) saturate(1.2);
+  -webkit-backdrop-filter:blur(24px) saturate(1.2);
+  box-shadow:0 8px 60px rgba(0,0,0,0.4);
+}
+.effect-stat .stat-value{
+  font-size:clamp(28px,2.6vw,44px);font-weight:800;letter-spacing:1px;
+  background:linear-gradient(135deg,var(--green-light),var(--teal));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+  background-clip:text;
+  margin-bottom:4px;
+}
+.effect-stat .stat-label{
+  font-size:clamp(10px,0.65vw,12px);color:var(--text-dim);letter-spacing:2px;text-transform:uppercase;
+}
+
+/* ============================================================
+   TECH UPGRADE PATH SECTION
+   ============================================================ */
+.tech-path-grid{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:clamp(20px,2vw,32px);
+  margin-bottom:clamp(40px,5vw,64px);
+}
+.tech-path-card{
+  background:var(--card-bg);
+  border:1px solid var(--border);
+  border-radius:var(--radius);
+  padding:clamp(20px,1.8vw,30px);
+  backdrop-filter:blur(24px);
+  -webkit-backdrop-filter:blur(24px);
+  box-shadow:0 8px 60px rgba(0,0,0,0.4);
+}
+.tech-path-card h4{
+  font-size:clamp(14px,0.85vw,17px);font-weight:700;letter-spacing:1px;
+  margin-bottom:16px;padding-bottom:10px;
+  border-bottom:1px solid var(--border);
+}
+.tech-path-card .path-step{
+  display:flex;gap:10px;margin-bottom:10px;align-items:flex-start;
+}
+.tech-path-card .path-step-num{
+  font-family:'SF Mono','Fira Code',monospace;
+  font-size:11px;font-weight:700;color:var(--green);
+  background:rgba(34,197,94,0.1);border-radius:4px;
+  padding:2px 7px;flex-shrink:0;min-width:24px;text-align:center;
+}
+.tech-path-card .path-step-text{font-size:12.5px;color:var(--text-dim);line-height:1.5}
+.tech-path-card .path-step-ref{
+  font-size:10.5px;color:var(--text-muted);margin-top:2px;
+  font-family:'SF Mono','Fira Code',monospace;
+}
+
 /* ============================================================
    RESPONSIVE
    ============================================================ */
+@media(max-width:900px){
+  .role-detail-grid,
+  .tech-path-grid{grid-template-columns:1fr;gap:16px}
+  .effects-bar{grid-template-columns:repeat(3,1fr);gap:10px}
+}
 @media(max-width:768px){
-  [data-role="collaborator"]{left:50%!important;top:7%;width:clamp(200px,70vw,300px);transform:translateX(-50%);animation:none!important}
-  [data-role="throttler"]{left:50%!important;top:44%;width:clamp(200px,70vw,300px);transform:translateX(-50%);animation:none!important}
-  [data-role="monitor"]{left:50%!important;top:78%;width:clamp(200px,70vw,300px);transform:translateX(-50%);animation:none!important}
-  .card{padding:16px 20px}
-  .card-icon{width:40px;height:40px;margin-bottom:12px}
-  .card-icon svg{width:20px;height:20px}
+  .hero [data-role="collaborator"]{left:50%!important;top:7%;width:clamp(200px,70vw,300px);transform:translateX(-50%);animation:none!important}
+  .hero [data-role="throttler"]{left:50%!important;top:44%;width:clamp(200px,70vw,300px);transform:translateX(-50%);animation:none!important}
+  .hero [data-role="monitor"]{left:50%!important;top:78%;width:clamp(200px,70vw,300px);transform:translateX(-50%);animation:none!important}
+  .hero .card{padding:16px 20px}
+  .hero .card-icon{width:40px;height:40px;margin-bottom:12px}
+  .hero .card-icon svg{width:20px;height:20px}
   .header{top:1.5%}
-  .footer{bottom:1.5%}
+  .hero-footer{bottom:6%}
+  .scroll-hint{bottom:3%}
   .orb{opacity:0.06 !important}
+  .overview-table thead th,
+  .overview-table tbody td{padding:10px 12px;font-size:11px}
+  .effects-bar{grid-template-columns:1fr 1fr 1fr}
+  .effect-stat{padding:16px 12px}
+  .effect-stat .stat-value{font-size:22px}
 }
 @media(max-width:480px){
-  [data-role="collaborator"]{top:4%!important;width:88vw}
-  [data-role="throttler"]{top:39%!important;width:88vw}
-  [data-role="monitor"]{top:70%!important;width:88vw}
+  .hero [data-role="collaborator"]{top:4%!important;width:88vw}
+  .hero [data-role="throttler"]{top:39%!important;width:88vw}
+  .hero [data-role="monitor"]{top:70%!important;width:88vw}
+  .details{padding:24px 12px 32px}
+  .effects-bar{grid-template-columns:1fr;gap:10px}
+  .overview-table{font-size:11px}
 }
 </style>
 </head>
@@ -303,8 +550,10 @@ body::before{
 <!-- Canvas for particles & triangle -->
 <canvas id="canvas"></canvas>
 
-<!-- Container -->
-<div class="container">
+<!-- ============================================================
+     HERO: 铁三角总览 (fixed, full-screen)
+     ============================================================ -->
+<div class="hero">
 
   <!-- Header -->
   <div class="header">
@@ -329,7 +578,7 @@ body::before{
     <div class="card-title">协作者</div>
     <div class="card-subtitle">Collaborator</div>
     <div class="card-engine">kf-multi-team-compete</div>
-    <div class="card-desc">多 Agent 并发竞争评审引擎。红蓝绿三队竞争，裁判择优融合。</div>
+    <div class="card-desc">多 Agent 并发竞争评审引擎。Team Lead 统筹，6 专家角色，Pipeline 六阶段流水线。</div>
     <div class="card-tag">夯 · 竞争择优</div>
   </div>
   </div>
@@ -345,9 +594,9 @@ body::before{
       </svg>
     </div>
     <div class="card-title">节流者</div>
-    <div class="card-subtitle">Throttler</div>
-    <div class="card-engine">kf-model-router + lean-ctx + CCP + λ</div>
-    <div class="card-desc">模型路由 · 上下文压缩 · 智能调度。综合 Token 节省约 80%，费用降至 1/5。</div>
+    <div class="card-subtitle">Saver / Throttler</div>
+    <div class="card-engine">kf-model-router + lean-ctx + CCP + λ + KV Cache</div>
+    <div class="card-desc">模型路由 · 上下文压缩 · 智能调度 · KV Cache 优化。综合 Token 节省约 80%，成本降至 1/5。</div>
     <div class="card-tag">省 · Token 节省 80%</div>
   </div>
   </div>
@@ -366,22 +615,404 @@ body::before{
     </div>
     <div class="card-title">监测者</div>
     <div class="card-subtitle">Monitor</div>
-    <div class="card-engine">kf-token-tracker</div>
-    <div class="card-desc">实时 Token 追踪 · 成本看板 · 全链路自检系统。实现"准"原则。</div>
+    <div class="card-engine">kf-token-tracker + Monitor 看板 + /api/v1/cache</div>
+    <div class="card-desc">实时 Token 追踪 · 成本仪表盘 · 缓存命中看板 · 异常自动告警。</div>
     <div class="card-tag">准 · 实时精准</div>
   </div>
   </div>
 
-  <!-- Footer -->
-  <div class="footer">
-    <div class="footer-line"></div>
-    <div class="footer-text">
+  <!-- Hero Footer -->
+  <div class="hero-footer">
+    <div class="hero-footer-line"></div>
+    <div class="hero-footer-text">
       铁三角闭环&ensp;<strong>监测者 → 节流者 → 协作者</strong>&ensp;全链路自动化
     </div>
-    <div class="footer-savings">40–67% Token 节省 &middot; 六大原则全覆盖</div>
+    <div class="hero-footer-savings">40–83% Token 节省 &middot; 六大原则全覆盖</div>
   </div>
 
-</div>
+  <!-- Scroll hint -->
+  <div class="scroll-hint">
+    <span>向下滚动</span>
+    <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round" stroke-width="2">
+      <polyline points="6 9 12 15 18 9"/>
+    </svg>
+  </div>
+
+</div><!-- /hero -->
+
+<!-- ============================================================
+     DETAILS: 特性详解（向下滚动）
+     ============================================================ -->
+<div class="details">
+<div class="details-inner">
+
+  <!-- Section Title -->
+  <div class="section-title">
+    <div class="section-title-sub">Deep Dive</div>
+    <div class="section-title-main">三角色 · 技术全景</div>
+    <div class="section-title-dash"></div>
+  </div>
+
+  <!-- ========== 总览表 ========== -->
+  <div class="overview-table-wrap">
+  <table class="overview-table">
+  <thead>
+  <tr>
+    <th>角色</th>
+    <th>入口技能</th>
+    <th>触发方式</th>
+    <th>触发场景</th>
+    <th>核心技术</th>
+    <th>开源参考</th>
+  </tr>
+  </thead>
+  <tbody>
+  <tr>
+    <td><span class="role-name collab">协作者</span></td>
+    <td><span class="entry-skill">/夯</span> (kf-multi-team-compete)</td>
+    <td><span class="trigger-badge manual">主动触发</span></td>
+    <td>开发任务、代码评审、Bug 修复、架构设计</td>
+    <td>Team Lead + 6 专家 + Pipeline + 进化机制</td>
+    <td>Qoder · gspowers · gstack · Gos · λ-lang · CCP</td>
+  </tr>
+  <tr>
+    <td><span class="role-name saver">节流者</span></td>
+    <td><span class="entry-skill">kf-model-router + lean-ctx + CCP + λ</span> (全自动)<br><span class="entry-skill">kf-saver</span> (可选诊断)</td>
+    <td><span class="trigger-badge auto">全自动</span></td>
+    <td>所有场景自动生效；可选 <code>节省</code> / <code>缓存分析</code> 出诊断报告</td>
+    <td>KV Cache 120x 杠杆 · 共享前缀 · 模型路由</td>
+    <td>lean-ctx · CCP · λ-lang · DeepSeek KV Cache</td>
+  </tr>
+  <tr>
+    <td><span class="role-name monitor-r">监测者</span></td>
+    <td><span class="entry-skill">kf-token-tracker</span> (全自动)<br><span class="entry-skill">kf-monitor</span> (手动)</td>
+    <td><span class="trigger-badge both">自动+手动</span></td>
+    <td>SessionStart/Stop（自动）；查看面板、成本分析</td>
+    <td>Token 追踪 · 成本看板 · 缓存监控 · 异常告警</td>
+    <td>Symphony · Grafana · Graphify · Monitor 看板</td>
+  </tr>
+  </tbody>
+  </table>
+  </div>
+
+  <!-- ========== 三大功效指标 ========== -->
+  <div class="effects-bar">
+    <div class="effect-stat">
+      <div class="stat-value">80%</div>
+      <div class="stat-label">Token 节省率（节流者）</div>
+    </div>
+    <div class="effect-stat">
+      <div class="stat-value">3–6x</div>
+      <div class="stat-label">质量提升倍率（协作者）</div>
+    </div>
+    <div class="effect-stat">
+      <div class="stat-value">&lt;30s</div>
+      <div class="stat-label">异常告警延迟（监测者）</div>
+    </div>
+  </div>
+
+  <!-- ========== 三角色详细卡片 ========== -->
+  <div class="section-title">
+    <div class="section-title-sub">Role Breakdown</div>
+    <div class="section-title-main">角色详解</div>
+    <div class="section-title-dash"></div>
+  </div>
+
+  <div class="role-detail-grid">
+
+    <!-- 协作者 -->
+    <div class="role-detail-card">
+      <div class="rd-header">
+        <div class="rd-icon">
+          <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="5" r="2.5"/><circle cx="5" cy="19" r="2.5"/><circle cx="19" cy="19" r="2.5"/>
+            <line x1="12" y1="7.5" x2="5" y2="16.5"/><line x1="12" y1="7.5" x2="19" y2="16.5"/><line x1="7.5" y1="19" x2="16.5" y2="19"/>
+          </svg>
+        </div>
+        <div>
+          <div class="rd-title">协作者</div>
+          <div class="rd-subtitle">Collaborator</div>
+        </div>
+      </div>
+
+      <div class="rd-section">
+        <div class="rd-section-title">特性亮点</div>
+        <ul>
+          <li><strong>Team Lead 统筹</strong> — 先出计划、用户确认、再征召专家，避免盲目执行</li>
+          <li><strong>6 专家角色</strong> — 前端/后端/QA/Code Review/调研/UX，各司其职</li>
+          <li><strong>三队并发竞争</strong> — 红蓝绿队 Pipeline 六阶段，裁判择优融合</li>
+          <li><strong>用户介入三级</strong> — 小改静默/中改通知/大改暂停，人机协同</li>
+          <li><strong>进化机制</strong> — 个体经验积累 + 团队阵容优化，越用越强</li>
+        </ul>
+      </div>
+
+      <div class="rd-section">
+        <div class="rd-section-title">技术升级路径</div>
+        <ul>
+          <li>Qoder 专家团模式 → Team Lead + 多专家并行架构</li>
+          <li>gspowers SOP 导航 → Pipeline 六阶段流水线引擎</li>
+          <li>gstack 产品流程 → 从需求到交付的标准化框架</li>
+          <li>Lambda-lang A2A 协议 → Agent 间 3x 压缩通信</li>
+          <li>CCP 智能调度 → 回调替代轮询，省 80-97% 等待 Token</li>
+          <li>Gos 并发模型 (goroutine+channel) → 多 Agent 并发编排与通信</li>
+        </ul>
+      </div>
+
+      <div class="rd-section">
+        <div class="rd-section-title">如何使用</div>
+        <ul>
+          <li><strong>入口</strong>：<code>/夯 [任务描述]</code> 或 <code>triple [任务]</code></li>
+          <li><strong>自动触发</strong>：被其他 kf- 技能按需 spawn（如 kf-reverse-spec 逆向工程）</li>
+          <li><strong>场景</strong>：新功能开发、复杂重构、代码评审、架构设计决策</li>
+          <li><strong>需主动触发</strong>：是 — 用户手动输入 <code>/夯</code> 启动</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- 节流者 -->
+    <div class="role-detail-card saver-card">
+      <div class="rd-header">
+        <div class="rd-icon">
+          <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="9"/><path d="M12 3v9l4 4"/><circle cx="12" cy="12" r="2" fill="currentColor"/>
+          </svg>
+        </div>
+        <div>
+          <div class="rd-title">节流者</div>
+          <div class="rd-subtitle">Saver / Throttler</div>
+        </div>
+      </div>
+
+      <div class="rd-section">
+        <div class="rd-section-title">特性亮点</div>
+        <ul>
+          <li><strong>KV Cache 优化</strong> — DeepSeek 120x 差价杠杆，缓存命中 ¥0.025/M vs 未命中 ¥3/M</li>
+          <li><strong>共享前缀统一</strong> — 所有 Agent prompt 前 200-500 token 逐字相同，最大化缓存复用</li>
+          <li><strong>模型智能路由</strong> — 计划任务自动切 Pro，执行任务自动切 Flash，用户无感</li>
+          <li><strong>上下文压缩</strong> — lean-ctx 90+ 压缩模式，CCP 智能跳过不必要的 Agent spawn</li>
+          <li><strong>成本预算控制</strong> — 会话/任务级 Token 预算，超额自动降级</li>
+        </ul>
+      </div>
+
+      <div class="rd-section">
+        <div class="rd-section-title">技术升级路径</div>
+        <ul>
+          <li>DeepSeek KV Cache (120x) → 共享前缀 + 预热策略 + TTL 管理，N agent 成本 ≈ 1+(N-1)×2%</li>
+          <li>lean-ctx (90+ 压缩模式) → CLI 输出省 80-99%，ctx_read 10 种模式，重读 ~13 tok</li>
+          <li>kf-model-router → Pro/Flash 分阶段路由，利用 3x 价差，成本降 ~92%</li>
+          <li>CCP/claude-code-pro → 跳过 spawn（省 15K tok/次）+ 回调替代轮询（省 80-97%）</li>
+          <li>Lambda-lang (340+ 原子) → Agent 间输出压缩 66.5%，A2A 通信 3x 压缩</li>
+          <li>claude-mem + context-mode → 跨会话记忆复用 + 会话连续性保缓存不中断</li>
+        </ul>
+      </div>
+
+      <div class="rd-section">
+        <div class="rd-section-title">如何使用</div>
+        <ul>
+          <li><strong>全自动运行</strong>：每次 API 调用自动压缩上下文、路由模型、优化缓存</li>
+          <li><strong>可选诊断</strong>：说 <code>节省</code> / <code>缓存分析</code> / <code>成本优化</code> 查看报告和建议</li>
+          <li><strong>场景</strong>：零感知后台优化，成本异常时自动告警</li>
+          <li><strong>需主动触发</strong>：否 — 所有核心节省机制全自动</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- 监测者 -->
+    <div class="role-detail-card">
+      <div class="rd-header">
+        <div class="rd-icon">
+          <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="2" y="4" width="20" height="14" rx="2"/><line x1="8" y1="22" x2="16" y2="22"/><line x1="12" y1="18" x2="12" y2="22"/>
+            <circle cx="12" cy="11" r="3"/><circle cx="12" cy="11" r="1" fill="currentColor"/>
+          </svg>
+        </div>
+        <div>
+          <div class="rd-title">监测者</div>
+          <div class="rd-subtitle">Monitor</div>
+        </div>
+      </div>
+
+      <div class="rd-section">
+        <div class="rd-section-title">特性亮点</div>
+        <ul>
+          <li><strong>Token 全量追踪</strong> — 每次 API 调用的 input/output/cache 全记录</li>
+          <li><strong>成本仪表盘</strong> — 按模型/技能/Agent/会话维度实时呈现</li>
+          <li><strong>缓存命中监控</strong> — <code>/api/v1/cache</code> 端点，命中率 < 30% 自动告警</li>
+          <li><strong>异常检测</strong> — 缓存骤降 &lt;20% · Token 暴涨 &gt;200% · 模型比例偏离 &gt;50%</li>
+          <li><strong>Symphony 兼容</strong> — REST API 标准接口，可接入外部监控体系</li>
+        </ul>
+      </div>
+
+      <div class="rd-section">
+        <div class="rd-section-title">技术升级路径</div>
+        <ul>
+          <li>Symphony 监控思想 → 统一 REST API 端点设计</li>
+          <li>Grafana 仪表盘模式 → Monitor Web 看板（3456 端口）</li>
+          <li>Graphify 依赖分析 → 技能调用链路追踪（skill_calls 表）</li>
+          <li>SessionStart/Stop Hook → 自动注入追踪，零侵入</li>
+        </ul>
+      </div>
+
+      <div class="rd-section">
+        <div class="rd-section-title">如何使用</div>
+        <ul>
+          <li><strong>入口</strong>：全自动（Hook 注入 SessionStart/Stop）</li>
+          <li><strong>手动触发</strong>：说 <code>监测</code> / <code>面板</code> / <code>成本面板</code> / <code>缓存面板</code></li>
+          <li><strong>看板</strong>：浏览器访问 <code>http://localhost:3456</code></li>
+          <li><strong>需主动触发</strong>：否 — 追踪全自动，看板/分析按需查看</li>
+        </ul>
+      </div>
+    </div>
+
+  </div><!-- /role-detail-grid -->
+
+  <!-- ========== 技术升级路径对比 ========== -->
+  <div class="section-title">
+    <div class="section-title-sub">Technical Upgrade Path</div>
+    <div class="section-title-main">技术升级路径</div>
+    <div class="section-title-dash"></div>
+  </div>
+
+  <div class="tech-path-grid">
+
+    <!-- 节流者升级路径 -->
+    <div class="tech-path-card">
+      <h4 style="color:var(--teal)">节流者 · 升级路线</h4>
+      <div class="path-step">
+        <span class="path-step-num">1</span>
+        <div>
+          <div class="path-step-text">KV Cache 缓存利用：120x 价格杠杆（¥0.025 vs ¥3/M）→ 统一共享前缀 → 预热策略 + TTL 管理</div>
+          <div class="path-step-ref">→ cache-optimization.md + agent-prompt-prefix.md + kf-saver-hook.cjs</div>
+        </div>
+      </div>
+      <div class="path-step">
+        <span class="path-step-num">2</span>
+        <div>
+          <div class="path-step-text">上下文压缩：lean-ctx 90+ 压缩模式，CLI 输出省 80-99%，ctx_read 重读 ~13 tok，自动识别紧凑内容</div>
+          <div class="path-step-ref">→ lean-ctx MCP（输入 Token 压缩）</div>
+        </div>
+      </div>
+      <div class="path-step">
+        <span class="path-step-num">3</span>
+        <div>
+          <div class="path-step-text">模型路由：Pro（计划）+ Flash（执行）分阶段路由，利用 3x 价差，成本降 ~92%</div>
+          <div class="path-step-ref">→ kf-model-router 全自动切换</div>
+        </div>
+      </div>
+      <div class="path-step">
+        <span class="path-step-num">4</span>
+        <div>
+          <div class="path-step-text">智能调度：CCP &lt;3 文件跳过 spawn（省 15K tok/次）+ 回调替代轮询（省 80-97% 等待开销）</div>
+          <div class="path-step-ref">→ ccp-smart-dispatch.cjs</div>
+        </div>
+      </div>
+      <div class="path-step">
+        <span class="path-step-num">5</span>
+        <div>
+          <div class="path-step-text">A2A 压缩通信：Lambda-lang 340+ 原子协议替代自然语言，输出压缩 66.5%</div>
+          <div class="path-step-ref">→ lambda-lang 自动注入</div>
+        </div>
+      </div>
+      <div class="path-step">
+        <span class="path-step-num">6</span>
+        <div>
+          <div class="path-step-text">多 Agent 缓存共享：同会话 Prompt 前缀统一，N agent 成本 ≈ 1+(N-1)×2%（N=5 省 95%）</div>
+          <div class="path-step-ref">→ 会话管理 + Prompt 标准化</div>
+        </div>
+      </div>
+      <div class="path-step">
+        <span class="path-step-num">7</span>
+        <div>
+          <div class="path-step-text">跨会话记忆复用：claude-mem SQLite + Chroma 向量库，每次省 100-300 tok + context-mode 保持缓存不中断</div>
+          <div class="path-step-ref">→ claude-mem + context-mode</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 协作者升级路径 -->
+    <div class="tech-path-card">
+      <h4 style="color:var(--green-light)">协作者 · 升级路线</h4>
+      <div class="path-step">
+        <span class="path-step-num">1</span>
+        <div>
+          <div class="path-step-text">单 Agent 串行 → 红蓝两队竞争 → 三队 Pipeline 并发</div>
+          <div class="path-step-ref">→ gspowers Pipeline 引擎集成</div>
+        </div>
+      </div>
+      <div class="path-step">
+        <span class="path-step-num">2</span>
+        <div>
+          <div class="path-step-text">借鉴 Qoder 专家团模式：Team Lead 角色 + 6 专家</div>
+          <div class="path-step-ref">→ SKILL.md Team Lead 章节</div>
+        </div>
+      </div>
+      <div class="path-step">
+        <span class="path-step-num">3</span>
+        <div>
+          <div class="path-step-text">用户介入三级机制：小改静默 · 中改通知 · 大改暂停</div>
+          <div class="path-step-ref">→ kf-multi-team-compete 用户介入处理</div>
+        </div>
+      </div>
+      <div class="path-step">
+        <span class="path-step-num">4</span>
+        <div>
+          <div class="path-step-text">专家角色细化：全栈开发 → 前端/后端/QA/CR/调研/UX</div>
+          <div class="path-step-ref">→ SKILL.md 专家角色定义章节</div>
+        </div>
+      </div>
+      <div class="path-step">
+        <span class="path-step-num">5</span>
+        <div>
+          <div class="path-step-text">进化机制：个体经验积累 + 团队阵容优化，越用越强</div>
+          <div class="path-step-ref">→ kf-evolution + expert-memory/</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 监测者升级路径 -->
+    <div class="tech-path-card">
+      <h4 style="color:var(--green-light)">监测者 · 升级路线</h4>
+      <div class="path-step">
+        <span class="path-step-num">1</span>
+        <div>
+          <div class="path-step-text">Hook 注入追踪：SessionStart/Stop 自动记录 Token 用量</div>
+          <div class="path-step-ref">→ monitor-hooks.cjs + monitor-session.cjs</div>
+        </div>
+      </div>
+      <div class="path-step">
+        <span class="path-step-num">2</span>
+        <div>
+          <div class="path-step-text">SQLite 数据库：conversations + messages + skill_calls 三表</div>
+          <div class="path-step-ref">→ monitor/src/db.js</div>
+        </div>
+      </div>
+      <div class="path-step">
+        <span class="path-step-num">3</span>
+        <div>
+          <div class="path-step-text">Express 看板：实时 Web 仪表盘 (port 3456)</div>
+          <div class="path-step-ref">→ monitor/src/server.js + EJS 模板</div>
+        </div>
+      </div>
+      <div class="path-step">
+        <span class="path-step-num">4</span>
+        <div>
+          <div class="path-step-text">Symphony REST API：/api/v1/state + /api/v1/cache 标准端点</div>
+          <div class="path-step-ref">→ stats.js 新增端点</div>
+        </div>
+      </div>
+      <div class="path-step">
+        <span class="path-step-num">5</span>
+        <div>
+          <div class="path-step-text">异常检测 + 自动告警：三级阈值（critical/warning/info）</div>
+          <div class="path-step-ref">→ kf-monitor-bridge.cjs 桥接脚本</div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /tech-path-grid -->
+
+</div><!-- /details-inner -->
+</div><!-- /details -->
 
 <script>
 (function(){
@@ -408,9 +1039,14 @@ resize();
 window.addEventListener('resize', resize);
 
 // ============================================================
-// MOUSE
+// MOUSE — 星空残影追踪 (StarCraft phantom trail)
 // ============================================================
 const mouse = { x: -9999, y: -9999, px: -9999, py: -9999, vx: 0, vy: 0 };
+const trail = [];
+const TRAIL_MAX = 60;
+const TRAIL_INTERVAL = 2; // push every mousemove
+let trailFrameSkip = 0;
+
 document.addEventListener('mousemove', e => {
   mouse.px = mouse.x;
   mouse.py = mouse.y;
@@ -418,12 +1054,19 @@ document.addEventListener('mousemove', e => {
   mouse.y = e.clientY;
   mouse.vx = mouse.x - mouse.px;
   mouse.vy = mouse.y - mouse.py;
+
+  // Push trail point (throttled)
+  trailFrameSkip++;
+  if (trailFrameSkip >= TRAIL_INTERVAL) {
+    trailFrameSkip = 0;
+    trail.push({ x: mouse.x, y: mouse.y, life: 1.0 });
+    if (trail.length > TRAIL_MAX) trail.shift();
+  }
 });
 document.addEventListener('mouseleave', () => {
   mouse.x = -9999; mouse.y = -9999;
 });
 
-// Touch support
 document.addEventListener('touchmove', e => {
   const t = e.touches[0];
   mouse.x = t.clientX;
@@ -433,31 +1076,133 @@ document.addEventListener('touchend', () => {
   mouse.x = -9999; mouse.y = -9999;
 });
 
-// ============================================================
-// PARTICLES
-// ============================================================
-const PARTICLE_COUNT = 120;
-const CONNECTION_DIST = 130;
-const REPULSION_RADIUS = 140;
-const REPULSION_FORCE = 0.6;
-
-class Particle {
-  constructor(){
-    this.x = Math.random() * W;
-    this.y = Math.random() * H;
-    this.vx = (Math.random() - 0.5) * 0.6;
-    this.vy = (Math.random() - 0.5) * 0.6;
-    this.r = Math.random() * 2 + 0.8;
-    this.alpha = Math.random() * 0.35 + 0.08;
-    this.hue = Math.random() > 0.6 ? 150 : 142; // green hue range
+function drawMouseTrail(time){
+  // Age trail points - slower decay for longer tail
+  for (let i = trail.length - 1; i >= 0; i--) {
+    trail[i].life -= 0.012;
+    if (trail[i].life <= 0) {
+      trail.splice(i, 1);
+    }
   }
 
-  update(){
-    // drift
-    this.vx += (Math.random() - 0.5) * 0.02;
-    this.vy += (Math.random() - 0.5) * 0.02;
+  if (trail.length < 2) return;
 
-    // mouse repulsion
+  // Draw from oldest to newest (fading trail)
+  for (let i = 0; i < trail.length; i++) {
+    const t = trail[i];
+    const fade = t.life; // 0 → 1
+    const ease = fade * fade; // quadratic easing for natural fade
+    const radius = 2 + ease * 12;
+    const alpha = ease * 0.85;
+
+    // Outer glow — much larger and brighter
+    const gr = ctx.createRadialGradient(t.x, t.y, 0, t.x, t.y, radius * 8);
+    gr.addColorStop(0, `rgba(74,222,128,${alpha * 0.5})`);
+    gr.addColorStop(0.3, `rgba(45,212,191,${alpha * 0.25})`);
+    gr.addColorStop(0.6, `rgba(34,197,94,${alpha * 0.08})`);
+    gr.addColorStop(1, 'rgba(74,222,128,0)');
+    ctx.beginPath();
+    ctx.arc(t.x, t.y, radius * 8, 0, Math.PI*2);
+    ctx.fillStyle = gr;
+    ctx.fill();
+
+    // Mid glow
+    const gm = ctx.createRadialGradient(t.x, t.y, 0, t.x, t.y, radius * 3);
+    gm.addColorStop(0, `rgba(255,255,255,${alpha * 0.3})`);
+    gm.addColorStop(0.5, `rgba(74,222,128,${alpha * 0.2})`);
+    gm.addColorStop(1, 'rgba(74,222,128,0)');
+    ctx.beginPath();
+    ctx.arc(t.x, t.y, radius * 3, 0, Math.PI*2);
+    ctx.fillStyle = gm;
+    ctx.fill();
+
+    // Core dot
+    ctx.beginPath();
+    ctx.arc(t.x, t.y, radius * 0.6, 0, Math.PI*2);
+    ctx.fillStyle = `rgba(255,255,255,${alpha * 0.8})`;
+    ctx.fill();
+  }
+
+  // Draw connecting trail line — phantom energy ribbon
+  if (trail.length > 3) {
+    // Wide glow ribbon
+    ctx.beginPath();
+    ctx.moveTo(trail[0].x, trail[0].y);
+    for (let i = 1; i < trail.length; i++) {
+      ctx.lineTo(trail[i].x, trail[i].y);
+    }
+    ctx.strokeStyle = 'rgba(74,222,128,0.1)';
+    ctx.lineWidth = 6;
+    ctx.lineCap = 'round';
+    ctx.lineJoin = 'round';
+    ctx.stroke();
+
+    // Bright core line
+    ctx.beginPath();
+    ctx.moveTo(trail[0].x, trail[0].y);
+    for (let i = 1; i < trail.length; i++) {
+      ctx.lineTo(trail[i].x, trail[i].y);
+    }
+    ctx.strokeStyle = 'rgba(74,222,128,0.25)';
+    ctx.lineWidth = 1.5;
+    ctx.stroke();
+  }
+
+  // Leading cursor glow — bright point at cursor
+  if (mouse.x > -100 && mouse.y > -100) {
+    const cx = mouse.x, cy = mouse.y;
+    const lg = ctx.createRadialGradient(cx, cy, 0, cx, cy, 30);
+    lg.addColorStop(0, 'rgba(255,255,255,0.6)');
+    lg.addColorStop(0.2, 'rgba(74,222,128,0.3)');
+    lg.addColorStop(1, 'rgba(74,222,128,0)');
+    ctx.beginPath();
+    ctx.arc(cx, cy, 30, 0, Math.PI*2);
+    ctx.fillStyle = lg;
+    ctx.fill();
+
+    // Tiny bright core
+    ctx.beginPath();
+    ctx.arc(cx, cy, 2, 0, Math.PI*2);
+    ctx.fillStyle = 'rgba(255,255,255,0.9)';
+    ctx.fill();
+  }
+}
+
+// ============================================================
+// PARTICLES — 星空增强
+// ============================================================
+const PARTICLE_COUNT = 300;
+const BIG_STAR_COUNT = 12;
+const CONNECTION_DIST = 200;
+const REPULSION_RADIUS = 300;
+const REPULSION_FORCE = 1.8;
+
+class Particle {
+  constructor(isBig){
+    this.isBig = isBig;
+    this.x = Math.random() * W;
+    this.y = Math.random() * H;
+    this.vx = (Math.random() - 0.5) * (isBig ? 0.15 : 0.4);
+    this.vy = (Math.random() - 0.5) * (isBig ? 0.15 : 0.4);
+    if (isBig) {
+      this.r = 2.5 + Math.random() * 3.5;  // 2.5-6px big stars
+      this.alpha = 0.5 + Math.random() * 0.4; // 50-90% opacity
+      this.baseAlpha = this.alpha;
+      this.targetR = this.r;
+      this.pulseSpeed = 0.5 + Math.random() * 1.5;
+    } else {
+      this.r = 0.8 + Math.random() * 2.2;
+      this.alpha = Math.random() * 0.45 + 0.12;
+      this.baseAlpha = this.alpha;
+    }
+    this.hue = Math.random() > 0.4 ? 142 : 170; // green/teal range
+    this.phase = Math.random() * Math.PI * 2;
+  }
+
+  update(time){
+    this.vx += (Math.random() - 0.5) * 0.015;
+    this.vy += (Math.random() - 0.5) * 0.015;
+
     const dx = this.x - mouse.x;
     const dy = this.y - mouse.y;
     const dist = Math.sqrt(dx*dx + dy*dy);
@@ -468,17 +1213,27 @@ class Particle {
       this.vy += (dy / dist) * f;
     }
 
-    // mouse trail attraction (subtle)
-    if (dist < 80 && dist > 0.1) {
-      this.vx -= (dx / dist) * 0.02;
-      this.vy -= (dy / dist) * 0.02;
+    // Strong attraction zone — particles orbit/linger near cursor
+    if (dist < 120 && dist > 20) {
+      this.vx -= (dx / dist) * 0.08 * (120 - dist) / 120;
+      this.vy -= (dy / dist) * 0.08 * (120 - dist) / 120;
     }
 
-    // damping
-    this.vx *= 0.98;
-    this.vy *= 0.98;
+    // Close-range burst — particles zoom away when very close
+    if (dist < 20 && dist > 0.5) {
+      this.vx += (dx / dist) * 2.0;
+      this.vy += (dy / dist) * 2.0;
+    }
 
-    // clamp velocity
+    // Big stars near mouse glow brighter
+    if (this.isBig && dist < 200) {
+      this.alpha = this.baseAlpha * (0.8 + 0.4 * Math.sin(time * 4 + this.phase));
+      this.r = this.targetR * (0.9 + 0.3 * Math.sin(time * 3 + this.phase + 1));
+    }
+
+    this.vx *= 0.96;
+    this.vy *= 0.96;
+
     const speed = Math.sqrt(this.vx*this.vx + this.vy*this.vy);
     if (speed > 2) {
       this.vx = (this.vx / speed) * 2;
@@ -488,14 +1243,39 @@ class Particle {
     this.x += this.vx;
     this.y += this.vy;
 
-    // wrap
     if (this.x < -10) this.x = W + 10;
     if (this.x > W + 10) this.x = -10;
     if (this.y < -10) this.y = H + 10;
     if (this.y > H + 10) this.y = -10;
+
+    // Twinkle effect for big stars
+    if (this.isBig) {
+      this.alpha = this.baseAlpha * (0.7 + 0.3 * Math.sin(time * this.pulseSpeed + this.phase));
+      this.r = this.targetR * (0.85 + 0.15 * Math.sin(time * this.pulseSpeed * 0.7 + this.phase + 1));
+    }
   }
 
   draw(){
+    ctx.beginPath();
+    ctx.arc(this.x, this.y, this.r, 0, Math.PI*2);
+
+    if (this.isBig) {
+      // Glow halo around big stars
+      const g = ctx.createRadialGradient(this.x, this.y, 0, this.x, this.y, this.r * 4);
+      g.addColorStop(0, `hsla(${this.hue},80%,60%,${this.alpha * 0.3})`);
+      g.addColorStop(1, `hsla(${this.hue},80%,60%,0)`);
+      ctx.beginPath();
+      ctx.arc(this.x, this.y, this.r * 4, 0, Math.PI*2);
+      ctx.fillStyle = g;
+      ctx.fill();
+
+      // Core
+      ctx.beginPath();
+      ctx.arc(this.x, this.y, this.r * 1.2, 0, Math.PI*2);
+      ctx.fillStyle = `hsla(0,0%,100%,${this.alpha * 0.5})`;
+      ctx.fill();
+    }
+
     ctx.beginPath();
     ctx.arc(this.x, this.y, this.r, 0, Math.PI*2);
     ctx.fillStyle = `hsla(${this.hue},80%,55%,${this.alpha})`;
@@ -504,21 +1284,35 @@ class Particle {
 }
 
 const particles = [];
-for (let i = 0; i < PARTICLE_COUNT; i++) particles.push(new Particle());
+for (let i = 0; i < PARTICLE_COUNT; i++) {
+  particles.push(new Particle(i < BIG_STAR_COUNT));
+}
 
 function drawParticleConnections(){
+  const mx = mouse.x, my = mouse.y;
   for (let i = 0; i < particles.length; i++) {
     for (let j = i + 1; j < particles.length; j++) {
       const dx = particles[i].x - particles[j].x;
       const dy = particles[i].y - particles[j].y;
       const dist = dx*dx + dy*dy;
       if (dist < CONNECTION_DIST * CONNECTION_DIST) {
-        const alpha = (1 - Math.sqrt(dist) / CONNECTION_DIST) * 0.12;
+        let alpha = (1 - Math.sqrt(dist) / CONNECTION_DIST) * 0.12;
+
+        // Brighter near mouse
+        if (mx > -100 && my > -100) {
+          const midX = (particles[i].x + particles[j].x) / 2;
+          const midY = (particles[i].y + particles[j].y) / 2;
+          const mDist = Math.sqrt((midX - mx)*(midX - mx) + (midY - my)*(midY - my));
+          if (mDist < 250) {
+            alpha += (1 - mDist / 250) * 0.25;
+          }
+        }
+
         ctx.beginPath();
         ctx.moveTo(particles[i].x, particles[i].y);
         ctx.lineTo(particles[j].x, particles[j].y);
-        ctx.strokeStyle = `rgba(74,222,128,${alpha})`;
-        ctx.lineWidth = 0.6;
+        ctx.strokeStyle = `rgba(74,222,128,${Math.min(alpha, 0.35)})`;
+        ctx.lineWidth = 0.5 + alpha * 3;
         ctx.stroke();
       }
     }
@@ -526,12 +1320,12 @@ function drawParticleConnections(){
 }
 
 // ============================================================
-// CARD POSITIONS (read from DOM)
+// CARD POSITIONS (read from hero DOM)
 // ============================================================
 const cardEls = {
-  collaborator: document.querySelector('[data-role="collaborator"]'),
-  throttler: document.querySelector('[data-role="throttler"]'),
-  monitor: document.querySelector('[data-role="monitor"]'),
+  collaborator: document.querySelector('.hero [data-role="collaborator"]'),
+  throttler: document.querySelector('.hero [data-role="throttler"]'),
+  monitor: document.querySelector('.hero [data-role="monitor"]'),
 };
 
 function getCardCenters(){
@@ -553,14 +1347,12 @@ const EDGES = [
   ['monitor','collaborator'],
 ];
 
-// Gradient colors for each edge
 const EDGE_COLORS = [
-  ['rgba(34,197,94,', 'rgba(45,212,191,'],   // collab → throttler: green→teal
-  ['rgba(45,212,191,', 'rgba(74,222,128,'],  // throttler → monitor: teal→light-green
-  ['rgba(74,222,128,', 'rgba(34,197,94,'],   // monitor → collab: light-green→green
+  ['rgba(34,197,94,', 'rgba(45,212,191,'],
+  ['rgba(45,212,191,', 'rgba(74,222,128,'],
+  ['rgba(74,222,128,', 'rgba(34,197,94,'],
 ];
 
-// Flow travelers
 const travelers = [];
 for (let e = 0; e < 3; e++) {
   for (let t = 0; t < 4; t++) {
@@ -580,7 +1372,6 @@ function drawTriangle(){
   const pts = keys.map(k => centers[k]);
   if (pts.some(p => !p)) return;
 
-  // ---- draw base glow lines ----
   for (let i = 0; i < 3; i++) {
     const from = pts[EDGES[i][0] === 'collaborator' ? 0 : EDGES[i][0] === 'throttler' ? 1 : 2];
     const to   = pts[EDGES[i][1] === 'collaborator' ? 0 : EDGES[i][1] === 'throttler' ? 1 : 2];
@@ -589,7 +1380,6 @@ function drawTriangle(){
     const c1 = EDGE_COLORS[i][0];
     const c2 = EDGE_COLORS[i][1];
 
-    // outer glow
     ctx.beginPath();
     ctx.moveTo(from.x, from.y);
     ctx.lineTo(to.x, to.y);
@@ -598,7 +1388,6 @@ function drawTriangle(){
     ctx.lineCap = 'round';
     ctx.stroke();
 
-    // mid glow
     ctx.beginPath();
     ctx.moveTo(from.x, from.y);
     ctx.lineTo(to.x, to.y);
@@ -606,7 +1395,6 @@ function drawTriangle(){
     ctx.lineWidth = 4;
     ctx.stroke();
 
-    // core line
     ctx.beginPath();
     ctx.moveTo(from.x, from.y);
     ctx.lineTo(to.x, to.y);
@@ -615,7 +1403,6 @@ function drawTriangle(){
     ctx.stroke();
   }
 
-  // ---- draw node glow at each card center ----
   for (const p of pts) {
     if (!p) continue;
     const g = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, 30);
@@ -627,7 +1414,6 @@ function drawTriangle(){
     ctx.fill();
   }
 
-  // ---- draw traveling flow dots ----
   const time = Date.now() / 1000;
   for (const t of travelers) {
     const edge = EDGES[t.edge];
@@ -637,7 +1423,6 @@ function drawTriangle(){
     const to = pts[ti];
     if (!from || !to) continue;
 
-    // advance with slight oscillation
     t.progress += t.speed;
     if (t.progress > 1) {
       t.progress -= 1;
@@ -648,7 +1433,6 @@ function drawTriangle(){
     const py = from.y + (to.y - from.y) * t.progress;
     const pulse = 0.6 + 0.4 * Math.sin(time * 2 + t.phase);
 
-    // glow ball
     const gr = ctx.createRadialGradient(px, py, 0, px, py, t.size * 5);
     const c = EDGE_COLORS[t.edge][0];
     gr.addColorStop(0, c + (0.7 * pulse) + ')');
@@ -659,7 +1443,6 @@ function drawTriangle(){
     ctx.fillStyle = gr;
     ctx.fill();
 
-    // core dot
     ctx.beginPath();
     ctx.arc(px, py, t.size * 0.7, 0, Math.PI*2);
     ctx.fillStyle = `rgba(255,255,255,${0.5 * pulse})`;
@@ -673,16 +1456,21 @@ function drawTriangle(){
 function animate(){
   ctx.clearRect(0, 0, W, H);
 
-  // update & draw particles
+  const time = Date.now() / 1000;
+
+  // 1. Mouse trail (behind everything else)
+  drawMouseTrail(time);
+
+  // 2. Particles
   for (const p of particles) {
-    p.update();
+    p.update(time);
     p.draw();
   }
 
-  // particle connections
+  // 3. Particle connections
   drawParticleConnections();
 
-  // triangle connection lines
+  // 4. Triangle lines
   drawTriangle();
 
   requestAnimationFrame(animate);
@@ -690,14 +1478,10 @@ function animate(){
 
 animate();
 
-// ============================================================
-// REDRAW card positions on resize
-// ============================================================
 let resizeTimeout;
 window.addEventListener('resize', () => {
   clearTimeout(resizeTimeout);
   resizeTimeout = setTimeout(() => {
-    // particles need repositioning on major resize
     for (const p of particles) {
       if (p.x > W || p.y > H) {
         p.x = Math.random() * W;

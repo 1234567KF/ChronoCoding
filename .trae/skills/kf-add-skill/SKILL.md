@@ -1,7 +1,7 @@
 ---
 name: kf-add-skill
 description: |
-  Use when the user wants to add, install, or integrate a new skill/plugin to this project — search by keyword, GitHub URL, or npm package. Syncs installation to both .claude/ and .trae/ directories, updates all related documentation (CLAUDE.md, 安装或更新/AICoding.md, 安装或更新/README.md, 知识库相关/docs/INSTALL.md, 知识库相关/docs/MANUAL.md, .trae/rules.md), and patches SKILL.md frontmatter of calling/called skills.
+  Use when the user wants to add, install, or integrate a new skill/plugin to this project — search by keyword, GitHub URL, or npm package. Syncs installation to both .claude/ and .trae/ directories, updates all related documentation (CLAUDE.md, 安装或更新/AICoding.md, 安装或更新/README.md, 安装或更新/docs/INSTALL.md, 安装或更新/docs/MANUAL.md, .trae/rules.md), and patches SKILL.md frontmatter of calling/called skills.
   Triggers: "install skill", "add skill", "add plugin", "search skill", "find skill", "integrate skill", "安装技能", "添加技能", "搜索技能", "装个技能".
 allowed-tools:
   - Bash
@@ -186,13 +186,13 @@ Load `references/doc-sync-rules.md` for the exact section templates and insertio
 
 Add skill to the skill list/table in 安装或更新/README.md. If 安装或更新/README.md has no skill table, add the entry in the same format as existing skills.
 
-### 5b. 知识库相关/docs/INSTALL.md
+### 5b. 安装或更新/docs/INSTALL.md
 
 If the skill requires global dependencies or special install steps, add them to the dependency table and install instructions.
 
 If the skill is self-contained (just cloned into `.claude/skills/`), add a note in the "后续步骤" section.
 
-### 5c. 知识库相关/docs/MANUAL.md
+### 5c. 安装或更新/docs/MANUAL.md
 
 Add a trigger entry to the "功能触发速查" table in Section 四 of MANUAL.md:
 

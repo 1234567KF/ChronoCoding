@@ -98,7 +98,7 @@ claude
 | `模型路由` / `省模式`     | 🆕 模型智能路由                   | kf-model-router      |
 | `spec coding`             | 🆕 Spec 驱动开发                   | kf-spec       |
 | `P图` / `改图` / `修图` / `去水印` | 🆕 AI 自然语言 P 图，无需打开编辑器  | kf-image-editor |
-| `摄入文件` / `ingest` / `lint` / `检查知识库` / `更新知识库` | 🆕 知识库全生命周期管理（知识库相关/raw/ → 知识库相关/wiki/ → CLAUDE.md） | kf-kb-envoy |
+| `摄入文件` / `ingest` / `lint` / `检查知识库` / `更新知识库` | 🆕 知识库全生命周期管理（知识库/raw/ → 知识库/wiki/ → CLAUDE.md） | kf-kb-envoy |
 | `一致性` / `文档自检` / `doc consistency` | 🆕 文档全局一致性自检，新增技能后自动触发 | kf-doc-consistency |
 | `逆向` / `存量代码` / `代码扫描` / `逆向工程` | 🆕 存量代码→Spec/文档 逆向流水线 | kf-reverse-spec |
 | `自动实验` / `ai实验` / `实验跑一夜` / `autoresearch` | 🆕 Karpathy 自主 ML 实验：AI 整夜跑实验 | kf-autoresearch |
@@ -113,6 +113,11 @@ claude
 | `ctx_stats` / `ctx_doctor` | 🆕 上下文压缩统计 / 诊断           | context-mode |
 | `会话恢复` / `压缩存活`   | 🆕 `/compact` 后自动恢复工作状态   | context-mode |
 | `提取` / `结构化提取` / `parse` / `langextract` | 🆕 LLM 驱动结构化提取：非结构化文本→JSON/CSV/YAML | kf-langextract |
+| `进化` / `自我优化` / `evolve` | 🆕 AI 自我优化与迭代改进：从执行历史学习，自动优化策略 | kf-evolution |
+| `监测者` / `仪表盘` / `dashboard` / `token监测` | 🆕 监测者仪表盘：Token 追踪 + 重审触发检测 + 成本分析 | kf-monitor |
+| `节省追踪` / `saver` / `成本节省` | 🆕 会话成本节省追踪：自动记录每次 API 调用的 token 节省数据 | kf-saver |
+| `λ` / `lambda` / `!ta ct` / `@v2.0#h` / `agent通信` | 🆕 Agent 间 Lambda 压缩通信（3x 压缩），自动注入 | lambda-lang |
+| `ccp` / `智能调度` / `回调` | 🆕 Token 高效调度：不 spawn 则省 10K-15K token | claude-code-pro |
 | `/mem-search` / `搜索记忆` / `我之前的` | 🆕 搜索跨会话持久记忆 | claude-mem |
 | `http://localhost:37777` | 🆕 记忆 Web 可视化面板（记忆浏览/搜索/管理） | claude-mem |
 
@@ -177,7 +182,15 @@ Agent 共享（在同一个项目内的 agents 共享记忆）
     │       ├── kf-exa-code/       # Exa Code — Web 规模代码上下文引擎
 │       ├── kf-scrapling/      # Web 爬虫 + 反反爬
     │       ├── kf-grant-research/ # 课题申报研究助手
-    │       ├── kf-langextract/     # LLM 驱动结构化提取
+    	    │       ├── kf-langextract/     # LLM 驱动结构化提取
+	    │       ├── kf-evolution/          # 进化机制：AI 自我优化与迭代
+	    │       ├── kf-monitor/            # 监测者仪表盘：Token 追踪 + 重审检测
+	    │       ├── kf-safe-router/        # 安全路由组件库（密钥隔离/断路器/限流）
+	    │       ├── kf-saver/              # 会话成本节省追踪
+	    │       ├── kf-smart-router/       # 多供应商模型适配器插件库
+	    │       ├── lambda-lang/          # Agent-to-Agent 原生语言（340+ 原子，7 域，3x 压缩）
+	    │       ├── claude-code-pro/      # Token 高效调度（智能跳过 + 回调替代轮询）
+	    │       ├── lean-ctx/             # 上下文压缩引擎，90+ 压缩模式 + CCP
 │       ├── gspowers/          # SOP 导航（上游）
 │       ├── gstack/            # 产品流程（上游）
 │       └── ... (+66 来自 jeffallan/claude-skills)  # 第三方技能合集

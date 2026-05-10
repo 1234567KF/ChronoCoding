@@ -1,0 +1,83 @@
+{
+  "schemaVersion": "2.0",
+  "description": "Unified model configuration for kf-model-router. Edit this file to add/remove/change models.",
+  "providers": [
+    {
+      "name": "deepseek",
+      "apiKey": "${DEEPSEEK_API_KEY}",
+      "baseUrl": "https://api.deepseek.com/v1",
+      "models": [
+        {
+          "id": "deepseek-v4-pro",
+          "family": "pro",
+          "description": "DeepSeek v4 Pro — heavy reasoning",
+          "capabilities": ["deep-reasoning", "complex-code", "architecture", "planning", "bug-debug"],
+          "costPer1KInput": 3.0,
+          "costPer1KOutput": 15.0,
+          "supportsCache": true,
+          "priority": 1,
+          "defaultFor": ["architecture", "bug-debug", "planning"],
+          "providerModelId": "deepseek-v4-pro",
+          "adapter": "deepseek"
+        },
+        {
+          "id": "deepseek-v4-flash",
+          "family": "flash",
+          "description": "DeepSeek v4 Flash — fast execution",
+          "capabilities": ["code", "review", "qa", "docs", "chat", "testing", "ui-prototype", "simple-qa"],
+          "costPer1KInput": 1.0,
+          "costPer1KOutput": 5.0,
+          "supportsCache": true,
+          "priority": 10,
+          "defaultFor": ["coding", "testing"],
+          "providerModelId": "deepseek-v4-flash",
+          "adapter": "deepseek"
+        }
+      ]
+    },
+    {
+      "name": "minimax",
+      "apiKey": "sk-cp-NkIxrvseL24IuUURo8Q2P4ESkx6TR7TSRpfwVQskmqge86P38lXJx2eDw8KA7DtD4CgNUEh77YHuixsLSdAHcY0CsKOfBz7l89JVHUJMr_oOjlGdQYmhlww",
+      "baseUrl": "https://api.minimax.chat/v1",
+      "models": [
+        {
+          "id": "minimax-m1-thinking",
+          "family": "thinking",
+          "description": "MiniMax M1 Thinking — deep reasoning",
+          "capabilities": ["deep-reasoning", "planning", "architecture"],
+          "costPer1KInput": 2.0,
+          "costPer1KOutput": 10.0,
+          "supportsCache": false,
+          "priority": 2,
+          "defaultFor": [],
+          "providerModelId": "minimax-m1-thinking",
+          "adapter": "minimax"
+        },
+        {
+          "id": "minimax-m1-fast",
+          "family": "fast",
+          "description": "MiniMax M1 Fast — efficient execution",
+          "capabilities": ["code", "chat", "docs", "review", "testing", "ui-prototype"],
+          "costPer1KInput": 0.5,
+          "costPer1KOutput": 2.0,
+          "supportsCache": false,
+          "priority": 11,
+          "defaultFor": ["review", "docs", "ui-prototype", "simple-qa"],
+          "providerModelId": "minimax-m1-fast",
+          "adapter": "minimax"
+        }
+      ]
+    }
+    ],
+  "routing": {
+    "strategy": "cost-first",
+    "defaultProvider": "deepseek",
+    "defaultModel": "deepseek-v4-flash"
+  },
+  "compatMappings": {
+    "pro": "deepseek-v4-pro",
+    "flash": "deepseek-v4-flash",
+    "sonnet": "deepseek-v4-flash",
+    "opus": "deepseek-v4-pro"
+  }
+}

@@ -27,7 +27,7 @@
 - 本技能基于 Inversion + Generator 组合模式，增加了：
   - SDD Excel 模板自动分流（检测到 SDD 格式时跳过口述问询）
   - 项目上下文自动检测（扫描 package.json / build.gradle.kts 提取技术栈）
-  - MVP 模式兜底（无依赖文件时回退到 `知识库相关/docs/mvp技术栈.md`）
+  - MVP 模式兜底（无依赖文件时回退到 `安装或更新/docs/mvp技术栈.md`）
   - Gate 1.5 技术约束完整性验证
   - Gherkin 验收标准格式（含 Frontend/Backend 执行边界标注）
   - Mermaid 状态图要求（核心流程）

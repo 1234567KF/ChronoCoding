@@ -1,5 +1,5 @@
 <p align="center">
-  <a href="https://github.com/1234567KF/ChronoCoding/blob/main/AICoding.md">
+  <a href="https://github.com/1234567KF/ChronoCoding/blob/main/安装或更新/AICoding.md">
     <img src="https://img.shields.io/badge/⚡_单文件入口-AICoding.md-22c55e?style=for-the-badge" alt="单文件入口">
   </a>
   <a href="LICENSE">
@@ -15,18 +15,26 @@
 
 ## 分享给朋友（一键复制）
 
-**把下面这段话复制发给朋友，他丢给任意 AI（Claude Code / Trae / Cursor / Qoder / CodeBuddy/ Antigravity/ AI Studio）即可自动完成全部安装配置：**
+> 海报中的 **铁三角**（协作者·节流者·监测者）就是朋友安装后将获得的完整能力：
+> **协作者** — 多 Agent 竞争评审引擎，夯 · 竞争择优
+> **节流者** — KV Cache 120x 杠杆 + 模型路由 + 上下文压缩，Token 节省 40-83%
+> **监测者** — 实时 Token 追踪 + 成本仪表盘 + 缓存命中看板
+
+**把下面这段话复制发给朋友。朋友无需安装任何东西——粘贴给任意 AI（Claude Code / Trae / Cursor / Qoder / CodeBuddy / Antigravity / AI Studio 甚至网页版 AI）即可自动完成全部安装配置：**
 
 ```
 🤖 AI 请执行：
 
-访问 https://github.com/1234567KF/ChronoCoding/blob/main/AICoding.md
+我是 AI编程智驾（铁三角：协作者+节流者+监测者）的安装助手。
+请访问 https://github.com/1234567KF/ChronoCoding/blob/main/安装或更新/AICoding.md
 严格按其中的阶段0-5完成安装配置。
-说"执行安装"从头开始，说"执行更新"升级已有安装。
+如果用户还没有 AI 编程工具 → 先引导安装 Claude Code（irm https://claude.ai/install.ps1 | iex）
+如果用户已有 Claude Code → 说"执行安装"从头开始
+如果已有安装要升级 → 说"执行更新"完成升级
 如无法访问URL请引导用户手动下载该文件。
 ```
 
-> 朋友那边无需装任何东西，无需下载任何文件，只需把上面这段话粘贴给 AI。
+> 朋友那边无需下载任何文件，只需把上面这段话粘贴给任意 AI，AI 自动处理从环境检测、工具安装、Token 配置到铁三角全部技能就绪的完整流程。
 
 ---
 
@@ -239,7 +247,7 @@ flowchart LR
 | [autoresearch](https://github.com/karpathy/autoresearch) | karpathy | MIT | 自主 ML 实验：AI 整夜改模型→训练→验证→循环 |
 | [jeffallan/claude-skills](https://github.com/jeffallan/claude-skills) | jeffallan | MIT | 66 个 Claude Code 第三方技能：语言/后端/前端/基础设施/API/测试/DevOps/安全/数据ML/平台 |
 
-详见 [CREDITS.md](../知识库相关/docs/CREDITS.md) 完整致谢。
+详见 [CREDITS.md](安装或更新/docs/CREDITS.md) 完整致谢。
 
 ---
 
@@ -264,13 +272,13 @@ flowchart LR
 **只需下载一个文件**，放入 AI IDE，AI 自动完成全部安装：
 
 ```
-1. 下载 AICoding.md（本仓库根目录）
+1. 下载 安装或更新/AICoding.md
 2. 放入任意目录，用 AI IDE（Claude Code / Trae / Cursor）打开
 3. 对 AI 说"执行安装"
-4. AI 自动完成：环境检测 → 下载项目 → 安装配置 → 完成
+4. AI 自动完成：环境检测 → 下载项目 → 安装配置 → 铁三角全部技能就绪
 ```
 
-> `AICoding.md` 只有 ~100 行，内容永远不需要更新——它从 GitHub 实时拉取最新仓库。
+> `AICoding.md` 内容永远不需要更新——用户说"执行安装"或"执行更新"，AI 从 GitHub 实时拉取最新仓库和安装指南。
 
 ### 方式二：AI 自动安装
 
@@ -296,7 +304,7 @@ npm install -g ruflo
 git clone https://github.com/fshaan/gspowers.git ~/.claude/skills/gspowers
 ```
 
-详见 [INSTALL.md](../知识库相关/docs/INSTALL.md)
+详见 [INSTALL.md](安装或更新/docs/INSTALL.md)
 
 ---
 
@@ -328,6 +336,11 @@ git clone https://github.com/fshaan/gspowers.git ~/.claude/skills/gspowers
 | `课题申报` / `科研项目` / `国自然` / `研究计划` | 课题申报研究助手 | kf-grant-research |
 | `提取` / `结构化提取` / `parse` / `langextract` | LLM 驱动结构化提取，非结构化文本→JSON/CSV/YAML | kf-langextract |
 | `exa-code` / `查代码示例` / `找API用法` / `代码搜索` / `查库文档` | Exa Code — Web 规模代码上下文引擎，自动知识缺口检测 | kf-exa-code |
+| `进化` / `自我优化` / `evolve` | AI 自我优化与迭代改进 | kf-evolution |
+| `监测者` / `仪表盘` / `dashboard` / `token监测` | 监测者仪表盘：Token 追踪 + 重审触发检测 + 成本分析 | kf-monitor |
+| `节省追踪` / `saver` / `成本节省` | 会话成本节省追踪，自动记录 API 调用节省数据 | kf-saver |
+| `λ` / `lambda` / `!ta ct` / `@v2.0#h` / `agent通信` | Agent 间 Lambda 压缩通信（自动注入） | lambda-lang |
+| `ccp` / `智能调度` / `回调` | Token 高效调度：不 spawn 则省 10K-15K token | claude-code-pro |
 
 ---
 
@@ -336,12 +349,12 @@ git clone https://github.com/fshaan/gspowers.git ~/.claude/skills/gspowers
 | 文档 | 说明 |
 |------|------|
 | [README.md](README.md) | 项目介绍（你在这里） |
-| [AICoding.md](AICoding.md) | 单文件入口（给 AI 看） |
-| [MANUAL.md](../知识库相关/docs/MANUAL.md) | 完整使用手册（给人看） |
-| [INSTALL.md](../知识库相关/docs/INSTALL.md) | AI 执行安装指南（给 AI 看） |
+| [AICoding.md](安装或更新/AICoding.md) | 单文件入口（给 AI 看） |
+| [MANUAL.md](安装或更新/docs/MANUAL.md) | 完整使用手册（给人看） |
+| [INSTALL.md](安装或更新/docs/INSTALL.md) | AI 执行安装指南（给 AI 看） |
 | [CHANGELOG.md](CHANGELOG.md) | 版本变更记录 |
-| [FEATURES.md](../知识库相关/docs/FEATURES.md) | 功能特性介绍 |
-| [CREDITS.md](../知识库相关/docs/CREDITS.md) | 第三方开源项目致谢 |
+| [FEATURES.md](安装或更新/docs/FEATURES.md) | 功能特性介绍 |
+| [CREDITS.md](安装或更新/docs/CREDITS.md) | 第三方开源项目致谢 |
 
 ---
 
@@ -360,6 +373,17 @@ AI编程智驾/
 ├── .claude/               # Claude Code 项目配置
 │   ├── CLAUDE.md          # 项目指令
 │   ├── settings.json      # 项目配置
+│   ├── helpers/                   # Hook 处理器 + 审计脚本
+│   │   ├── harness-gate-check.cjs # 机械化门控验证
+│   │   ├── harness-audit.cjs      # 五根铁律全路径审计
+│   │   ├── skill-validator.cjs    # SKILL.md 行为级验证框架
+│   │   ├── review-rerun-check.cjs # 条件重审触发判断
+│   │   ├── quality-signals.cjs    # 标准化质量信号发射器
+│   │   ├── cache-audit.cjs        # DeepSeek KV Cache 前缀一致性审计
+│   │   ├── key-isolator.cjs       # 多供应商密钥隔离
+│   │   ├── rate-limiter.cjs       # 令牌桶限流
+│   │   ├── ccp-smart-dispatch.cjs # CCP 智能调度 + Lambda 注入
+│   │   └── ...                    # +6 其他 helper
 │   ├── agents/            # Agent 定义
 │   ├── commands/          # 自定义命令
 │   └── skills/            # 技能（kf- 系列 + 上游）
@@ -387,8 +411,27 @@ AI编程智驾/
 │       ├── kf-reverse-spec/        # 存量代码→Spec 逆向
 │       ├── kf-scrapling/           # Web 爬虫 + 反反爬
 │       ├── kf-langextract/         # LLM 驱动结构化提取
+│       ├── kf-evolution/            # 进化机制：AI 自我优化与迭代
+│       ├── kf-monitor/              # 监测者仪表盘：Token 追踪 + 重审检测
+│       ├── kf-saver/                # 会话成本节省追踪
+│       ├── kf-safe-router/          # 安全路由组件库
+│       ├── kf-smart-router/         # 多供应商模型适配器插件库
+│       ├── lambda-lang/             # Agent-to-Agent 原生语言
+│       ├── claude-code-pro/         # Token 高效调度
+│       ├── lean-ctx/                # 上下文压缩引擎
 │       ├── gspowers/               # SOP 导航（上游）
 │       └── gstack/                 # 产品流程（上游）
+│
+├── 监测者/monitor/          # Token 追踪监测仪表盘
+│   ├── src/
+│   │   ├── server.js       # Express 服务端（端口 3456）
+│   │   ├── db/             # SQLite 数据库 + Schema
+│   │   ├── api/            # REST API 端点
+│   │   ├── collector/      # 数据采集器
+│   │   └── watcher.js      # 文件监听 + 重审检测
+│   ├── client/             # EJS 前端页面
+│   ├── scripts/            # 安装/运维脚本
+│   └── package.json
 │
 ├── templates/             # 配置模板
 │   ├── settings.json.template

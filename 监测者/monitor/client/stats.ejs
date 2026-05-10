@@ -8,6 +8,53 @@
 
 <div class="grid-3" id="summaryCards"></div>
 
+<!-- Cache Dashboard -->
+<div class="card" style="margin-top:20px;">
+  <h3 style="font-size:14px;margin-bottom:12px;">KV Cache 命中率 <span id="cacheStatusBadge" style="font-size:12px;font-weight:normal;"></span></h3>
+  <div id="cacheSummary" style="display:flex;gap:20px;flex-wrap:wrap;margin-bottom:12px;"></div>
+  <table id="cacheTable">
+    <thead>
+      <tr>
+        <th>模型</th>
+        <th>调用次数</th>
+        <th>缓存输入</th>
+        <th>未缓存输入</th>
+        <th>总输入</th>
+        <th>缓存率</th>
+        <th>输入费用</th>
+        <th>缓存费用</th>
+        <th>输出费用</th>
+      </tr>
+    </thead>
+    <tbody id="cacheBody"></tbody>
+    <tfoot id="cacheFoot" style="display:none;"></tfoot>
+  </table>
+  <div id="cacheEmpty" style="display:none;text-align:center;padding:20px;color:#888;font-size:13px;">暂无缓存数据（需先有 API 调用记录）</div>
+</div>
+
+<!-- Message Type Breakdown (user vs A2A) -->
+<div class="card" style="margin-top:20px;">
+  <h3 style="font-size:14px;margin-bottom:12px;">消息类型统计（用户 vs A2A）</h3>
+  <table id="msgTypeTable">
+    <thead>
+      <tr>
+        <th>类型</th>
+        <th>消息数</th>
+        <th>输入缓存</th>
+        <th>输入未缓存</th>
+        <th>总输入</th>
+        <th>输出</th>
+        <th>输入费用</th>
+        <th>输出费用</th>
+        <th>总费用</th>
+        <th>基线费用</th>
+        <th>节省</th>
+      </tr>
+    </thead>
+    <tbody id="msgTypeBody"></tbody>
+  </table>
+</div>
+
 <div class="grid-2" style="margin-top:20px;">
   <div class="card">
     <h3 style="font-size:14px;margin-bottom:12px;">Token 趋势</h3>
@@ -20,6 +67,40 @@
       <tbody id="skillBody"></tbody>
     </table>
   </div>
+</div>
+
+<!-- Re-Review Trigger Tracking (Monitor-side independent detection) -->
+<div class="card" style="margin-top:20px;">
+  <h3 style="font-size:14px;margin-bottom:12px;">重审触发追踪 <span style="font-size:11px;color:#888;font-weight:normal;">（监测者独立检测，非 Agent 自报）</span></h3>
+  <div id="rerunSummary" style="display:flex;gap:20px;flex-wrap:wrap;margin-bottom:12px;"></div>
+  <table id="rerunTable" style="display:none;">
+    <thead>
+      <tr>
+        <th>技能</th>
+        <th>团队</th>
+        <th>轮次</th>
+        <th>触发重审</th>
+        <th>P0 数</th>
+        <th>P1 数</th>
+        <th>P1 密度</th>
+        <th>总问题</th>
+        <th>判定</th>
+        <th>时间</th>
+      </tr>
+    </thead>
+    <tbody id="rerunBody"></tbody>
+  </table>
+  <div id="rerunEmpty" style="text-align:center;padding:20px;color:#888;font-size:13px;">暂无重审记录（代码审查尚未触发或未产出 review JSON）</div>
+</div>
+
+<!-- Agent Breakdown Stats -->
+<div class="card" style="margin-top:20px;">
+  <h3 style="font-size:14px;margin-bottom:12px;">Agent 使用统计</h3>
+  <table id="agentTable">
+    <thead><tr><th>Agent</th><th>团队</th><th>调用次数</th><th>输入 Token</th><th>输出 Token</th><th>会话数</th></tr></thead>
+    <tbody id="agentBody"></tbody>
+  </table>
+  <div id="agentEmpty" style="display:none;text-align:center;padding:20px;color:#888;font-size:13px;">暂无 Agent 数据</div>
 </div>
 
 <script>
@@ -47,8 +128,105 @@ async function loadStats() {
     '</div>' +
     '<div class="card">' +
       '<div class="stat-value">' + (tData.summary.total_cost ? '¥' + tData.summary.total_cost.toFixed(4) : '¥0') + '</div>' +
-      '<div class="stat-label">实际花费 (' + range + ') ' + (baseline > 0.0001 ? ' | 基线 ¥' + baseline.toFixed(4) + ' | 节省 ¥' + saving.toFixed(4) + ' (' + savingPct + '%)' : ' | 基线 (旧数据无基线)') + '</div>' +
+      '<div class="stat-label">实际花费 (' + range + ') ' + (baseline > 0.0001 ? '| 基线 ¥' + baseline.toFixed(4) + ' | 节省 ¥' + saving.toFixed(4) + ' (' + savingPct + '%)' : '| 基线 (旧数据无基线)') + '</div>' +
     '</div>';
+
+  // Cache stats
+  const cRes = await fetch('/api/v1/cache?range=' + range);
+  const cData = await cRes.json();
+  const s = cData.summary;
+
+  // Status badge color
+  const statusColor = s.status === 'good' ? '#2e7d32' : s.status === 'warning' ? '#e65100' : '#c62828';
+  const statusLabel = s.status === 'good' ? '优秀' : s.status === 'warning' ? '偏低' : '危险';
+
+  document.getElementById('cacheSummary').innerHTML =
+    '<div style="min-width:140px;">' +
+      '<div style="font-size:24px;font-weight:700;color:' + statusColor + ';">' + s.overall_cache_hit_rate + '%</div>' +
+      '<div style="font-size:12px;color:#888;">总缓存率 <span style="color:' + statusColor + ';">(' + statusLabel + ')</span></div>' +
+    '</div>' +
+    '<div style="min-width:140px;">' +
+      '<div style="font-size:20px;font-weight:600;">' + (s.total_cached_input / 1000).toFixed(1) + 'K</div>' +
+      '<div style="font-size:12px;color:#2e7d32;">缓存命中 tokens</div>' +
+    '</div>' +
+    '<div style="min-width:140px;">' +
+      '<div style="font-size:20px;font-weight:600;">' + (s.total_uncached_input / 1000).toFixed(1) + 'K</div>' +
+      '<div style="font-size:12px;color:#c62828;">未缓存 tokens</div>' +
+    '</div>' +
+    '<div style="min-width:140px;">' +
+      '<div style="font-size:20px;font-weight:600;">¥' + (s.estimated_savings || 0).toFixed(2) + '</div>' +
+      '<div style="font-size:12px;color:#2e7d32;">估算节省</div>' +
+    '</div>' +
+    '<div style="min-width:140px;">' +
+      '<div style="font-size:20px;font-weight:600;">¥' + (s.total_actual_cost || 0).toFixed(4) + '</div>' +
+      '<div style="font-size:12px;color:#888;">实际花费（含缓存价）</div>' +
+    '</div>';
+
+  document.getElementById('cacheBody').innerHTML = (cData.by_model || []).map(function(m) {
+    const rateColor = m.cache_hit_rate > 50 ? '#2e7d32' : m.cache_hit_rate > 20 ? '#e65100' : '#c62828';
+    return '<tr>' +
+      '<td><strong>' + esc(m.model) + '</strong></td>' +
+      '<td>' + m.call_count + '</td>' +
+      '<td style="color:#2e7d32;">' + (m.cached_input?.toLocaleString() || 0) + '</td>' +
+      '<td style="color:#1565c0;">' + (m.uncached_input?.toLocaleString() || 0) + '</td>' +
+      '<td>' + (m.total_input?.toLocaleString() || 0) + '</td>' +
+      '<td style="font-weight:600;color:' + rateColor + ';">' + m.cache_hit_rate + '%</td>' +
+      '<td>' + (m.input_cost ? '¥' + m.input_cost.toFixed(4) : '¥0') + '</td>' +
+      '<td>' + (m.cache_cost ? '¥' + m.cache_cost.toFixed(4) : '¥0') + '</td>' +
+      '<td>' + (m.output_cost ? '¥' + m.output_cost.toFixed(4) : '¥0') + '</td>' +
+      '</tr>';
+  }).join('');
+
+  // Cache status badge + empty state + footer
+  const cacheEmpty = document.getElementById('cacheEmpty');
+  const cacheFoot = document.getElementById('cacheFoot');
+  document.getElementById('cacheStatusBadge').innerHTML =
+    '<span style="color:' + statusColor + ';">[' + statusLabel + ']</span>';
+
+  if (cData.by_model && cData.by_model.length > 0) {
+    cacheEmpty.style.display = 'none';
+    cacheFoot.style.display = '';
+    cacheFoot.innerHTML = '<tr style="font-weight:bold;background:#f5f5f5;">' +
+      '<td>总计</td>' +
+      '<td>' + (cData.by_model || []).reduce(function(a, m) { return a + m.call_count; }, 0) + '</td>' +
+      '<td style="color:#2e7d32;">' + (s.total_cached_input || 0).toLocaleString() + '</td>' +
+      '<td style="color:#1565c0;">' + (s.total_uncached_input || 0).toLocaleString() + '</td>' +
+      '<td>' + (s.total_input || 0).toLocaleString() + '</td>' +
+      '<td style="font-weight:600;color:' + statusColor + ';">' + (s.overall_cache_hit_rate || 0) + '%</td>' +
+      '<td>' + (s.total_input_cost ? '¥' + s.total_input_cost.toFixed(4) : '¥0') + '</td>' +
+      '<td>' + (s.total_cache_cost ? '¥' + s.total_cache_cost.toFixed(4) : '¥0') + '</td>' +
+      '<td>' + (s.total_output_cost ? '¥' + s.total_output_cost.toFixed(4) : '¥0') + '</td>' +
+      '</tr>';
+  } else {
+    cacheEmpty.style.display = 'block';
+    cacheFoot.style.display = 'none';
+  }
+
+  // Message-type breakdown
+  const mtRes = await fetch('/api/stats/by-message-type?range=' + range);
+  const mtData = await mtRes.json();
+
+  const mtBody = document.getElementById('msgTypeBody');
+  mtBody.innerHTML = [
+    { key: 'user', label: '👤 用户消息', data: mtData.user },
+    { key: 'a2a', label: '🤖 助手消息', data: mtData.a2a },
+    { key: 'total', label: '<strong>总计</strong>', data: mtData.total }
+  ].map(function(item) {
+    const d = item.data;
+    return '<tr>' +
+      '<td>' + item.label + '</td>' +
+      '<td>' + (d.msg_count || 0) + '</td>' +
+      '<td style="color:#2e7d32;">' + ((d.cached_input || 0).toLocaleString()) + '</td>' +
+      '<td style="color:#1565c0;">' + ((d.uncached_input || 0).toLocaleString()) + '</td>' +
+      '<td>' + ((d.total_input || 0).toLocaleString()) + '</td>' +
+      '<td>' + ((d.total_output || 0).toLocaleString()) + '</td>' +
+      '<td>' + (d.input_cost ? '¥' + d.input_cost.toFixed(4) : '¥0') + '</td>' +
+      '<td>' + (d.output_cost ? '¥' + d.output_cost.toFixed(4) : '¥0') + '</td>' +
+      '<td class="cost-pos">' + (d.total_cost ? '¥' + d.total_cost.toFixed(4) : '¥0') + '</td>' +
+      '<td class="cost-pos">' + (d.baseline_cost ? '¥' + d.baseline_cost.toFixed(4) : '¥0') + '</td>' +
+      '<td class="cost-save">' + (d.baseline_cost ? '¥' + (d.baseline_cost - (d.total_cost || 0)).toFixed(4) : '¥0') + '</td>' +
+      '</tr>';
+  }).join('');
 
   // Chart
   const ctx = document.getElementById('tokenChart').getContext('2d');
@@ -84,7 +262,93 @@ async function loadStats() {
       '<td>' + (s.total_output?.toLocaleString() || 0) + '</td>' +
       '</tr>';
   }).join('');
+
+  // Agent stats
+  const aRes = await fetch('/api/stats/agents?range=' + range);
+  const aData = await aRes.json();
+  const agentBody = document.getElementById('agentBody');
+  const agentEmpty = document.getElementById('agentEmpty');
+  if (aData.data && aData.data.length > 0) {
+    agentBody.style.display = '';
+    agentEmpty.style.display = 'none';
+    agentBody.innerHTML = aData.data.map(function(a) {
+      return '<tr>' +
+        '<td><strong>' + esc(a.agent_name) + '</strong></td>' +
+        '<td>' + esc(a.agent_team) + '</td>' +
+        '<td>' + a.call_count + '</td>' +
+        '<td>' + (a.total_input?.toLocaleString() || 0) + '</td>' +
+        '<td>' + (a.total_output?.toLocaleString() || 0) + '</td>' +
+        '<td>' + a.session_count + '</td>' +
+        '</tr>';
+    }).join('');
+  } else {
+    agentBody.style.display = 'none';
+    agentEmpty.style.display = 'block';
+  }
+}
+async function loadRerunStats() {
+  const range = document.getElementById('rangeSelect').value;
+  try {
+    const res = await fetch('/api/stats/review-reruns?range=' + range);
+    const data = await res.json();
+
+    // Summary cards
+    const s = data.summary;
+    document.getElementById('rerunSummary').innerHTML =
+      '<div style="min-width:120px;">' +
+        '<div style="font-size:24px;font-weight:700;color:#1a1a2e;">' + s.total_checks + '</div>' +
+        '<div style="font-size:12px;color:#888;">总检查次数</div>' +
+      '</div>' +
+      '<div style="min-width:120px;">' +
+        '<div style="font-size:24px;font-weight:700;color:' + (s.total_triggers > 0 ? '#c62828' : '#2e7d32') + ';">' + s.total_triggers + '</div>' +
+        '<div style="font-size:12px;color:#888;">触发重审次数</div>' +
+      '</div>' +
+      '<div style="min-width:120px;">' +
+        '<div style="font-size:24px;font-weight:700;">' + s.total_p0 + '</div>' +
+        '<div style="font-size:12px;color:#c62828;">P0 问题总数</div>' +
+      '</div>' +
+      '<div style="min-width:120px;">' +
+        '<div style="font-size:24px;font-weight:700;">' + s.total_p1 + '</div>' +
+        '<div style="font-size:12px;color:#e65100;">P1 问题总数</div>' +
+      '</div>' +
+      '<div style="min-width:120px;">' +
+        '<div style="font-size:24px;font-weight:700;">' + s.trigger_rate + '%</div>' +
+        '<div style="font-size:12px;color:#888;">重审触发率</div>' +
+      '</div>';
+
+    // Table
+    const table = document.getElementById('rerunTable');
+    const body = document.getElementById('rerunBody');
+    const empty = document.getElementById('rerunEmpty');
+
+    if (data.recent && data.recent.length > 0) {
+      table.style.display = '';
+      empty.style.display = 'none';
+      body.innerHTML = data.recent.map(function(r) {
+        const trigColor = r.triggered ? '#c62828' : '#2e7d32';
+        const trigLabel = r.triggered ? '是' : '否';
+        return '<tr>' +
+          '<td><strong>' + esc(r.skill_name || '') + '</strong></td>' +
+          '<td>' + esc(r.agent_team || '-') + '</td>' +
+          '<td>' + r.round + '</td>' +
+          '<td style="color:' + trigColor + ';font-weight:600;">' + trigLabel + '</td>' +
+          '<td style="color:#c62828;">' + r.p0_count + '</td>' +
+          '<td style="color:#e65100;">' + r.p1_count + '</td>' +
+          '<td>' + r.p1_density + '</td>' +
+          '<td>' + r.total_issues + '</td>' +
+          '<td style="font-size:12px;">' + esc(r.decision || '') + '</td>' +
+          '<td style="font-size:11px;color:#888;">' + (r.created_at ? new Date(r.created_at).toLocaleString('zh-CN') : '') + '</td>' +
+          '</tr>';
+      }).join('');
+    } else {
+      table.style.display = 'none';
+      empty.style.display = 'block';
+    }
+  } catch (e) {
+    document.getElementById('rerunEmpty').textContent = '加载重审数据失败: ' + e.message;
+  }
 }
 function esc(s) { var d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
 loadStats();
+loadRerunStats();
 </script>

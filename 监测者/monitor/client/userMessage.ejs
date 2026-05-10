@@ -1,0 +1,109 @@
+<a href="/" style="color:#666;text-decoration:none;font-size:13px;">&larr; 返回列表</a>
+<div id="msgHeader" style="margin:12px 0;"></div>
+
+<div id="chainSummary" style="margin:16px 0;display:none;">
+  <h3 style="font-size:14px;margin-bottom:8px;">A2A 回复链汇总</h3>
+  <div id="summaryCards" style="display:flex;gap:12px;flex-wrap:wrap;"></div>
+</div>
+
+<div id="messages"></div>
+
+<script>
+(async function() {
+  const res = await fetch('/api/user-messages/<%= msgId %>');
+  const data = await res.json();
+  const u = data.user_message;
+
+  document.getElementById('msgHeader').innerHTML = `
+    <h2>${esc(u.title || u.session_id || '(无标题)')}</h2>
+    <div class="msg-user" style="margin:8px 0;">
+      <strong>👤 用户消息</strong>
+      <pre style="white-space:pre-wrap;margin:8px 0;font-size:13px;font-family:inherit;max-height:200px;overflow-y:auto;">${esc(u.content || '')}</pre>
+    </div>
+    <div style="font-size:13px;color:#888;margin-top:4px;">
+      触发 ${data.chain_count} 条 A2A 回复 |
+      总输入(缓存+未缓存): ${data.total_input_tokens?.toLocaleString() || 0} |
+      输出: ${data.total_output_tokens?.toLocaleString() || 0} |
+      总花费: ${data.total_cost ? '¥' + data.total_cost.toFixed(4) : '-'} |
+      ${new Date(u.created_at).toLocaleString('zh-CN')}
+    </div>
+  `;
+
+  // Summary cards
+  if (data.chain && data.chain.length > 0) {
+    document.getElementById('chainSummary').style.display = 'block';
+    const cardsContainer = document.getElementById('summaryCards');
+    const totalInput = data.chain.reduce((s, m) => s + (m.input_tokens || 0), 0);
+    const totalCache = data.chain.reduce((s, m) => s + (m.cache_hit || 0), 0);
+    const totalOutput = data.chain.reduce((s, m) => s + (m.output_tokens || 0), 0);
+    const totalCost = data.chain.reduce((s, m) => s + (m.input_cost || 0) + (m.output_cost || 0) + (m.cache_cost || 0), 0);
+    cardsContainer.innerHTML = `
+      <div style="background:#fff;border-radius:8px;padding:12px 16px;box-shadow:0 1px 3px rgba(0,0,0,0.1);min-width:160px;flex:1;">
+        <div style="font-size:13px;font-weight:600;color:#1a1a2e;">🤖 A2A 回复</div>
+        <div style="font-size:11px;color:#888;">${data.chain_count} 条消息</div>
+      </div>
+      <div style="background:#fff;border-radius:8px;padding:12px 16px;box-shadow:0 1px 3px rgba(0,0,0,0.1);min-width:160px;flex:1;">
+        <div style="font-size:13px;font-weight:600;color:#1a1a2e;">Token</div>
+        <div style="font-size:11px;color:#888;">
+          <span class="badge badge-input">未缓存 ${totalInput.toLocaleString()}</span>
+          <span class="badge badge-cache">缓存 ${totalCache.toLocaleString()}</span>
+          <span class="badge badge-output">输出 ${totalOutput.toLocaleString()}</span>
+        </div>
+      </div>
+      <div style="background:#fff;border-radius:8px;padding:12px 16px;box-shadow:0 1px 3px rgba(0,0,0,0.1);min-width:160px;flex:1;">
+        <div style="font-size:13px;font-weight:600;color:#1a1a2e;">花费</div>
+        <div style="font-size:11px;color:#888;"><span class="cost-pos">¥${totalCost.toFixed(4)}</span></div>
+      </div>
+    `;
+  }
+
+  if (!data.chain || data.chain.length === 0) {
+    document.getElementById('messages').innerHTML = '<div style="text-align:center;padding:40px;color:#999;">暂无 A2A 回复</div>';
+    return;
+  }
+
+  const container = document.getElementById('messages');
+  for (const msg of data.chain) {
+    const hasAgent = msg.skillCalls && msg.skillCalls.some(s => s.agent_name);
+    const roleLabel = hasAgent ? '🤖 A2A' : '💬 助手';
+
+    // Cache badge
+    const cacheBadge = msg.cache_hit > 0
+      ? '<span class="badge badge-cache">缓存: ' + msg.cache_hit.toLocaleString() + '</span>'
+      : '<span class="badge badge-cache" style="background:#fce4ec;">无缓存</span>';
+
+    // Agent info from skill calls
+    const agentNames = [...new Set((msg.skillCalls || [])
+      .filter(s => s.agent_name)
+      .map(s => s.agent_name))];
+    const agentTag = agentNames.length > 0
+      ? `<span style="font-size:11px;color:#7b1fa2;font-weight:500;">🤖 ${esc(agentNames.join(', '))}</span>`
+      : '';
+
+    const modelTag = msg.model
+      ? `<span style="font-size:11px;color:#888;">模型: ${esc(msg.model)}</span>`
+      : '';
+
+    const totalCost = (msg.input_cost || 0) + (msg.output_cost || 0) + (msg.cache_cost || 0);
+
+    container.innerHTML += `
+      <div class="msg-assistant">
+        <strong>${roleLabel}</strong>
+        ${agentTag ? ' ' + agentTag : ''}
+        ${modelTag ? ' | ' + modelTag : ''}
+        <pre style="white-space:pre-wrap;margin:8px 0;font-size:13px;font-family:inherit;max-height:200px;overflow-y:auto;">${esc(msg.content || '').slice(0, 1000)}</pre>
+        <div class="msg-meta">
+          <span class="badge badge-input">未缓存输入: ${(msg.input_tokens || 0).toLocaleString()}</span>
+          ${cacheBadge}
+          <span class="badge badge-output">输出: ${(msg.output_tokens || 0).toLocaleString()}</span>
+          <span class="cost-pos">花费: ¥${totalCost.toFixed(6)}</span>
+        </div>
+        ${msg.skillCalls && msg.skillCalls.length > 0 ? `<div style="margin-top:6px;display:flex;gap:4px;flex-wrap:wrap;">${msg.skillCalls.map(s =>
+          `<span class="badge badge-a2a">${esc(s.skill_name)}${s.agent_name ? ' (' + esc(s.agent_name) + ')' : ''}</span>`
+        ).join(' ')}</div>` : ''}
+      </div>
+    `;
+  }
+})();
+function esc(s) { const d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
+</script>

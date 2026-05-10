@@ -69,6 +69,12 @@ md2docx工具箱/
 # Swarm runtime databases (personal session data, per-developer private)
 .swarm/
 
+# Monitor runtime data (personal token usage records, per-developer private)
+监测者/monitor/data/
+
+# Claude Flow runtime state (session data, per-developer private)
+.claude-flow/
+
 
 # Generated monitoring reports (kf-token-tracker output)
 **/token-usage-report.md

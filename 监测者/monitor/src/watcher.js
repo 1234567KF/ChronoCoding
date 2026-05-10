@@ -48,22 +48,37 @@ function importTraces() {
 
   const db = getDB();
   const insertMsg = db.prepare(
-    `INSERT INTO messages (conversation_id, role, content, input_tokens, output_tokens, cache_hit, input_cost, output_cost, baseline_cost, model, created_at)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+    `INSERT INTO messages (conversation_id, role, content, input_tokens, output_tokens, cache_hit, input_cost, output_cost, cache_cost, baseline_cost, model, created_at)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
   );
   const insertSkill = db.prepare(
     `INSERT INTO skill_calls (message_id, skill_name, skill_type, input_tokens, output_tokens, duration_ms, status, agent_name, agent_team)
      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`
   );
 
+  // Build dedup set from existing messages for this batch
+  const dedupKeys = new Set();
+  try {
+    const convIds = [...new Set(pending.map(l => { try { const e = JSON.parse(l); return e._session_id || e.trace_id; } catch { return null; } }).filter(Boolean))];
+    for (const cid of convIds) {
+      const existing = db.prepare("SELECT role, content FROM messages WHERE conversation_id = ?").all(cid);
+      for (const row of existing) {
+        dedupKeys.add(`${cid}:${row.role}:${(row.content || '').slice(0, 120)}`);
+      }
+    }
+  } catch {}
+
   let imported = 0;
+  let batchTokensIn = 0, batchTokensOut = 0, batchCost = 0, batchBaseline = 0;
   const tx = db.transaction(() => {
     for (const line of pending) {
       let entry;
       try { entry = JSON.parse(line); } catch { continue; }
       if (!entry || !entry.skill) continue;
       if (entry.skill_type === 'session') continue;
-      // subagent traces are now included (with per-agent token data from hooks)
+      // Skip agent lifecycle events (subagent start/end) — these are status signals, not real messages
+      const note = entry.note || '';
+      if (/^agent subagent (开始|结束)/.test(note)) continue;
 
       // Use real session ID for subagent/skill traces, not trace_id (avoids 0-cost ghost conversations)
       const sessionId = entry._session_id || entry.trace_id;
@@ -90,11 +105,17 @@ function importTraces() {
       const cost = calcCost(model, entry.tokens_in || 0, entry.tokens_out || 0, entry.cache_hit || 0);
       const baseline = calcBaselineCost(entry.tokens_in || 0, entry.tokens_out || 0, entry.cache_hit || 0);
 
+      // Dedup against existing messages (hook push + watcher import race)
+      const dk = `${convId}:assistant:${(entry.note || '').slice(0, 120)}`;
+      if (dedupKeys.has(dk)) { imported++; continue; }
+      dedupKeys.add(dk);
+
       const msg = insertMsg.run(
         convId, 'assistant', entry.note || '',
         entry.tokens_in || 0, entry.tokens_out || 0,
         entry.cache_hit ?? null,
         cost?.input_cost ?? null, cost?.output_cost ?? null,
+        cost?.cache_cost ?? null,
         baseline?.total_cost ?? null,
         model,
         now
@@ -109,28 +130,50 @@ function importTraces() {
         entry.agent || null, entry.team || null
       );
 
-      // update conversation totals — 使用总输入 token（含缓存）
-      db.prepare(
-        `UPDATE conversations SET
-          total_input_tokens = total_input_tokens + ?,
-          total_output_tokens = total_output_tokens + ?,
-          total_cost = total_cost + ?,
-          total_baseline_cost = total_baseline_cost + ?,
-          ended_at = ?
-         WHERE id = ?`
-      ).run(
-        totalInput, entry.tokens_out || 0,
-        cost?.total_cost || 0, baseline?.total_cost || 0, now, convId
-      );
+      // UPDATE conversation model/ended_at only (not token totals — transcript import
+      // is the authoritative source for cumulative totals; trace data would double-count)
+      db.prepare('UPDATE conversations SET ended_at = ? WHERE id = ?').run(now, convId);
 
+      batchTokensIn += totalInput;
+      batchTokensOut += entry.tokens_out || 0;
+      batchCost += cost?.total_cost || 0;
+      batchBaseline += baseline?.total_cost || 0;
       imported++;
     }
   });
 
   tx();
   writeCursor(lines.length);
+
+  // Update daily stats for traces (mirrors transcript import behavior)
+  if (batchCost > 0) {
+    try {
+      const today = new Date().toISOString().slice(0, 10);
+      const existingStats = db.prepare('SELECT * FROM token_daily_stats WHERE date = ?').get(today);
+      if (existingStats) {
+        db.prepare(
+          `UPDATE token_daily_stats SET
+            total_input = total_input + ?,
+            total_output = total_output + ?,
+            total_cost = total_cost + ?,
+            total_baseline_cost = total_baseline_cost + ?
+           WHERE date = ?`
+        ).run(batchTokensIn, batchTokensOut, batchCost, batchBaseline, today);
+      } else {
+        db.prepare(
+          `INSERT INTO token_daily_stats (date, total_input, total_output, cache_hit_input, total_cost, total_baseline_cost)
+           VALUES (?, ?, ?, 0, ?, ?)`
+        ).run(today, batchTokensIn, batchTokensOut, batchCost, batchBaseline);
+      }
+    } catch (e) {
+      console.error(`[watcher] Trace daily stats update failed: ${e.message}`);
+    }
+  }
+
   return imported;
 }
+
+/* ---------- transcript import 已移除 — SQLite 唯一数据源，不再从 .jsonl 文件中转 ---------- */
 
 /* ---------- import session state (当前会话) ---------- */
 function importSessionState() {
@@ -145,9 +188,9 @@ function importSessionState() {
 
     const now = state.startedAt || new Date().toISOString();
     db.prepare(
-      `INSERT INTO conversations (id, session_id, title, model, started_at)
-       VALUES (?, ?, ?, ?, ?)`
-    ).run(state.sessionId, state.sessionId, `会话 ${state.sessionId.slice(0, 16)}`, state.model || null, now);
+      `INSERT INTO conversations (id, session_id, title, model, started_at, restored_from)
+       VALUES (?, ?, ?, ?, ?, ?)`
+    ).run(state.sessionId, state.sessionId, `会话 ${state.sessionId.slice(0, 16)}`, state.model || null, now, state.restoredFrom || null);
 
     const insertMsg = db.prepare(
       `INSERT INTO messages (conversation_id, role, content, input_tokens, output_tokens, cache_hit, model, created_at)
@@ -159,257 +202,122 @@ function importSessionState() {
   } catch { return false; }
 }
 
-/* ---------- transcript import (DeepSeek-aware, hook fallback) ---------- */
-const HOME_DIR = process.env.USERPROFILE || process.env.HOME || '';
-const PROJECT_NAME = path.basename(PROJECT_ROOT);
+/* ---------- transcript import 已移除 — SQLite 唯一数据源，不再从 .jsonl 文件中转 ---------- */
 
-function resolveTranscriptPath(sessionId) {
-  if (!sessionId || !HOME_DIR) return null;
-  const candidate = path.join(HOME_DIR, '.claude', 'projects', `D--${PROJECT_NAME}`, `${sessionId}.jsonl`);
-  return fs.existsSync(candidate) ? candidate : null;
-}
+/* ---------- review re-run detection ---------- */
+const REVIEW_DIRS = [
+  path.join(PROJECT_ROOT, '.claude-flow', 'reviews'),
+  path.join(PROJECT_ROOT, '.claude-flow', 'quality-signals'),
+];
+const REVIEW_CURSOR_PATH = path.join(PROJECT_ROOT, '.claude-flow', 'data', 'review-rerun-cursor.json');
 
-// System messages to skip (carry cumulative session totals, not per-message usage)
-const SYSTEM_MSGS = new Set(['会话开始', '会话结束', '会话继续', '会话重启', '会话恢复']);
+const MAX_RERUN_ROUNDS = 3;
+const P1_DENSITY_THRESHOLD = 3;
 
-function extractMsgText(entry) {
-  const c = entry.message?.content;
-  if (typeof c === 'string') return c.trim();
-  if (Array.isArray(c)) return c.filter(x => x.type === 'text').map(x => x.text || '').join('\n').trim();
-  return '';
-}
-
-function buildTranscriptMessages(lines) {
-  const messages = [];
-  let pendingUser = null;
-  let pendingSkill = null; // attributionSkill from thinking/tool_use blocks without text
-
-  for (const line of lines) {
-    try {
-      const entry = JSON.parse(line);
-      const role = entry.message?.role;
-
-      // Track attributionSkill from thinking/tool_use blocks (no text content)
-      if (entry.attributionSkill) {
-        pendingSkill = entry.attributionSkill;
-      }
-
-      if (role !== 'user' && role !== 'assistant') continue;
-
-      const text = extractMsgText(entry);
-      if (!text) continue;
-      if (SYSTEM_MSGS.has(text)) continue;
-
-      const ts = entry.timestamp || entry.message?.timestamp || new Date().toISOString();
-      const m = entry.message?.model || null;
-      const model = MODEL_ALIASES[m] || m;
-
-      if (role === 'user') {
-        pendingUser = { role, content: text, input_tokens: 0, output_tokens: 0, cache_hit: 0, model, created_at: ts };
-      } else if (role === 'assistant') {
-        const usage = entry.message?.usage || {};
-        const hasUsage = usage.input_tokens !== undefined;
-        const skill = entry.attributionSkill || pendingSkill;
-        pendingSkill = null; // consumed
-
-        if (hasUsage && pendingUser) {
-          // Attribute assistant's input_tokens to preceding user message (DeepSeek format)
-          pendingUser.input_tokens = usage.input_tokens || 0;
-          pendingUser.cache_hit = usage.cache_read_input_tokens || 0;
-          pendingUser.model = model;
-          messages.push(pendingUser);
-          pendingUser = null;
-          messages.push({
-            role, content: text, input_tokens: 0,
-            output_tokens: usage.output_tokens || 0, cache_hit: 0,
-            model, created_at: ts, attributionSkill: skill,
-          });
-        } else {
-          if (pendingUser) { messages.push(pendingUser); pendingUser = null; }
-          messages.push({
-            role, content: text,
-            input_tokens: hasUsage ? (usage.input_tokens || 0) : 0,
-            output_tokens: hasUsage ? (usage.output_tokens || 0) : 0,
-            cache_hit: hasUsage ? (usage.cache_read_input_tokens || 0) : 0,
-            model, created_at: ts, attributionSkill: skill,
-          });
-        }
-      }
-    } catch {}
-  }
-  if (pendingUser) messages.push(pendingUser);
-  return messages;
-}
-
-/* ---------- transcript cursor ---------- */
-function readTranscriptCursor(sessionId) {
+function readReviewCursor() {
   try {
-    const raw = fs.readFileSync(CURSOR_PATH, 'utf-8');
-    const data = JSON.parse(raw);
-    return data.transcriptOffsets?.[sessionId] || 0;
-  } catch { return 0; }
+    const raw = fs.readFileSync(REVIEW_CURSOR_PATH, 'utf-8');
+    return JSON.parse(raw);
+  } catch { return { seen: {} }; }
 }
 
-function writeTranscriptCursor(sessionId, offset) {
-  const dir = path.dirname(CURSOR_PATH);
+function writeReviewCursor(data) {
+  const dir = path.dirname(REVIEW_CURSOR_PATH);
   if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
-  let data = {};
-  try { data = JSON.parse(fs.readFileSync(CURSOR_PATH, 'utf-8')); } catch {}
-  if (!data.transcriptOffsets) data.transcriptOffsets = {};
-  data.transcriptOffsets[sessionId] = offset;
-  data.updatedAt = new Date().toISOString();
-  fs.writeFileSync(CURSOR_PATH, JSON.stringify(data), 'utf-8');
+  fs.writeFileSync(REVIEW_CURSOR_PATH, JSON.stringify({ ...data, updatedAt: new Date().toISOString() }), 'utf-8');
 }
 
-function importTranscriptMessages() {
-  // 1. Get session ID from session state
-  if (!fs.existsSync(SESSION_STATE_PATH)) return 0;
-  let sessionId;
-  try { sessionId = JSON.parse(fs.readFileSync(SESSION_STATE_PATH, 'utf-8')).sessionId; } catch { return 0; }
-  if (!sessionId) return 0;
-
-  // 2. Resolve transcript path
-  const transcriptPath = resolveTranscriptPath(sessionId);
-  if (!transcriptPath) return 0;
-
-  // 3. Read cursor — skip already-imported lines
-  const cursor = readTranscriptCursor(sessionId);
-  let content;
-  try { content = fs.readFileSync(transcriptPath, 'utf-8'); } catch { return 0; }
-  const lines = content.split('\n').filter(Boolean);
-  if (lines.length <= cursor) return 0;
-
-  const newLines = lines.slice(cursor);
-  const messages = buildTranscriptMessages(newLines);
-  if (messages.length === 0) return 0;
-
-  // 4. Import to DB with dedup
+/**
+ * Independently detect re-review triggers from review JSON files.
+ * This is the monitor's own assessment — does NOT trust agent self-reporting.
+ */
+function importReviewReruns() {
   const db = getDB();
-  const existingKeys = new Set();
-  try {
-    const existing = db.prepare('SELECT role, content FROM messages WHERE conversation_id = ?').all(sessionId);
-    for (const row of existing) {
-      existingKeys.add(`${row.role}:${(row.content || '').slice(0, 100)}`);
-    }
-  } catch {}
+  const cursor = readReviewCursor();
+  let newRecords = 0;
 
-  const insertMsg = db.prepare(
-    `INSERT INTO messages (conversation_id, role, content, input_tokens, output_tokens, cache_hit, input_cost, output_cost, baseline_cost, model, created_at)
+  const insertRerun = db.prepare(
+    `INSERT INTO review_reruns (review_path, skill_name, agent_team, round, triggered, p0_count, p1_count, p1_density, total_issues, total_lines, decision)
      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
   );
-  const insertSkill = db.prepare(
-    `INSERT INTO skill_calls (message_id, skill_name, skill_type, input_tokens, output_tokens, status)
-     VALUES (?, ?, ?, ?, ?, ?)`
-  );
 
-  let imported = 0;
-  let batchInput = 0, batchOutput = 0, batchCost = 0, batchBaseline = 0, batchCache = 0;
-  const tx = db.transaction(() => {
-    for (const msg of messages) {
-      const key = `${msg.role}:${(msg.content || '').slice(0, 100)}`;
-      if (existingKeys.has(key)) continue;
-      existingKeys.add(key);
+  for (const dir of REVIEW_DIRS) {
+    if (!fs.existsSync(dir)) continue;
+    let files;
+    try { files = fs.readdirSync(dir).filter(f => f.endsWith('.json')); } catch { continue; }
 
-      const cost = msg.model ? calcCost(msg.model, msg.input_tokens, msg.output_tokens, msg.cache_hit) : null;
-      const baselineCost = calcBaselineCost(msg.input_tokens, msg.output_tokens, msg.cache_hit);
+    for (const file of files) {
+      const fullPath = path.join(dir, file);
+      let stat;
+      try { stat = fs.statSync(fullPath); } catch { continue; }
 
-      const result = insertMsg.run(
-        sessionId, msg.role,
-        msg.content.length > 10000 ? msg.content.slice(0, 10000) + '...' : msg.content,
-        msg.input_tokens, msg.output_tokens, msg.cache_hit || null,
-        cost?.input_cost ?? null, cost?.output_cost ?? null,
-        baselineCost?.total_cost ?? null,
-        msg.model || null, msg.created_at
+      const key = fullPath;
+      const lastMtime = cursor.seen[key];
+      if (lastMtime && stat.mtimeMs <= lastMtime) continue;
+
+      // Parse review JSON
+      let report;
+      try {
+        const raw = fs.readFileSync(fullPath, 'utf-8');
+        const data = JSON.parse(raw);
+        report = data.review_report || data;
+      } catch { continue; }
+
+      if (!report.issues && !report.severity) continue; // Not a review file
+
+      // Calculate trigger conditions (same logic as review-rerun-check.cjs)
+      const issues = report.issues || [];
+      const p0Count = issues.filter(i => i.severity === 'P0').length;
+      const p1Count = issues.filter(i => i.severity === 'P1').length;
+      const totalLines = report.total_lines || report.line_count_total || 0;
+      const p1Density = totalLines > 0 ? (p1Count / totalLines) * 1000 : 0;
+
+      // Determine round from review path or metadata
+      const round = report.round || report.review_round || 1;
+      const triggers = [];
+      if (p0Count > 0) triggers.push('P0_COUNT_GT_0');
+      if (p1Density > P1_DENSITY_THRESHOLD) triggers.push('P1_DENSITY_GT_3');
+      const atMaxRounds = round >= MAX_RERUN_ROUNDS;
+      const shouldRerun = triggers.length > 0 && !atMaxRounds;
+
+      let decision;
+      if (shouldRerun) {
+        decision = `触发第 ${round + 1}/${MAX_RERUN_ROUNDS} 轮重审`;
+      } else if (atMaxRounds && triggers.length > 0) {
+        decision = `已达上限 ${MAX_RERUN_ROUNDS} 轮，标记 UNRESOLVED`;
+      } else {
+        decision = '一次通过，无需重审';
+      }
+
+      // Extract team name from path
+      const teamMatch = file.match(/(red|blue|green|红|蓝|绿)/i);
+      const agentTeam = report.team || (teamMatch ? teamMatch[0].toLowerCase() : null);
+
+      insertRerun.run(
+        fullPath,
+        report.skill_name || report.skill || 'kf-code-review-graph',
+        agentTeam,
+        round,
+        shouldRerun ? 1 : 0,
+        p0Count,
+        p1Count,
+        parseFloat(p1Density.toFixed(2)),
+        issues.length,
+        totalLines,
+        decision
       );
 
-      // Create skill_call record from attributionSkill
-      if (msg.attributionSkill) {
-        const skillType = msg.attributionSkill.startsWith('kf-') ? 'kf-custom' : 'builtin';
-        insertSkill.run(
-          result.lastInsertRowid,
-          msg.attributionSkill, skillType,
-          msg.input_tokens || 0, msg.output_tokens || 0,
-          'success'
-        );
-      }
-
-      const msgTotalIn = (msg.input_tokens || 0) + (msg.cache_hit || 0);
-      batchInput += msgTotalIn;
-      batchOutput += msg.output_tokens || 0;
-      batchCache += msg.cache_hit || 0;
-      batchCost += cost?.total_cost || 0;
-      batchBaseline += baselineCost?.total_cost || 0;
-      imported++;
-    }
-  });
-
-  try { tx(); } catch (e) {
-    console.error(`[watcher] Transcript import tx failed: ${e.message}`);
-    return 0;
-  }
-
-  // 5. Update cursor
-  writeTranscriptCursor(sessionId, lines.length);
-
-  // 6. Update conversation cumulative totals (include cache_hit, and only increase — never decrease)
-  try {
-    const costRow = db.prepare('SELECT COALESCE(SUM(input_cost),0) as ic, COALESCE(SUM(output_cost),0) as oc FROM messages WHERE conversation_id = ?').get(sessionId);
-    const tokenRow = db.prepare('SELECT COALESCE(SUM(input_tokens + COALESCE(cache_hit,0)),0) as it, COALESCE(SUM(output_tokens),0) as ot FROM messages WHERE conversation_id = ?').get(sessionId);
-    const baselineRow = db.prepare('SELECT COALESCE(SUM(baseline_cost),0) as bc FROM messages WHERE conversation_id = ?').get(sessionId);
-    const current = db.prepare('SELECT total_input_tokens, total_output_tokens, total_cost, total_baseline_cost FROM conversations WHERE id = ?').get(sessionId);
-
-    // Use MAX to avoid overwriting with lower values from competing ingestion paths
-    const newInput = current ? Math.max(current.total_input_tokens || 0, tokenRow.it) : tokenRow.it;
-    const newOutput = current ? Math.max(current.total_output_tokens || 0, tokenRow.ot) : tokenRow.ot;
-    const newCost = current ? Math.max(current.total_cost || 0, (costRow.ic || 0) + (costRow.oc || 0)) : (costRow.ic || 0) + (costRow.oc || 0);
-    const newBaseline = current ? Math.max(current.total_baseline_cost || 0, baselineRow.bc || 0) : baselineRow.bc || 0;
-
-    db.prepare(
-      `UPDATE conversations SET
-        total_input_tokens = ?, total_output_tokens = ?,
-        total_cost = ?, total_baseline_cost = ?,
-        ended_at = ?
-       WHERE id = ?`
-    ).run(
-      newInput, newOutput,
-      newCost, newBaseline,
-      new Date().toISOString(),
-      sessionId
-    );
-  } catch (e) {
-    console.error(`[watcher] Transcript totals update failed: ${e.message}`);
-  }
-
-  // 7. Update daily stats from this batch
-  if (batchCost > 0) {
-    try {
-      const today = new Date().toISOString().slice(0, 10);
-      const existingStats = db.prepare('SELECT * FROM token_daily_stats WHERE date = ?').get(today);
-      if (existingStats) {
-        db.prepare(
-          `UPDATE token_daily_stats SET
-            total_input = total_input + ?,
-            total_output = total_output + ?,
-            cache_hit_input = cache_hit_input + ?,
-            total_cost = total_cost + ?,
-            total_baseline_cost = total_baseline_cost + ?
-           WHERE date = ?`
-        ).run(batchInput, batchOutput, batchCache, batchCost, batchBaseline, today);
-      } else {
-        db.prepare(
-          `INSERT INTO token_daily_stats (date, total_input, total_output, cache_hit_input, total_cost, total_baseline_cost)
-           VALUES (?, ?, ?, ?, ?, ?)`
-        ).run(today, batchInput, batchOutput, batchCache, batchCost, batchBaseline);
-      }
-    } catch (e) {
-      console.error(`[watcher] Transcript daily stats update failed: ${e.message}`);
+      cursor.seen[key] = stat.mtimeMs;
+      newRecords++;
     }
   }
 
-  if (imported > 0) {
-    console.log(`[watcher] imported ${imported} message(s) from transcript (session ${sessionId.slice(0, 16)})`);
+  if (newRecords > 0) {
+    writeReviewCursor(cursor);
+    console.log(`[watcher] Recorded ${newRecords} review re-run check(s)`);
   }
-  return imported;
+
+  return newRecords;
 }
 
 /* ---------- start watcher ---------- */
@@ -428,8 +336,8 @@ function importPendingSessions() {
         const existing = db.prepare('SELECT id FROM conversations WHERE id = ?').get(data.sessionId);
         if (!existing) {
           db.prepare(
-            `INSERT INTO conversations (id, session_id, title, model, started_at, total_input_tokens, total_output_tokens, total_cost, total_baseline_cost, ended_at)
-             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+            `INSERT INTO conversations (id, session_id, title, model, started_at, total_input_tokens, total_output_tokens, total_cost, total_baseline_cost, ended_at, restored_from)
+             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
           ).run(
             data.sessionId, data.sessionId,
             data.title || `会话 ${data.sessionId.slice(0, 16)}`,
@@ -439,7 +347,8 @@ function importPendingSessions() {
             data.total_output_tokens || 0,
             data.total_cost || 0,
             data.total_baseline_cost || 0,
-            data.ended_at || null
+            data.ended_at || null,
+            data.restoredFrom || null
           );
           console.log(`[watcher] Imported pending session: ${data.sessionId}`);
         } else if (data.phase === 'end') {
@@ -473,22 +382,22 @@ function startWatcher(intervalMs = 10000) {
   importSessionState();
   importTraces();
   importPendingSessions();
-  importTranscriptMessages();
+  importReviewReruns();
 
   _interval = setInterval(() => {
     try {
       importSessionState();
       const n = importTraces();
       const p = importPendingSessions();
-      const t = importTranscriptMessages();
+      const r = importReviewReruns();
       if (n > 0) {
         console.log(`[watcher] imported ${n} trace(s) from skill-traces.jsonl`);
       }
       if (p > 0) {
         console.log(`[watcher] imported ${p} pending session(s)`);
       }
-      if (t > 0) {
-        console.log(`[watcher] imported ${t} message(s) from transcript`);
+      if (r > 0) {
+        console.log(`[watcher] detected ${r} review re-run(s)`);
       }
     } catch (err) {
       console.error(`[watcher] error: ${err.message}`);
@@ -502,4 +411,4 @@ function stopWatcher() {
   if (_interval) { clearInterval(_interval); _interval = null; }
 }
 
-module.exports = { startWatcher, stopWatcher, importTraces, importSessionState };
+module.exports = { startWatcher, stopWatcher, importTraces, importSessionState, importReviewReruns };

@@ -1,39 +1,160 @@
 <a href="/" style="color:#666;text-decoration:none;font-size:13px;">&larr; 返回列表</a>
 <div id="convHeader" style="margin:12px 0;"></div>
+
+<!-- Message Type Summary -->
+<div id="typeSummary" style="margin:16px 0;display:none;">
+  <h3 style="font-size:14px;margin-bottom:8px;">消息类型汇总</h3>
+  <div id="typeCards" style="display:flex;gap:12px;flex-wrap:wrap;"></div>
+</div>
+
+<!-- Agent Breakdown -->
+<div id="agentBreakdown" style="margin:16px 0;display:none;">
+  <h3 style="font-size:14px;margin-bottom:8px;">Agent 用量分解</h3>
+  <div id="agentCards" style="display:flex;gap:12px;flex-wrap:wrap;"></div>
+</div>
+
 <div id="messages"></div>
 
 <script>
+// Team color mapping
+function teamStyle(team) {
+  const map = {
+    'red':   { bg:'#ffebee', border:'#e74c3c', text:'#c0392b', label:'🔴 红队', dot:'#e74c3c' },
+    'blue':  { bg:'#e3f2fd', border:'#3498db', text:'#2471a3', label:'🔵 蓝队', dot:'#3498db' },
+    'green': { bg:'#e8f5e9', border:'#27ae60', text:'#1e7e34', label:'🟢 绿队', dot:'#27ae60' },
+  };
+  return map[team] || { bg:'#fafafa', border:'#999', text:'#666', label:team||'未知', dot:'#999' };
+}
+
 (async function() {
   const res = await fetch('/api/conversations/<%= convId %>');
   const conv = await res.json();
   document.getElementById('convHeader').innerHTML = `
-    <h2>${esc(conv.title || '(无标题)')}</h2>
+    <h2>${esc(conv.title || conv.session_id || '(无标题)')}</h2>
     <div style="font-size:13px;color:#888;margin-top:4px;">
-      输入: ${conv.total_input_tokens?.toLocaleString() || 0} |
+      总输入(缓存+未缓存): ${conv.total_input_tokens?.toLocaleString() || 0} |
       输出: ${conv.total_output_tokens?.toLocaleString() || 0} |
       总花费: ${conv.total_cost ? '¥' + conv.total_cost.toFixed(4) : '-'} |
+      ${(conv.total_baseline_cost || 0) > 0 ? '基线: ¥' + conv.total_baseline_cost.toFixed(4) + ' | 节省: <span class="cost-save">¥' + ((conv.total_baseline_cost || 0) - (conv.total_cost || 0)).toFixed(4) + ' (' + (((conv.total_baseline_cost || 0) > 0 ? ((conv.total_baseline_cost - (conv.total_cost || 0)) / conv.total_baseline_cost * 100) : 0).toFixed(1)) + '%)</span> | ' : ''}
       ${conv.model ? '模型: ' + esc(conv.model) + ' | ' : ''}
       ${new Date(conv.started_at).toLocaleString('zh-CN')}
     </div>
   `;
-  const container = document.getElementById('messages');
-  for (const msg of conv.messages) {
-    const cacheBadge = msg.cache_hit === 1 ? '<span class="badge badge-cache">缓存✓</span>' :
-      msg.cache_hit === 0 ? '<span class="badge badge-cache">未命中</span>' : '';
-    container.innerHTML += `
-      <div class="msg-${msg.role}">
-        <strong>${msg.role === 'user' ? '👤 用户' : '🤖 助手'}</strong>
-        <pre style="white-space:pre-wrap;margin:8px 0;font-size:13px;font-family:inherit;">${esc(msg.content || '')}</pre>
-        <div class="msg-meta">
-          <span class="badge badge-input">输入: ${msg.input_tokens?.toLocaleString() || 0}</span>
-          <span class="badge badge-output">输出: ${msg.output_tokens?.toLocaleString() || 0}</span>
-          ${cacheBadge}
-          ${msg.input_cost !== null ? `<span>输入费: ¥${msg.input_cost.toFixed(4)}</span>` : '<span>输入费: —</span>'}
-          <span>输出费: ${msg.output_cost ? '¥' + msg.output_cost.toFixed(4) : '-'}</span>
+
+  // Render message-type summary
+  if (conv.typeSummary && conv.typeSummary.length > 0) {
+    document.getElementById('typeSummary').style.display = 'block';
+    const cardsContainer = document.getElementById('typeCards');
+    cardsContainer.innerHTML = conv.typeSummary.map(t => {
+      const isUser = t.role === 'user';
+      const label = isUser ? '👤 用户消息' : '🤖 助手消息';
+      const badgeCls = isUser ? 'badge-user' : 'badge-a2a';
+      const totalCost = (t.input_cost_sum || 0) + (t.output_cost_sum || 0) + (t.cache_cost_sum || 0);
+      return `<div style="background:#fff;border-radius:8px;padding:12px 16px;box-shadow:0 1px 3px rgba(0,0,0,0.1);min-width:200px;flex:1;">
+        <div style="font-size:13px;font-weight:600;color:#1a1a2e;">${label}</div>
+        <div style="font-size:11px;color:#888;margin-bottom:6px;">${t.msg_count} 条消息</div>
+        <div style="display:flex;gap:8px;font-size:12px;flex-wrap:wrap;">
+          <span class="badge badge-cache">缓存 ${(t.cached_input || 0).toLocaleString()}</span>
+          <span class="badge badge-input">未缓存 ${(t.uncached_input || 0).toLocaleString()}</span>
+          <span class="badge badge-output">输出 ${(t.total_output || 0).toLocaleString()}</span>
+          <span class="cost-pos">¥${totalCost.toFixed(4)}</span>
         </div>
-        ${msg.skillCalls?.length ? `<div style="margin-top:6px;">${msg.skillCalls.map(s =>
-          `<span class="badge badge-skill">${esc(s.skill_name)}</span>`
-        ).join(' ')}</div>` : ''}
+      </div>`;
+    }).join('');
+  }
+
+  // Render agent breakdown
+  if (conv.agentBreakdown && conv.agentBreakdown.length > 0) {
+    document.getElementById('agentBreakdown').style.display = 'block';
+    const agentCardsContainer = document.getElementById('agentCards');
+    agentCardsContainer.innerHTML = conv.agentBreakdown.map(a => {
+      const ts = teamStyle(a.agent_team);
+      const totalTokens = (a.total_input_tokens || 0) + (a.total_output_tokens || 0);
+      return `<div style="background:#fff;border-radius:8px;padding:12px 16px;box-shadow:0 1px 3px rgba(0,0,0,0.1);min-width:200px;flex:1;border-left:4px solid ${ts.border};">
+        <div style="font-size:13px;font-weight:600;color:#1a1a2e;">
+          <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:${ts.dot};margin-right:6px;"></span>${esc(a.agent_name)}
+        </div>
+        <div style="font-size:11px;color:#888;margin-bottom:6px;">${ts.label} · ${a.call_count} 次调用</div>
+        <div style="display:flex;gap:8px;font-size:12px;flex-wrap:wrap;">
+          <span class="badge badge-input">输入 ${(a.total_input_tokens || 0).toLocaleString()}</span>
+          <span class="badge badge-output">输出 ${(a.total_output_tokens || 0).toLocaleString()}</span>
+          <span style="font-size:11px;color:#666;">合计 ${totalTokens.toLocaleString()} tok</span>
+        </div>
+      </div>`;
+    }).join('');
+  }
+
+  const container = document.getElementById('messages');
+  // Check if any agents (subagents) exist in this conversation
+  const hasAgents = conv.agentBreakdown && conv.agentBreakdown.length > 0;
+  for (const msg of conv.messages) {
+    const isUser = msg.role === 'user';
+    const hasAgent = (msg.skillCalls || []).some(s => s.agent_name);
+    const roleLabel = isUser ? '👤 用户' : (hasAgent ? '🤖 A2A' : '💬 助手');
+
+    // For user messages with empty content in agent conversations, show appropriate text
+    let displayContent = msg.content || '';
+    if (isUser && !displayContent && hasAgents) {
+      displayContent = '🤖 A2A 会话 — 用户消息在子 agent 中';
+    } else if (isUser && !displayContent && !hasAgents) {
+      displayContent = '⚠️ 用户消息缺失';
+    }
+
+    // Cache badge
+    const cacheBadge = msg.cache_hit > 0
+      ? '<span class="badge badge-cache">缓存: ' + msg.cache_hit.toLocaleString() + '</span>'
+      : '<span class="badge badge-cache" style="background:#fce4ec;">无缓存</span>';
+
+    // Agent info from skill calls — collect unique (agent_name, agent_team) pairs
+    const agentPairs = [...new Map((msg.skillCalls || [])
+      .filter(s => s.agent_name)
+      .map(s => [s.agent_name, s])).values()];
+    const agentNames = agentPairs.map(s => s.agent_name);
+    const primaryTeam = agentPairs.length > 0 ? agentPairs[0].agent_team : null;
+    const ts = teamStyle(primaryTeam);
+
+    // Team-colored agent badges
+    const teamBadges = agentPairs.map(s => {
+      const t = teamStyle(s.agent_team);
+      return `<span style="display:inline-block;padding:1px 6px;border-radius:3px;font-size:10px;font-weight:600;background:${t.bg};color:${t.text};border:1px solid ${t.border};margin:0 2px;">${t.label} ${esc(s.agent_name)}</span>`;
+    }).join('');
+
+    const agentTag = agentNames.length > 0
+      ? `<span style="font-size:11px;color:#7b1fa2;font-weight:500;">🤖 ${esc(agentNames.join(', '))}</span>`
+      : '';
+
+    const modelTag = msg.model
+      ? `<span style="font-size:11px;color:#888;">模型: ${esc(msg.model)}</span>`
+      : '';
+
+    const totalCost = (msg.input_cost || 0) + (msg.output_cost || 0) + (msg.cache_cost || 0);
+    const msgBaseline = msg.baseline_cost || 0;
+    const msgSaving = msgBaseline > 0 ? msgBaseline - totalCost : 0;
+
+    // Team-colored left border for agent messages
+    const borderStyle = primaryTeam
+      ? `border-left:4px solid ${ts.border};`
+      : '';
+
+    container.innerHTML += `
+      <div class="msg-${msg.role}" style="${borderStyle}">
+        <strong>${roleLabel}</strong>
+        ${agentTag ? ' ' + agentTag : ''}
+        ${teamBadges ? ' ' + teamBadges : ''}
+        ${modelTag ? ' | ' + modelTag : ''}
+        <pre style="white-space:pre-wrap;margin:8px 0;font-size:13px;font-family:inherit;max-height:120px;overflow-y:auto;">${esc(displayContent.slice(0, 500))}</pre>
+        <div class="msg-meta">
+          <span class="badge badge-input">未缓存输入: ${(msg.uncached_input || 0).toLocaleString()}</span>
+          ${cacheBadge}
+          <span class="badge badge-output">输出: ${(msg.output_tokens || 0).toLocaleString()}</span>
+          <span class="cost-pos">花费: ¥${totalCost.toFixed(6)}</span>
+          ${msgBaseline > 0 ? `<span style="font-size:11px;color:#666;">基线: ¥${msgBaseline.toFixed(6)}</span> <span class="cost-save">节省: ¥${msgSaving.toFixed(6)}</span>` : ''}
+          ${msg.created_at ? `<span style="font-size:11px;color:#999;">${new Date(msg.created_at).toLocaleString('zh-CN')}</span>` : ''}
+        </div>
+        ${msg.skillCalls?.length ? `<div style="margin-top:6px;display:flex;gap:4px;flex-wrap:wrap;align-items:center;"><span style="font-size:11px;color:#888;margin-right:4px;">技能:</span>${msg.skillCalls.map(s => {
+          const st = teamStyle(s.agent_team);
+          return `<span class="badge badge-a2a" style="background:${st.bg};color:${st.text};border:1px solid ${st.border};">${esc(s.skill_name)}${s.agent_name ? ' (' + esc(s.agent_name) + ')' : ''}</span>`;
+        }).join(' ')}</div>` : ''}
       </div>
     `;
   }

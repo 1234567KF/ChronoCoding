@@ -1,21 +1,24 @@
 <div class="filter-bar">
-  <input type="text" id="search" placeholder="搜索对话标题..." oninput="loadList()">
+  <input type="text" id="search" placeholder="搜索会话..." oninput="loadList()">
   <input type="date" id="dateFrom" onchange="loadList()">
   <span>—</span>
   <input type="date" id="dateTo" onchange="loadList()">
-  <span style="font-size:13px;color:#888;"><span id="totalCount">0</span> 条对话</span>
+  <span style="font-size:13px;color:#888;"><span id="totalCount">0</span> 个会话</span>
 </div>
 
 <table>
   <thead>
     <tr>
-      <th>标题</th>
+      <th>会话</th>
       <th>模型</th>
-      <th>输入 Token</th>
-      <th>输出 Token</th>
+      <th>消息</th>
+      <th>输入 (缓存/总)</th>
+      <th>输出</th>
       <th>花费 (¥)</th>
       <th>节省 (¥)</th>
-      <th>技能数</th>
+      <th>Agent</th>
+      <th>技能</th>
+      <th>用户消息预览</th>
       <th>时间</th>
     </tr>
   </thead>
@@ -37,21 +40,81 @@ async function loadList() {
 }
 function renderList(json) {
   const tbody = document.getElementById('convBody');
+  // Team colors
+  const teamColors = {
+    'red':   { bg:'#ffebee', color:'#c0392b', border:'#e74c3c', label:'红' },
+    'blue':  { bg:'#e3f2fd', color:'#2471a3', border:'#3498db', label:'蓝' },
+    'green': { bg:'#e8f5e9', color:'#1e7e34', border:'#27ae60', label:'绿' },
+  };
+  function teamBadge(team) {
+    const t = teamColors[team] || { bg:'#f5f5f5', color:'#666', border:'#999', label:team };
+    return `<span style="display:inline-block;padding:0 4px;border-radius:2px;font-size:9px;font-weight:600;background:${t.bg};color:${t.color};border:1px solid ${t.border};margin:1px;">${t.label}</span>`;
+  }
   tbody.innerHTML = json.data.map(c => {
-    const cost = c.total_cost ? '¥' + c.total_cost.toFixed(4) : '-';
-    const model = c.model ? esc(c.model) : '<span style="color:#999">-</span>';
     const time = new Date(c.started_at).toLocaleString('zh-CN');
-    const baseline = c.total_baseline_cost || 0;
-    const saving = baseline > 0.0001 ? (baseline - (c.total_cost || 0)) : 0;
-    const savingStr = saving > 0.0001 ? '<span style="color:#2e7d32;font-weight:600">¥' + saving.toFixed(4) + '</span>' : '<span style="color:#999">-</span>';
+    const title = c.title || c.session_id?.slice(0, 16) || '(无标题)';
+
+    // Skill badges
+    let skillStr = '';
+    if (c.skills && c.skills.length > 0) {
+      skillStr = c.skills.map(s =>
+        '<span class="badge badge-skill">' + esc(s.skill_name || s.name) + '</span>'
+      ).join(' ');
+    }
+
+    // Agent badges with team colors
+    let agentStr = '<span style="color:#999;font-size:11px;">-</span>';
+    if (c.agents) {
+      const agentList = c.agents.split(',');
+      const teams = c.agentTeams || [];
+      agentStr = agentList.map((a, i) => {
+        const t = teams[i] || '';
+        const tc = teamBadge(t);
+        return '<span class="badge badge-a2a" style="font-size:10px;">' + tc + ' ' + esc(a.trim().slice(0, 20)) + '</span>';
+      }).join(' ');
+    }
+
+    // Models used (show all, not just latest)
+    let modelStr = '<span style="color:#999;font-size:11px;">-</span>';
+    if (c.models_used && c.models_used.length > 0) {
+      modelStr = c.models_used.map(m => {
+        const short = m.replace('deepseek-v4-', '').replace('deepseek-', '');
+        return '<span class="badge" style="background:#e8eaf6;color:#283593;font-size:10px;">' + esc(short) + '</span>';
+      }).join(' ');
+    } else if (c.model) {
+      const short = c.model.replace('deepseek-v4-', '').replace('deepseek-', '');
+      modelStr = '<span class="badge" style="background:#e8eaf6;color:#283593;font-size:10px;">' + esc(short) + '</span>';
+    }
+
+    // Message counts
+    const userMsgCount = c.msg_breakdown?.user?.msg_count || 0;
+    const a2aCount = c.msg_breakdown?.a2a?.msg_count || 0;
+
+    // Token breakdown from conversation totals (accurate PATCH values)
+    const totalIn = c.total_input_tokens || 0;
+    const totalOut = c.total_output_tokens || 0;
+    const totalCost = c.total_cost || 0;
+    const baselineCost = c.total_baseline_cost || 0;
+
+    // Cache from msg_breakdown (best available)
+    const userCache = c.msg_breakdown?.user?.cached_input || 0;
+    const a2aCache = c.msg_breakdown?.a2a?.cached_input || 0;
+    const totalCache = userCache + a2aCache;
+
+    // Content preview
+    const preview = c.last_user_message ? esc(c.last_user_message.slice(0, 80)) + (c.last_user_message.length > 80 ? '...' : '') : '<span style="color:#999;font-size:11px;">-</span>';
+
     return '<tr onclick="location=\'/conversations/' + c.id + '\'" style="cursor:pointer">' +
-      '<td><strong>' + esc(c.title || '(无标题)') + '</strong></td>' +
-      '<td>' + model + '</td>' +
-      '<td>' + (c.total_input_tokens?.toLocaleString() || 0) + '</td>' +
-      '<td>' + (c.total_output_tokens?.toLocaleString() || 0) + '</td>' +
-      '<td>' + cost + '</td>' +
-      '<td>' + savingStr + '</td>' +
-      '<td><span class="badge badge-skill">' + (c.skill_count || 0) + '</span></td>' +
+      '<td><strong>' + esc(title) + '</strong></td>' +
+      '<td>' + modelStr + '</td>' +
+      '<td><span class="badge badge-user">' + userMsgCount + '</span> <span class="badge badge-a2a">' + a2aCount + '</span></td>' +
+      '<td style="color:#2e7d32;">' + totalCache.toLocaleString() + ' / ' + totalIn.toLocaleString() + '</td>' +
+      '<td>' + totalOut.toLocaleString() + '</td>' +
+      '<td class="cost-pos">' + (totalCost > 0 ? '¥' + totalCost.toFixed(4) : '-') + '</td>' +
+      '<td class="cost-save">' + (baselineCost > 0 ? '¥' + (baselineCost - totalCost).toFixed(4) + ' (' + ((baselineCost - totalCost) / baselineCost * 100).toFixed(1) + '%)' : '-') + '</td>' +
+      '<td>' + agentStr + '</td>' +
+      '<td>' + (c.skills && c.skills.length > 0 ? skillStr : '<span style="color:#999;font-size:11px;">-</span>') + '</td>' +
+      '<td style="max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:12px;color:#555;" title="' + esc(c.last_user_message) + '">' + preview + '</td>' +
       '<td>' + time + '</td>' +
       '</tr>';
   }).join('');
