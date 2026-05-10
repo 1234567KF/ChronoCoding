@@ -80,3 +80,6 @@ md2docx工具箱/
 **/token-usage-report.md
 **/comprehensive-report.json
 **/savings-report.json
+
+# External project (stock-advisor, independent project)
+stock-advisor/

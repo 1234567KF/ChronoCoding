@@ -1,0 +1,703 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>AI编程智驾 · 主流程多泳道图</title>
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --bg:#09090b;
+  --bg2:#0c0c0f;
+  --card:rgba(14,14,18,0.82);
+  --green:#22c55e;
+  --green-light:#4ade80;
+  --green-dark:#166534;
+  --green-glow:rgba(34,197,94,0.5);
+  --teal:#2dd4bf;
+  --blue:#60a5fa;
+  --amber:#f59e0b;
+  --purple:#a78bfa;
+  --text:#e8e8e8;
+  --text-dim:#888;
+  --text-muted:#555;
+  --border:rgba(34,197,94,0.10);
+  --radius:12px;
+  --font:'Inter','Segoe UI','PingFang SC','Microsoft YaHei',system-ui,-apple-system,sans-serif;
+  --mono:'SF Mono','Fira Code','Cascadia Code',monospace;
+}
+html{scroll-behavior:smooth}
+body{
+  font-family:var(--font);
+  background:var(--bg);
+  color:var(--text);
+  overflow-x:hidden;
+  -webkit-font-smoothing:antialiased;
+  min-height:100vh;
+}
+body::before{
+  content:'';position:fixed;inset:0;
+  background:
+    linear-gradient(rgba(34,197,94,0.020) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(34,197,94,0.020) 1px,transparent 1px);
+  background-size:48px 48px;
+  z-index:0;pointer-events:none;
+}
+.orb{
+  position:fixed;border-radius:50%;pointer-events:none;z-index:0;
+  filter:blur(100px);opacity:0.08;
+}
+.orb-1{width:700px;height:700px;background:radial-gradient(circle,#22c55e,transparent 70%);top:-15%;left:-10%}
+.orb-2{width:500px;height:500px;background:radial-gradient(circle,#2dd4bf,transparent 70%);bottom:-8%;right:-5%}
+.orb-3{width:400px;height:400px;background:radial-gradient(circle,#4ade80,transparent 70%);top:40%;left:50%;opacity:0.05}
+
+/* ─── Canvas ─── */
+#canvas{position:fixed;top:0;left:0;width:100%;height:100%;z-index:1;pointer-events:none}
+
+/* ─── Main Container ─── */
+.container{position:relative;z-index:2;max-width:1400px;margin:0 auto;padding:40px 32px 60px}
+
+/* ─── Header ─── */
+.header{text-align:center;margin-bottom:40px}
+.header-sub{
+  font-size:12px;letter-spacing:6px;text-transform:uppercase;
+  color:var(--green);opacity:0.5;margin-bottom:6px;
+}
+.header-main{
+  font-size:clamp(28px,3vw,48px);font-weight:800;letter-spacing:2px;
+  background:linear-gradient(135deg,#fff 20%,var(--green-light) 60%,var(--teal) 100%);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+  background-clip:text;
+}
+.header-desc{
+  font-size:clamp(13px,0.85vw,16px);color:var(--text-dim);margin-top:8px;letter-spacing:1px;
+}
+.header-dash{
+  width:80px;height:2px;margin:12px auto 0;
+  background:linear-gradient(90deg,transparent,var(--green),transparent);
+}
+
+/* ─── Legend ─── */
+.legend{
+  display:flex;justify-content:center;gap:24px;flex-wrap:wrap;
+  margin-bottom:36px;padding:14px 24px;
+  background:var(--card);border:1px solid var(--border);
+  border-radius:var(--radius);backdrop-filter:blur(20px);
+  -webkit-backdrop-filter:blur(20px);
+}
+.legend-item{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--text-dim)}
+.legend-dot{width:10px;height:10px;border-radius:3px;flex-shrink:0}
+.legend-line{width:24px;height:2px;border-radius:1px;flex-shrink:0}
+.legend-line.solid{background:var(--green);opacity:0.5}
+.legend-line.dashed{background:var(--amber);opacity:0.5;height:0;border-top:2px dashed var(--amber);background:transparent}
+
+/* ─── Swimlane Grid ─── */
+.swimlane-wrap{
+  overflow-x:auto;
+  border-radius:var(--radius);
+  border:1px solid var(--border);
+  background:rgba(14,14,18,0.45);
+  backdrop-filter:blur(20px);
+  -webkit-backdrop-filter:blur(20px);
+  box-shadow:0 8px 80px rgba(0,0,0,0.5);
+}
+.swimlane-grid{
+  display:grid;
+  grid-template-columns:120px repeat(6,1fr);
+  min-width:960px;
+}
+
+/* ─── Stage Header Row ─── */
+.stage-header{
+  padding:16px 12px;text-align:center;
+  border-bottom:2px solid rgba(34,197,94,0.15);
+  background:rgba(34,197,94,0.03);
+  position:relative;
+}
+.stage-header-top-left{
+  border-bottom:2px solid rgba(34,197,94,0.15);
+  background:rgba(34,197,94,0.03);
+}
+.stage-num{
+  font-size:11px;letter-spacing:3px;text-transform:uppercase;
+  color:var(--green);opacity:0.6;font-weight:600;
+}
+.stage-name{
+  font-size:clamp(12px,0.75vw,15px);font-weight:700;margin-top:2px;
+}
+.stage-name.implemented{color:var(--green-light)}
+.stage-name.planned{color:var(--amber)}
+
+.stage-badge{
+  display:inline-block;padding:1px 8px;border-radius:4px;
+  font-size:10px;font-weight:600;letter-spacing:1px;
+  margin-top:4px;
+}
+.stage-badge.auto{background:rgba(34,197,94,0.12);color:var(--green-light);border:1px solid rgba(34,197,94,0.2)}
+.stage-badge.on-demand{background:rgba(245,158,11,0.10);color:var(--amber);border:1px solid rgba(245,158,11,0.2)}
+
+/* ─── Swimlane Rows ─── */
+.lane-label{
+  display:flex;align-items:center;gap:10px;
+  padding:12px 10px 12px 16px;
+  border-bottom:1px solid var(--border);
+  min-height:80px;
+}
+.lane-label:last-child{border-bottom:none}
+.lane-icon{
+  width:28px;height:28px;border-radius:6px;
+  display:flex;align-items:center;justify-content:center;
+  flex-shrink:0;font-size:14px;
+}
+.lane-icon.user{background:rgba(167,139,250,0.12);border:1px solid rgba(167,139,250,0.2)}
+.lane-icon.tl{background:rgba(34,197,94,0.12);border:1px solid rgba(34,197,94,0.2)}
+.lane-icon.team{background:rgba(96,165,250,0.12);border:1px solid rgba(96,165,250,0.2)}
+.lane-icon.judge{background:rgba(245,158,11,0.10);border:1px solid rgba(245,158,11,0.2)}
+.lane-icon.delivery{background:rgba(45,212,191,0.10);border:1px solid rgba(45,212,191,0.2)}
+.lane-text{
+  font-size:13px;font-weight:700;letter-spacing:1px;
+  writing-mode:horizontal-tb;white-space:nowrap;
+}
+.lane-text-sub{font-size:10px;color:var(--text-muted);font-weight:400;letter-spacing:1px;display:block;margin-top:1px}
+
+/* ─── Cell ─── */
+.cell{
+  padding:10px;border-bottom:1px solid var(--border);border-left:1px solid var(--border);
+  min-height:80px;
+  display:flex;flex-direction:column;gap:6px;
+  position:relative;
+}
+.cell:last-child{border-bottom:none}
+.cell-empty{
+  display:flex;align-items:center;justify-content:center;
+  color:var(--text-muted);font-size:11px;opacity:0.3;
+}
+
+/* ─── Activity Card ─── */
+.activity{
+  padding:8px 10px;border-radius:8px;
+  font-size:clamp(10.5px,0.65vw,12.5px);line-height:1.5;
+  position:relative;overflow:hidden;
+  transition:border-color .3s,box-shadow .3s,transform .2s;
+}
+.activity:hover{transform:translateY(-1px)}
+.activity.implemented{
+  background:rgba(34,197,94,0.06);
+  border:1px solid rgba(34,197,94,0.15);
+  color:var(--text-dim);
+}
+.activity.implemented:hover{
+  border-color:rgba(34,197,94,0.3);
+  box-shadow:0 0 20px rgba(34,197,94,0.06);
+}
+.activity.planned{
+  background:rgba(245,158,11,0.04);
+  border:1px dashed rgba(245,158,11,0.2);
+  color:var(--text-dim);
+  opacity:0.75;
+}
+.activity.planned:hover{
+  border-color:rgba(245,158,11,0.35);
+  box-shadow:0 0 20px rgba(245,158,11,0.05);
+}
+.activity .act-label{
+  display:block;font-weight:600;font-size:clamp(11px,0.7vw,13px);
+  margin-bottom:1px;
+}
+.activity.implemented .act-label{color:var(--green-light)}
+.activity.planned .act-label{color:var(--amber)}
+.activity .act-sub{display:block;color:var(--text-muted);font-size:clamp(10px,0.6vw,11.5px)}
+.activity .act-tag{
+  display:inline-block;padding:0 6px;border-radius:3px;
+  font-size:9px;font-weight:700;letter-spacing:1px;margin-top:3px;
+}
+.activity .act-tag.auto{background:rgba(34,197,94,0.15);color:var(--green-light)}
+.activity .act-tag.tl-call{background:rgba(96,165,250,0.12);color:var(--blue)}
+
+/* ─── Team sub-cells ─── */
+.team-group{display:flex;flex-direction:column;gap:3px}
+.team-row{display:flex;gap:4px;align-items:center}
+.team-dot{
+  width:8px;height:8px;border-radius:50%;flex-shrink:0;
+}
+.team-dot.red{background:#ef4444;box-shadow:0 0 6px rgba(239,68,68,0.3)}
+.team-dot.blue{background:#3b82f6;box-shadow:0 0 6px rgba(59,130,246,0.3)}
+.team-dot.green{background:#22c55e;box-shadow:0 0 6px rgba(34,197,94,0.3)}
+.team-task{
+  font-size:clamp(10px,0.6vw,12px);color:var(--text-dim);line-height:1.5;
+}
+
+/* ─── Cycle indicator ─── */
+.cycle-badge{
+  display:inline-flex;align-items:center;gap:4px;
+  padding:2px 8px;border-radius:10px;
+  font-size:10px;font-weight:600;
+  background:rgba(34,197,94,0.08);color:var(--green-light);
+  border:1px solid rgba(34,197,94,0.15);
+  animation:pulse 2s ease-in-out infinite;
+}
+@keyframes pulse{0%,100%{opacity:.6}50%{opacity:1}}
+
+/* ─── Flow Arrow Overlay ─── */
+.flow-arrows{position:relative;height:0;overflow:visible;pointer-events:none}
+
+/* ─── Footer ─── */
+.footer{
+  display:flex;justify-content:space-between;align-items:center;
+  margin-top:20px;padding:16px 24px;
+  background:var(--card);border:1px solid var(--border);
+  border-radius:var(--radius);backdrop-filter:blur(20px);
+  -webkit-backdrop-filter:blur(20px);
+  font-size:12px;color:var(--text-muted);
+}
+.footer .status{display:flex;align-items:center;gap:12px}
+.footer .status-dot{width:8px;height:8px;border-radius:50%;background:var(--green);animation:pulse 2s ease-in-out infinite}
+.footer .status-text{color:var(--green-light);font-weight:600}
+.footer .version{font-family:var(--mono);font-size:11px;letter-spacing:1px}
+
+/* ─── Responsive ─── */
+@media(max-width:768px){
+  .container{padding:24px 12px 40px}
+  .swimlane-grid{grid-template-columns:80px repeat(6,1fr);min-width:800px}
+  .lane-label{padding:10px 6px 10px 10px;min-height:60px}
+  .lane-text{font-size:11px}
+  .lane-icon{width:22px;height:22px;font-size:11px}
+  .cell{padding:6px;min-height:60px}
+  .activity{padding:5px 7px;font-size:10px}
+  .legend{gap:12px;padding:10px 16px}
+}
+@media(max-width:480px){
+  .container{padding:16px 8px 32px}
+  .swimlane-grid{min-width:680px;grid-template-columns:60px repeat(6,1fr)}
+  .lane-text{font-size:10px}
+  .stage-name{font-size:11px}
+}
+</style>
+</head>
+<body>
+
+<!-- Ambient Orbs -->
+<div class="orb orb-1"></div>
+<div class="orb orb-2"></div>
+<div class="orb orb-3"></div>
+
+<!-- Particle Canvas -->
+<canvas id="canvas"></canvas>
+
+<div class="container">
+
+  <!-- Header -->
+  <div class="header">
+    <div class="header-sub">AI Coding Cockpit · Pipeline</div>
+    <div class="header-main">主流程多泳道图</div>
+    <p class="header-desc">从一句话需求到代码交付 · 夯编排全流程多泳道视图</p>
+    <div class="header-dash"></div>
+  </div>
+
+  <!-- Legend -->
+  <div class="legend">
+    <div class="legend-item"><span class="legend-dot" style="background:var(--green-light)"></span> 已实现</div>
+    <div class="legend-item"><span class="legend-dot" style="background:var(--amber)"></span> 规划中</div>
+    <div class="legend-item"><span class="legend-line solid"></span> 自动触发</div>
+    <div class="legend-item"><span class="legend-line dashed"></span> 按需/可选</div>
+    <div class="legend-item"><span class="legend-dot" style="background:var(--blue);opacity:0.6"></span> 人类决策点</div>
+  </div>
+
+  <!-- Swimlane Grid -->
+  <div class="swimlane-wrap">
+  <div class="swimlane-grid">
+
+    <!-- Row 0: Stage Headers -->
+    <div class="stage-header-top-left"></div>
+
+    <!-- S0 -->
+    <div class="stage-header">
+      <div class="stage-num">Stage 0</div>
+      <div class="stage-name planned">深度选择</div>
+      <div class="stage-badge tl-call" style="background:rgba(245,158,11,0.10);color:var(--amber);border:1px solid rgba(245,158,11,0.2)">规划中</div>
+    </div>
+
+    <!-- S1 -->
+    <div class="stage-header">
+      <div class="stage-num">Stage 1</div>
+      <div class="stage-name implemented">方案评审</div>
+      <div class="stage-badge auto">自动</div>
+    </div>
+
+    <!-- S2 -->
+    <div class="stage-header">
+      <div class="stage-num">Stage 2</div>
+      <div class="stage-name implemented">PRD/设计</div>
+      <div class="stage-badge on-demand">按需</div>
+    </div>
+
+    <!-- S3 -->
+    <div class="stage-header">
+      <div class="stage-num">Stage 3</div>
+      <div class="stage-name planned">Spec 审查</div>
+      <div class="stage-badge on-demand" style="background:rgba(245,158,11,0.10);color:var(--amber);border:1px solid rgba(245,158,11,0.2)">规划中</div>
+    </div>
+
+    <!-- S4 -->
+    <div class="stage-header">
+      <div class="stage-num">Stage 4</div>
+      <div class="stage-name implemented">编码开发</div>
+      <div class="stage-badge auto">自动</div>
+    </div>
+
+    <!-- S5 -->
+    <div class="stage-header">
+      <div class="stage-num">Stage 5</div>
+      <div class="stage-name planned">测试交付</div>
+      <div class="stage-badge on-demand" style="background:rgba(245,158,11,0.10);color:var(--amber);border:1px solid rgba(245,158,11,0.2)">规划中</div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════ -->
+    <!-- Row 1: User -->
+    <!-- ═══════════════════════════════════════════════ -->
+    <div class="lane-label">
+      <div class="lane-icon user">&#x1F464;</div>
+      <span class="lane-text">用户<User><span class="lane-text-sub">User</span></span>
+    </div>
+
+    <!-- S0 -->
+    <div class="cell">
+      <div class="activity implemented" style="border-color:rgba(167,139,250,0.2);background:rgba(167,139,250,0.05)">
+        <span class="act-label" style="color:var(--purple)">输入需求</span>
+        <span class="act-sub"><code style="color:var(--green);font-family:var(--mono);font-size:11px">/夯 [需求]</code></span>
+      </div>
+      <div class="activity planned" style="border-color:rgba(167,139,250,0.15);background:rgba(167,139,250,0.03);border-style:dashed">
+        <span class="act-label" style="color:var(--purple)">选择深度</span>
+        <span class="act-sub">A 方案 / B 设计 / C 编码</span>
+      </div>
+    </div>
+
+    <!-- S1 -->
+    <div class="cell">
+      <div class="activity implemented" style="border-color:rgba(167,139,250,0.2);background:rgba(167,139,250,0.05)">
+        <span class="act-label" style="color:var(--purple)">选方向</span>
+        <span class="act-sub">看方案对比排名 → 选最优/博采众长</span>
+        <span class="act-tag tl-call">决策点</span>
+      </div>
+    </div>
+
+    <!-- S2 -->
+    <div class="cell">
+      <div class="activity implemented" style="border-color:rgba(167,139,250,0.2);background:rgba(167,139,250,0.05)">
+        <span class="act-label" style="color:var(--purple)">确认 PRD</span>
+        <span class="act-sub">确认内容 / 提修改意见 / 跳过</span>
+      </div>
+    </div>
+
+    <!-- S3 -->
+    <div class="cell">
+      <div class="activity planned" style="border-color:rgba(167,139,250,0.15);background:rgba(167,139,250,0.03);border-style:dashed">
+        <span class="act-label" style="color:var(--purple)">确认 Spec</span>
+        <span class="act-sub">查看评分 → 批准 / 修改 / 驳回</span>
+        <span class="act-tag tl-call">决策点</span>
+      </div>
+    </div>
+
+    <!-- S4 -->
+    <div class="cell cell-empty">—</div>
+
+    <!-- S5 -->
+    <div class="cell">
+      <div class="activity implemented" style="border-color:rgba(167,139,250,0.2);background:rgba(167,139,250,0.05)">
+        <span class="act-label" style="color:var(--purple)">确认交付</span>
+        <span class="act-sub">查看结果 → 确认 / 修改 / 驳回</span>
+      </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════ -->
+    <!-- Row 2: Team Lead -->
+    <!-- ═══════════════════════════════════════════════ -->
+    <div class="lane-label">
+      <div class="lane-icon tl">&#x2699;</div>
+      <span class="lane-text">夯编排<span class="lane-text-sub">Team Lead</span></span>
+    </div>
+
+    <!-- S0 -->
+    <div class="cell">
+      <div class="activity implemented">
+        <span class="act-label">分类引导</span>
+        <span class="act-sub">判断任务类型 → bugfix直开 / 模块流程</span>
+      </div>
+      <div class="activity planned" style="border-style:dashed">
+        <span class="act-label">展示三档深度</span>
+        <span class="act-sub">A/B/C + 持久化 hang-state.json</span>
+        <span class="act-tag auto">规划中</span>
+      </div>
+    </div>
+
+    <!-- S1 -->
+    <div class="cell">
+      <div class="activity implemented">
+        <span class="act-label">三队并发评审</span>
+        <span class="act-sub">红蓝绿 → 调研 → 方案 → 裁判评分排名</span>
+        <span class="act-tag auto">自动</span>
+      </div>
+    </div>
+
+    <!-- S2 -->
+    <div class="cell">
+      <div class="activity implemented">
+        <span class="act-label">按需触发 PRD</span>
+        <span class="act-sub">需求模糊/复杂时 → kf-prd-generator</span>
+        <span class="act-tag auto">自动</span>
+      </div>
+    </div>
+
+    <!-- S3 -->
+    <div class="cell">
+      <div class="activity planned" style="border-style:dashed">
+        <span class="act-label">Spec 生成+审查</span>
+        <span class="act-sub">kf-spec → spec-reviewer AI审查 → 循环达标</span>
+        <span class="act-tag auto">规划中</span>
+      </div>
+    </div>
+
+    <!-- S4 -->
+    <div class="cell">
+      <div class="activity implemented">
+        <span class="act-label">浅层 Plan 注入</span>
+        <span class="act-sub">10-15行任务预览 → 三队编码启动</span>
+        <span class="act-tag auto">自动</span>
+      </div>
+    </div>
+
+    <!-- S5 -->
+    <div class="cell">
+      <div class="activity planned" style="border-style:dashed">
+        <span class="act-label">门控+重审</span>
+        <span class="act-sub">质量门禁检查 → 条件触发重审 (上限3轮)</span>
+        <span class="act-tag auto">规划中</span>
+      </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════ -->
+    <!-- Row 3: Teams (Red/Blue/Green) -->
+    <!-- ═══════════════════════════════════════════════ -->
+    <div class="lane-label">
+      <div class="lane-icon team">&#x1F525;</div>
+      <span class="lane-text">三队开发<span class="lane-text-sub">Red · Blue · Green</span></span>
+    </div>
+
+    <!-- S0 -->
+    <div class="cell cell-empty">—</div>
+
+    <!-- S1 -->
+    <div class="cell">
+      <div class="team-group">
+        <div class="team-row"><span class="team-dot red"></span><span class="team-task">需求对齐 → 调研 → 方案1 输出</span></div>
+        <div class="team-row"><span class="team-dot blue"></span><span class="team-task">需求对齐 → 调研 → 方案2 输出</span></div>
+        <div class="team-row"><span class="team-dot green"></span><span class="team-task">需求对齐 → 调研 → 方案3 输出</span></div>
+      </div>
+    </div>
+
+    <!-- S2 -->
+    <div class="cell cell-empty">—</div>
+
+    <!-- S3 -->
+    <div class="cell cell-empty">—</div>
+
+    <!-- S4 -->
+    <div class="cell">
+      <div class="team-group">
+        <div class="team-row"><span class="team-dot red"></span><span class="team-task">Stage 2 编码 → Stage 3 自测</span></div>
+        <div class="team-row"><span class="team-dot blue"></span><span class="team-task">Stage 2 编码 → Stage 3 自测</span></div>
+        <div class="team-row"><span class="team-dot green"></span><span class="team-task">Stage 2 编码 → Stage 3 自测</span></div>
+      </div>
+    </div>
+
+    <!-- S5 -->
+    <div class="cell">
+      <div class="activity planned" style="border-style:dashed">
+        <span class="act-label">测试专家循环</span>
+        <span class="act-sub">多角色数据准备 → 测试 → issue → fix → 回归</span>
+        <span class="cycle-badge">&#x21bb; 上限3轮</span>
+      </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════ -->
+    <!-- Row 4: Judge -->
+    <!-- ═══════════════════════════════════════════════ -->
+    <div class="lane-label">
+      <div class="lane-icon judge">&#x2696;</div>
+      <span class="lane-text">裁判评审<span class="lane-text-sub">Judge · Reviewer</span></span>
+    </div>
+
+    <!-- S0 -->
+    <div class="cell cell-empty">—</div>
+
+    <!-- S1 -->
+    <div class="cell">
+      <div class="activity implemented">
+        <span class="act-label">方案评分评级</span>
+        <span class="act-sub">多维度评分 → 排名 → 推荐最佳/融合方案</span>
+        <span class="act-tag auto">自动</span>
+      </div>
+    </div>
+
+    <!-- S2 -->
+    <div class="cell cell-empty">—</div>
+
+    <!-- S3 -->
+    <div class="cell">
+      <div class="activity planned" style="border-style:dashed">
+        <span class="act-label">Spec 审查循环</span>
+        <span class="act-sub">AC完整性/边界覆盖/可测试性 → 评分卡</span>
+        <span class="cycle-badge">&#x21bb; 达标为止</span>
+      </div>
+    </div>
+
+    <!-- S4 -->
+    <div class="cell">
+      <div class="activity implemented">
+        <span class="act-label">代码审查</span>
+        <span class="act-sub">变更影响图谱 → P0/P1缺陷检测 → 条件重审</span>
+        <span class="act-tag auto">自动</span>
+      </div>
+    </div>
+
+    <!-- S5 -->
+    <div class="cell">
+      <div class="activity planned" style="border-style:dashed">
+        <span class="act-label">终审定级</span>
+        <span class="act-sub">质量评分卡 → 是否达标判定 → known_issues</span>
+      </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════ -->
+    <!-- Row 5: Delivery -->
+    <!-- ═══════════════════════════════════════════════ -->
+    <div class="lane-label">
+      <div class="lane-icon delivery">&#x2714;</div>
+      <span class="lane-text">集成交付<span class="lane-text-sub">Integration</span></span>
+    </div>
+
+    <!-- S0 -->
+    <div class="cell cell-empty">—</div>
+
+    <!-- S1 -->
+    <div class="cell cell-empty">—</div>
+
+    <!-- S2 -->
+    <div class="cell cell-empty">—</div>
+
+    <!-- S3 -->
+    <div class="cell cell-empty">—</div>
+
+    <!-- S4 -->
+    <div class="cell cell-empty">—</div>
+
+    <!-- S5 -->
+    <div class="cell">
+      <div class="activity implemented">
+        <span class="act-label">融合最佳方案</span>
+        <span class="act-sub">汇总师 → 博采众长 → 最终交付产物</span>
+      </div>
+      <div class="activity planned" style="border-style:dashed">
+        <span class="act-label">进展看板</span>
+        <span class="act-sub">阶段状态 + 各队进度 + 产物路径 可视化</span>
+        <span class="act-tag auto">规划中</span>
+      </div>
+    </div>
+
+  </div><!-- /swimlane-grid -->
+  </div><!-- /swimlane-wrap -->
+
+  <!-- Summary Bar -->
+  <div class="footer">
+    <div class="status">
+      <span class="status-dot"></span>
+      <span>当前状态: </span>
+      <span class="status-text">Phase 0~1 进行中</span>
+      <span style="opacity:0.5;margin-left:4px">· 已实现: 方案评审 + PRD + 编码 + 代码审查</span>
+    </div>
+    <div class="version">V3 Pipeline · 2026.05</div>
+  </div>
+
+</div><!-- /container -->
+
+<script>
+(function(){
+'use strict';
+
+const canvas = document.getElementById('canvas');
+const ctx = canvas.getContext('2d');
+let W, H;
+
+function resize(){
+  W = window.innerWidth;
+  H = window.innerHeight;
+  canvas.width = W;
+  canvas.height = H;
+  canvas.style.width = W + 'px';
+  canvas.style.height = H + 'px';
+}
+resize();
+window.addEventListener('resize', resize);
+
+// Minimal particle system
+const PCOUNT = 120;
+const particles = [];
+for (let i = 0; i < PCOUNT; i++) {
+  particles.push({
+    x: Math.random() * W,
+    y: Math.random() * H,
+    vx: (Math.random() - 0.5) * 0.3,
+    vy: (Math.random() - 0.5) * 0.3,
+    r: 1 + Math.random() * 2,
+    alpha: 0.1 + Math.random() * 0.3,
+    hue: Math.random() > 0.4 ? 142 : 170,
+  });
+}
+
+function animate(){
+  ctx.clearRect(0, 0, W, H);
+
+  for (const p of particles) {
+    p.x += p.vx;
+    p.y += p.vy;
+    p.vx += (Math.random() - 0.5) * 0.01;
+    p.vy += (Math.random() - 0.5) * 0.01;
+
+    if (p.x < -20) p.x = W + 20;
+    if (p.x > W + 20) p.x = -20;
+    if (p.y < -20) p.y = H + 20;
+    if (p.y > H + 20) p.y = -20;
+
+    ctx.beginPath();
+    ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+    ctx.fillStyle = `hsla(${p.hue},70%,55%,${p.alpha})`;
+    ctx.fill();
+  }
+
+  // Draw sparse connections
+  for (let i = 0; i < particles.length; i++) {
+    for (let j = i + 1; j < particles.length; j++) {
+      const dx = particles[i].x - particles[j].x;
+      const dy = particles[i].y - particles[j].y;
+      const dist = dx * dx + dy * dy;
+      if (dist < 180 * 180) {
+        const alpha = (1 - Math.sqrt(dist) / 180) * 0.08;
+        ctx.beginPath();
+        ctx.moveTo(particles[i].x, particles[i].y);
+        ctx.lineTo(particles[j].x, particles[j].y);
+        ctx.strokeStyle = `rgba(74,222,128,${alpha})`;
+        ctx.lineWidth = 0.5;
+        ctx.stroke();
+      }
+    }
+  }
+
+  requestAnimationFrame(animate);
+}
+
+animate();
+})();
+</script>
+
+</body>
+</html>
