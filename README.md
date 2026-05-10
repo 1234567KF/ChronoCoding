@@ -42,7 +42,7 @@
 
 
 <p align="center">
-  <img src="https://cdn.jsdelivr.net/gh/1234567KF/ChronoCoding@main/assets/posters/%E4%B8%89%E8%A7%92%E8%89%B2%E6%9E%B6%E6%9E%84%E5%9B%BE.png" alt="AI编程智驾 三角色核心架构" width="900">
+  <img src="https://cdn.jsdelivr.net/gh/1234567KF/ChronoCoding@main/assets/posters/%E4%B8%89%E8%A7%92%E8%89%B2%E6%A0%B8%E5%BF%83%E6%9E%B6%E6%9E%84%E5%9B%BE.png" alt="AI编程智驾 三角色核心架构" width="900">
 </p>
 
 <p align="center">
