@@ -158,7 +158,7 @@ Hook 脚本逻辑（扩展后）：
 ```
 /set-model pro              # 手动切换到 pro（深度推理）
 /set-model flash            # 手动切换到 flash（高效执行）
-/set-model minimax-m1-fast  # 手动切换到 MiniMax M1 Fast
+/set-model minimax-2.7       # 手动切换到 MiniMax 2.7
 /set-model openai-4o-mini   # 手动切换到 OpenAI 4o-mini
 模型路由                     # AI 分析当前任务并推荐模型
 省模式                       # 自动进入执行模式（flash）
@@ -237,12 +237,11 @@ Agent({
 |------|---------|---------|
 | deepseek-v4-pro | 100% (¥3/K) | 架构设计、复杂 Bug、需求澄清 |
 | deepseek-v4-flash | ~33% (¥1/K) | 日常编码、代码审查、文档 |
-| minimax-m1-fast | ~17% (¥0.5/K) | 文档生成、UI 原型 |
+| minimax-2.7 | ~33% (¥1/K) | 通用任务（推理+编码+审查+文档） |
 | openai-4o-mini | ~5% (¥0.15/K) | 简单问答、格式转换 |
-| minimax-m1-thinking | ~67% (¥2/K) | 深度推理备选 |
 | openai-o3 | ~333% (¥10/K) | 高精度推理（成本敏感） |
 
-**建议配比**：pro 15% + flash 60% + 4o-mini 15% + M1-fast 10%，综合成本 ~40%。
+**建议配比**：pro 15% + flash 60% + 4o-mini 15% + minimax-2.7 10%，综合成本 ~40%。
 自动切换由 kf-model-router Hook 实现，默认开启。
 
 ---

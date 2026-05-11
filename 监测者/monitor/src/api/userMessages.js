@@ -88,7 +88,7 @@ router.get('/user-messages', (req, res) => {
     }
 
     // Aggregate chain data
-    let a2aCount = 0, totalInput = 0, totalOutput = 0, totalCache = 0;
+    let a2aCount = 0, totalInput = 0, totalOutput = 0, totalCache = 0, totalUncached = 0;
     let totalCost = 0, totalBaseline = 0;
     const skillsMap = {};
     const agentsSet = new Set();
@@ -96,6 +96,7 @@ router.get('/user-messages', (req, res) => {
     for (const msg of chainMsgs) {
       a2aCount++;
       totalInput += (msg.input_tokens || 0) + (msg.cache_hit || 0);
+      totalUncached += msg.input_tokens || 0;
       totalOutput += msg.output_tokens || 0;
       totalCache += msg.cache_hit || 0;
       totalCost += (msg.input_cost || 0) + (msg.output_cost || 0) + (msg.cache_cost || 0);
@@ -118,6 +119,8 @@ router.get('/user-messages', (req, res) => {
     row.msg_id = row.id;
     row.user_content = row.content;
     row.a2a_count = a2aCount;
+    row.total_uncached_input = totalUncached;
+    row.total_cached_input = totalCache;
     row.total_input_tokens = totalInput;
     row.total_output_tokens = totalOutput;
     row.total_cache_hit = totalCache;
@@ -194,9 +197,11 @@ router.get('/user-messages/:id', (req, res) => {
         input_tokens: row.input_tokens,
         output_tokens: row.output_tokens,
         cache_hit: row.cache_hit,
+        cache_cost: row.cache_cost,
         input_cost: row.input_cost,
         output_cost: row.output_cost,
         model: row.model,
+        context_window_pct: row.context_window_pct,
         created_at: row.created_at,
         skillCalls: []
       };
@@ -228,6 +233,8 @@ router.get('/user-messages/:id', (req, res) => {
     chain: Object.values(chainMap),
     chain_count: Object.keys(chainMap).length,
     total_cost: Object.values(chainMap).reduce((s, m) => s + (m.input_cost || 0) + (m.output_cost || 0) + (m.cache_cost || 0), 0),
+    total_uncached_input: Object.values(chainMap).reduce((s, m) => s + (m.input_tokens || 0), 0),
+    total_cached_input: Object.values(chainMap).reduce((s, m) => s + (m.cache_hit || 0), 0),
     total_input_tokens: Object.values(chainMap).reduce((s, m) => s + (m.input_tokens || 0) + (m.cache_hit || 0), 0),
     total_output_tokens: Object.values(chainMap).reduce((s, m) => s + (m.output_tokens || 0), 0)
   });

@@ -25,6 +25,7 @@ CREATE TABLE IF NOT EXISTS messages (
   cache_cost REAL DEFAULT 0,
   baseline_cost REAL,
   model TEXT,
+  context_window_pct REAL,
   created_at TEXT NOT NULL DEFAULT (datetime('now'))
 );
 

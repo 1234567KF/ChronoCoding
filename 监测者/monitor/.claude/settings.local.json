@@ -1,6 +1,6 @@
 {
   "env": {
-    "ANTHROPIC_AUTH_TOKEN": "sk-d1f346cb32b043bf9f77c5c0c72e3d59",
+    "ANTHROPIC_AUTH_TOKEN": "sk-3de6ca00061b47ee9eb2dc16d5520796",
     "ANTHROPIC_BASE_URL": "https://api.deepseek.com/anthropic",
     "CLAUDE_CODE_ALWAYS_THINKING": "1",
     "CLAUDE_CODE_ENABLE_THINKING": "1",
@@ -53,6 +53,7 @@
       "Bash(mv ui-prototype-generator *)"
     ]
   },
+  "model": "deepseek-v4-pro",
   "hooks": {
     "PreToolUse": [
       {
@@ -96,6 +97,5 @@
   "autoScrollEnabled": true,
   "showTurnDuration": true,
   "showMessageTimestamps": true,
-  "terminalProgressBarEnabled": true,
-  "model": "deepseek-v4-pro"
+  "terminalProgressBarEnabled": true
 }

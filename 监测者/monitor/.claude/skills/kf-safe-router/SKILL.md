@@ -46,7 +46,7 @@ graph:
 | 供应商 | API Key | 模型 | 默认 Base URL |
 |--------|---------|------|---------------|
 | DeepSeek | `DEEPSEEK_API_KEY` | `deepseek-v4-pro`, `deepseek-v4-flash` | `https://api.deepseek.com` |
-| MiniMax | `MINIMAX_API_KEY` | `minimax-m1` | `https://api.minimax.chat/v1` |
+| MiniMax | `MINIMAX_API_KEY` | `minimax-2.7` | `https://api.minimax.chat/v1` |
 | OpenAI | `OPENAI_API_KEY` | `codex` | `https://api.openai.com/v1` |
 
 ---
@@ -73,9 +73,9 @@ export OPENAI_BASE_URL=https://api.openai.com/v1
 
 | 首选模型 | 降级链 |
 |---------|--------|
-| `deepseek-v4-pro` | → `deepseek-v4-flash` → `minimax-m1` → `codex` → 抛异常 |
-| `deepseek-v4-flash` | → `deepseek-v4-pro` → `minimax-m1` → `codex` → 抛异常 |
-| `minimax-m1` | → `deepseek-v4-flash` → `codex` → 抛异常 |
+| `deepseek-v4-pro` | → `deepseek-v4-flash` → `minimax-2.7` → `codex` → 抛异常 |
+| `deepseek-v4-flash` | → `deepseek-v4-pro` → `minimax-2.7` → `codex` → 抛异常 |
+| `minimax-2.7` | → `deepseek-v4-flash` → `codex` → 抛异常 |
 | `codex` | → `deepseek-v4-flash` → 抛异常 |
 
 触发降级的条件：

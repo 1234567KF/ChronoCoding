@@ -48,8 +48,8 @@
           "costPer1KInput": 1.0,
           "costPer1KOutput": 5.0,
           "supportsCache": false,
-          "priority": 5,
-          "defaultFor": [],
+          "priority": 10,
+          "defaultFor": ["docs", "ui-prototype"],
           "providerModelId": "minimax-2.7",
           "adapter": "minimax"
         }

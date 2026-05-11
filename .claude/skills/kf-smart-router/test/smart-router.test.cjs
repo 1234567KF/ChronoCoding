@@ -196,14 +196,14 @@ async function runTests() {
     const complexDecision = await engine.decide(complexTask);
     assert(complexDecision.model !== null, '复杂任务有推荐模型');
     assertInArray(complexDecision.model.id,
-      ['deepseek-v4-pro', 'minimax-m1'],
+      ['deepseek-v4-pro', 'minimax-2.7'],
       '复杂任务推荐推理型模型');
 
     // 3.3 调试任务 → pro 或 codex（codex 也擅长代码分析）
     const debugTask = classifier.classify('排查一个内存泄漏问题，分析 heap dump');
     const debugDecision = await engine.decide(debugTask);
     assertInArray(debugDecision.model.id,
-      ['deepseek-v4-pro', 'minimax-m1', 'openai-codex'],
+      ['deepseek-v4-pro', 'minimax-2.7', 'openai-codex'],
       '调试任务推荐推理或编码型模型');
 
     // 3.4 简单问答 → 4o-mini 或 flash
@@ -315,7 +315,7 @@ async function runTests() {
 
     // 6.2 按供应商隔离
     assertEqual(registry.get('deepseek-v4-pro').api.api_key_env, 'DEEPSEEK_API_KEY', 'DeepSeek 密钥变量');
-    assertEqual(registry.get('minimax-m1').api.api_key_env, 'MINIMAX_API_KEY', 'MiniMax 密钥变量');
+    assertEqual(registry.get('minimax-2.7').api.api_key_env, 'MINIMAX_API_KEY', 'MiniMax 密钥变量');
     assertEqual(registry.get('openai-4o-mini').api.api_key_env, 'OPENAI_API_KEY', 'OpenAI 密钥变量');
   }
 

@@ -1,5 +1,5 @@
 const { getDB } = require('../db');
-const { calcCost, calcBaselineCost, MODEL_ALIASES } = require('../pricing');
+const { calcCost, calcBaselineCost, calcContextWindowPct, MODEL_ALIASES } = require('../pricing');
 
 function resolveModel(raw) {
   if (!raw) return null;
@@ -13,8 +13,8 @@ function saveRecord({ sessionId, title, model, messages, skillCalls, restoredFro
   const resolvedModel = resolveModel(model);
 
   const insertMsg = db.prepare(
-    `INSERT INTO messages (conversation_id, role, content, input_tokens, output_tokens, cache_hit, input_cost, output_cost, cache_cost, baseline_cost, model, created_at)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+    `INSERT INTO messages (conversation_id, role, content, input_tokens, output_tokens, cache_hit, input_cost, output_cost, cache_cost, baseline_cost, model, context_window_pct, created_at)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
   );
   const insertSkill = db.prepare(
     `INSERT INTO skill_calls (message_id, skill_name, skill_type, input_tokens, output_tokens, duration_ms, status, agent_name, agent_team)
@@ -57,6 +57,7 @@ function saveRecord({ sessionId, title, model, messages, skillCalls, restoredFro
       const msgModel = resolveModel(msg.model) || resolvedModel || model || 'deepseek-v4-pro';
       const cost = calcCost(msgModel, msg.input_tokens || 0, msg.output_tokens || 0, msg.cache_hit || 0);
       const baseline = calcBaselineCost(msg.input_tokens || 0, msg.output_tokens || 0, msg.cache_hit || 0);
+      const ctxPct = calcContextWindowPct(msgModel, msg.input_tokens || 0, msg.cache_hit || 0);
 
       const result = insertMsg.run(
         convId, msg.role, c,
@@ -67,6 +68,7 @@ function saveRecord({ sessionId, title, model, messages, skillCalls, restoredFro
         cost?.cache_cost ?? null,
         baseline?.total_cost ?? null,
         msgModel,
+        ctxPct,
         msg.created_at || now
       );
       const msgId = result.lastInsertRowid;

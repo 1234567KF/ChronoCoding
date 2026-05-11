@@ -69,8 +69,8 @@
           "costPer1KOutput": 5.0,
           "cacheHitCostPer1KInput": null,
           "supportsCache": false,
-          "priority": 5,
-          "defaultFor": [],
+          "priority": 10,
+          "defaultFor": ["docs", "ui-prototype"],
           "providerModelId": "minimax-2.7"
         }
       ]

@@ -19,6 +19,8 @@ router.get('/stats/tokens', (req, res) => {
   // Summary: prefer messages table (authoritative) over token_daily_stats (may be stale/incomplete)
   const msgTotals = db.prepare(
     `SELECT
+       COALESCE(SUM(m.input_tokens), 0) as uncached_input,
+       COALESCE(SUM(m.cache_hit), 0) as cached_input,
        COALESCE(SUM(m.input_tokens + m.cache_hit), 0) as total_input,
        COALESCE(SUM(m.output_tokens), 0) as total_output,
        COALESCE(SUM(m.input_cost + m.output_cost + m.cache_cost), 0) as total_cost,
@@ -36,6 +38,7 @@ router.get('/stats/tokens', (req, res) => {
   const statsTotals = db.prepare(
     `SELECT
        COALESCE(SUM(total_input), 0) as total_input,
+       COALESCE(SUM(cache_hit_input), 0) as cached_input,
        COALESCE(SUM(total_output), 0) as total_output,
        COALESCE(SUM(total_cost), 0) as total_cost,
        COALESCE(SUM(total_baseline_cost), 0) as total_baseline_cost
@@ -45,6 +48,7 @@ router.get('/stats/tokens', (req, res) => {
   // Merge: use max of all sources (conversations.total_cost is most complete when set)
   const summary = {
     total_input: Math.max(statsTotals.total_input, msgTotals.total_input),
+    cached_input: Math.max(statsTotals.cached_input || 0, msgTotals.cached_input || 0),
     total_output: Math.max(statsTotals.total_output, msgTotals.total_output),
     total_cost: Math.max(msgTotals.total_cost, convTotals.total_cost, statsTotals.total_cost),
     total_baseline_cost: Math.max(msgTotals.total_baseline_cost, convTotals.total_baseline_cost, statsTotals.total_baseline_cost),
@@ -291,6 +295,100 @@ router.get('/v1/cache', (req, res) => {
         cache_cost: row.cache_cost,
       };
     }),
+  });
+});
+
+// GET /api/stats/context-window?range=7d|30d — 上下文窗口占比统计
+router.get('/stats/context-window', (req, res) => {
+  const db = getDB();
+  const range = req.query.range || '7d';
+  const days = range === '30d' ? 30 : 7;
+  const since = new Date(Date.now() - days * 86400000).toISOString();
+
+  // 按模型统计
+  const byModel = db.prepare(
+    `SELECT
+       COALESCE(m.model, 'unknown') as model,
+       COUNT(*) as call_count,
+       COALESCE(AVG(m.context_window_pct), 0) as avg_pct,
+       COALESCE(MAX(m.context_window_pct), 0) as max_pct,
+       COALESCE(SUM(CASE WHEN m.context_window_pct > 80 THEN 1 ELSE 0 END), 0) as over_80_count,
+       COALESCE(SUM(CASE WHEN m.context_window_pct > 50 THEN 1 ELSE 0 END), 0) as over_50_count
+     FROM messages m
+     JOIN conversations c ON m.conversation_id = c.id
+     WHERE c.started_at >= ?
+       AND m.context_window_pct IS NOT NULL
+     GROUP BY m.model
+     ORDER BY call_count DESC`
+  ).all(since);
+
+  // 分布统计
+  const distribution = db.prepare(
+    `SELECT
+       COALESCE(SUM(CASE WHEN m.context_window_pct < 10 THEN 1 ELSE 0 END), 0) as bucket_0_10,
+       COALESCE(SUM(CASE WHEN m.context_window_pct >= 10 AND m.context_window_pct < 25 THEN 1 ELSE 0 END), 0) as bucket_10_25,
+       COALESCE(SUM(CASE WHEN m.context_window_pct >= 25 AND m.context_window_pct < 50 THEN 1 ELSE 0 END), 0) as bucket_25_50,
+       COALESCE(SUM(CASE WHEN m.context_window_pct >= 50 AND m.context_window_pct < 80 THEN 1 ELSE 0 END), 0) as bucket_50_80,
+       COALESCE(SUM(CASE WHEN m.context_window_pct >= 80 THEN 1 ELSE 0 END), 0) as bucket_80_plus
+     FROM messages m
+     JOIN conversations c ON m.conversation_id = c.id
+     WHERE c.started_at >= ?
+       AND m.context_window_pct IS NOT NULL`
+  ).get(since);
+
+  // 每日平均趋势
+  const daily = db.prepare(
+    `SELECT date(c.started_at) as date,
+       COALESCE(AVG(m.context_window_pct), 0) as avg_pct,
+       COALESCE(MAX(m.context_window_pct), 0) as max_pct,
+       COUNT(*) as call_count
+     FROM messages m
+     JOIN conversations c ON m.conversation_id = c.id
+     WHERE c.started_at >= ?
+       AND m.context_window_pct IS NOT NULL
+     GROUP BY date(c.started_at)
+     ORDER BY date ASC`
+  ).all(since);
+
+  // 汇总
+  const total = db.prepare(
+    `SELECT
+       COUNT(*) as total_calls,
+       COALESCE(AVG(m.context_window_pct), 0) as avg_pct,
+       COALESCE(MAX(m.context_window_pct), 0) as max_pct
+     FROM messages m
+     JOIN conversations c ON m.conversation_id = c.id
+     WHERE c.started_at >= ?
+       AND m.context_window_pct IS NOT NULL`
+  ).get(since);
+
+  const dist = distribution || { bucket_0_10: 0, bucket_10_25: 0, bucket_25_50: 0, bucket_50_80: 0, bucket_80_plus: 0 };
+  const totalDist = dist.bucket_0_10 + dist.bucket_10_25 + dist.bucket_25_50 + dist.bucket_50_80 + dist.bucket_80_plus;
+
+  res.json({
+    range,
+    summary: {
+      total_calls: total.total_calls || 0,
+      avg_pct: Math.round((total.avg_pct || 0) * 100) / 100,
+      max_pct: Math.round((total.max_pct || 0) * 100) / 100,
+      distribution: {
+        '0-10%': dist.bucket_0_10,
+        '10-25%': dist.bucket_10_25,
+        '25-50%': dist.bucket_25_50,
+        '50-80%': dist.bucket_50_80,
+        '80%+': dist.bucket_80_plus,
+        total: totalDist,
+      },
+    },
+    by_model: byModel.map(row => ({
+      model: row.model,
+      call_count: row.call_count,
+      avg_pct: Math.round(row.avg_pct * 100) / 100,
+      max_pct: Math.round(row.max_pct * 100) / 100,
+      over_50_count: row.over_50_count,
+      over_80_count: row.over_80_count,
+    })),
+    daily,
   });
 });
 

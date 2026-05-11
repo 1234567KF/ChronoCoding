@@ -22,7 +22,7 @@
     </div>
     <div style="font-size:13px;color:#888;margin-top:4px;">
       触发 ${data.chain_count} 条 A2A 回复 |
-      总输入(缓存+未缓存): ${data.total_input_tokens?.toLocaleString() || 0} |
+      缓存: ${data.chain.reduce((s, m) => s + (m.cache_hit || 0), 0).toLocaleString()} / 未缓存: ${data.chain.reduce((s, m) => s + (m.input_tokens || 0), 0).toLocaleString()} |
       输出: ${data.total_output_tokens?.toLocaleString() || 0} |
       总花费: ${data.total_cost ? '¥' + data.total_cost.toFixed(4) : '-'} |
       ${new Date(u.created_at).toLocaleString('zh-CN')}
@@ -96,6 +96,11 @@
           <span class="badge badge-input">未缓存输入: ${(msg.input_tokens || 0).toLocaleString()}</span>
           ${cacheBadge}
           <span class="badge badge-output">输出: ${(msg.output_tokens || 0).toLocaleString()}</span>
+          ${msg.context_window_pct != null
+            ? (msg.context_window_pct > 100
+              ? `<span class="badge" style="background:#fff3e0;color:#e65100;" title="多API调用累积，单次上限1M tok">上下文: ${msg.context_window_pct}% (多调用累积)</span>`
+              : `<span class="badge" style="background:${msg.context_window_pct > 80 ? '#ffebee' : msg.context_window_pct > 50 ? '#fff3e0' : '#e8f5e9'};color:${msg.context_window_pct > 80 ? '#c62828' : msg.context_window_pct > 50 ? '#e65100' : '#2e7d32'};">上下文: ${msg.context_window_pct}%</span>`)
+            : ''}
           <span class="cost-pos">花费: ¥${totalCost.toFixed(6)}</span>
         </div>
         ${msg.skillCalls && msg.skillCalls.length > 0 ? `<div style="margin-top:6px;display:flex;gap:4px;flex-wrap:wrap;">${msg.skillCalls.map(s =>

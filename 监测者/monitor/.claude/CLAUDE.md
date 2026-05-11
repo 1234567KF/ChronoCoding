@@ -141,6 +141,7 @@ claude
 | `/prd-generator`                                                     | kf-prd-generator          | 快     | 自动调用 kf-alignment                                             |
 | `triple [任务]`                                                      | kf-triple-collaboration   | 夯     | 轻量版 `/夯`                                                    |
 | `模型路由` / `省模式` / `多供应商` / `smart router`               | kf-model-router           | 省     | **全自动**，用户无感；支持 DeepSeek + MiniMax + OpenAI 动态路由 |
+| `智能路由` / `模型调度` / `多模型路由` / `smart router` / `路由调度` / `多模型` | kf-smart-router | 省 | 多供应商模型适配器插件库，被 kf-model-router 按 adapter 引用 |
 | `安全路由` / `safe router` / `断路器` / `限流`                   | kf-safe-router            | 省     | 被 kf-model-router 按需引用安全组件                                |
 | `Harness 评审` / `五根铁律审计`                                    | kf-skill-design-expert    | 稳     | 全路径扫描，评分矩阵 + 缺陷分级                                   |
 | `/token-tracker` / `/skill-monitor` / `技能监控` / `使用率` / `token成本` | kf-token-tracker | 准     | Token全量追踪 + 技能调用追踪 + 成本估算                           |

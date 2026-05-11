@@ -1,5 +1,12 @@
 const { Router } = require('express');
 const { getDB } = require('../db');
+const { MODEL_MAX_CONTEXT, MODEL_ALIASES } = require('../pricing');
+
+function getMaxContext(model) {
+  if (!model) return null;
+  const resolved = MODEL_ALIASES[model] || model;
+  return MODEL_MAX_CONTEXT[resolved] || null;
+}
 
 const router = Router();
 
@@ -49,15 +56,18 @@ router.get('/conversations', (req, res) => {
          COALESCE(SUM(m.input_cost), 0) as input_cost,
          COALESCE(SUM(m.output_cost), 0) as output_cost,
          COALESCE(SUM(m.cache_cost), 0) as cache_cost,
-          COALESCE(SUM(m.baseline_cost), 0) as baseline_cost
+          COALESCE(SUM(m.baseline_cost), 0) as baseline_cost,
+         MAX(COALESCE(m.input_tokens, 0) + COALESCE(CASE WHEN m.cache_hit > 0 THEN m.cache_hit ELSE 0 END, 0)) as peak_input,
+         MAX(COALESCE(m.input_tokens, 0)) as uncached_peak,
+         MAX(COALESCE(m.output_tokens, 0)) as peak_output
        FROM messages m
        WHERE m.conversation_id = ?
        GROUP BY m.role`
     ).all(conv.id);
 
     conv.msg_breakdown = {
-      user: breakdown.find(r => r.role === 'user') || { msg_count: 0, uncached_input: 0, cached_input: 0, total_output: 0, input_cost: 0, output_cost: 0, cache_cost: 0, baseline_cost: 0 },
-      a2a: breakdown.find(r => r.role === 'assistant') || { msg_count: 0, uncached_input: 0, cached_input: 0, total_output: 0, input_cost: 0, output_cost: 0, cache_cost: 0, baseline_cost: 0 },
+      user: breakdown.find(r => r.role === 'user') || { msg_count: 0, uncached_input: 0, cached_input: 0, total_output: 0, input_cost: 0, output_cost: 0, cache_cost: 0, baseline_cost: 0, peak_input: 0, uncached_peak: 0, peak_output: 0 },
+      a2a: breakdown.find(r => r.role === 'assistant') || { msg_count: 0, uncached_input: 0, cached_input: 0, total_output: 0, input_cost: 0, output_cost: 0, cache_cost: 0, baseline_cost: 0, peak_input: 0, uncached_peak: 0, peak_output: 0 },
     };
 
     // Derive total_cost / total_baseline_cost from msg_breakdown (messages table is authoritative)
@@ -114,6 +124,29 @@ router.get('/conversations', (req, res) => {
        ORDER BY model`
     ).all(conv.id);
     conv.models_used = models.map(r => r.model);
+
+    // Context window percentages
+    const primaryModel = conv.model || conv.models_used?.[0] || null;
+    const maxCtx = getMaxContext(primaryModel);
+    conv.context_max = maxCtx;
+
+    // input_pct = 单次请求峰值 / 模型最大上下文（不用 SUM，避免多轮累积叠加）
+    const peakIn = Math.max(
+      conv.msg_breakdown?.user?.peak_input || 0,
+      conv.msg_breakdown?.a2a?.peak_input || 0
+    );
+    const peakInUncached = Math.max(
+      conv.msg_breakdown?.user?.uncached_peak || 0,
+      conv.msg_breakdown?.a2a?.uncached_peak || 0
+    );
+    const peakOut = Math.max(
+      conv.msg_breakdown?.user?.peak_output || 0,
+      conv.msg_breakdown?.a2a?.peak_output || 0
+    );
+    const rawPct = maxCtx && maxCtx > 0 ? (peakIn / maxCtx) * 100 : null;
+    conv.input_pct = rawPct !== null ? parseFloat(Math.min(rawPct, 100).toFixed(1)) : null;
+    conv.input_pct_uncached = maxCtx && maxCtx > 0 ? parseFloat(((peakInUncached / maxCtx) * 100).toFixed(1)) : null;
+    conv.output_pct = maxCtx && maxCtx > 0 ? parseFloat(((peakOut / maxCtx) * 100).toFixed(1)) : null;
 
     // First user message content preview
     const firstUserMsg = db.prepare(

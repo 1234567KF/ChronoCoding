@@ -22,6 +22,25 @@ const TRACE_PATH = require('path').join(PROJECT_ROOT, '.claude-flow', 'data', 's
 const PENDING_DIR = require('path').join(PROJECT_ROOT, '.claude-flow', 'data', 'pending-sessions');
 const fs = require('fs');
 const path = require('path');
+const { fork } = require('child_process');
+
+/** Run cost-tracker as forked child process (avoids cmd.exe issues on Windows) */
+function runCostTracker(ctScript, cwd) {
+  return new Promise((resolve, reject) => {
+    const child = fork(ctScript, ['--update', '--json'], {
+      cwd, stdio: ['pipe', 'pipe', 'pipe', 'ipc'], timeout: 15000,
+    });
+    let stdout = '';
+    child.stdout.on('data', d => { stdout += d; });
+    child.on('close', code => {
+      if (code === 0) {
+        try { resolve(JSON.parse(stdout.trim())); }
+        catch (e) { reject(e); }
+      } else { reject(new Error(`exit code ${code}`)); }
+    });
+    child.on('error', reject);
+  });
+}
 
 // DeepSeek V4 官方定价（元/百万Token）
 const MODEL_PRICES = {
@@ -230,26 +249,38 @@ async function cmdEnd() {
     try { fs.unlinkSync(STATE_PATH); } catch {}
   }
 
-  // ── Token totals from transcript 已移除 — SQLite 唯一数据源 ──
-  const tokensIn = 0, tokensOut = 0, cacheRead = 0;
-  // Clean up transcript cache (no-op, transcript removed)
-  // try { if (fs.existsSync(TRANSCRIPT_CACHE)) fs.unlinkSync(TRANSCRIPT_CACHE); } catch {}
+  // ── Token totals from cost-tracker (full transcript parse) ──
+  let tokensIn = 0, tokensOut = 0, cacheRead = 0;
+  try {
+    const ctScript = path.join(__dirname, '..', 'helpers', 'session', 'cost-tracker.cjs');
+    const ctData = await runCostTracker(ctScript, PROJECT_ROOT);
+    tokensIn = ctData.input_tokens || 0;
+    tokensOut = ctData.output_tokens || 0;
+    cacheRead = ctData.cache_read_tokens || 0;
+  } catch {
+    // Fallback: read existing session-cost.json without re-parsing transcript
+    try {
+      const costFilePath = path.join(PROJECT_ROOT, '.claude', 'session-cost.json');
+      if (fs.existsSync(costFilePath)) {
+        const ctData = JSON.parse(fs.readFileSync(costFilePath, 'utf-8'));
+        tokensIn = ctData.input_tokens || 0;
+        tokensOut = ctData.output_tokens || 0;
+        cacheRead = ctData.cache_read_tokens || 0;
+      }
+    } catch {}
+  }
 
   const now = new Date().toISOString();
 
-  // No cost computation from transcript — skill traces push directly to SQLite
+  // Cost computed from cost-tracker transcript parse (accurate total)
   const cost = calcCost(model, tokensIn, tokensOut, cacheRead);
   const baselineCost = calcBaselineCost(tokensIn, tokensOut, cacheRead);
 
   // Write JSONL trace for watcher (兜底，不依赖 POST)
   writeTrace({ sessionId, model, phase: 'end', note: '会话结束', tokensIn, tokensOut, cacheRead });
 
-  // PATCH disabled — watcher's importTranscriptMessages() is the single source of truth
-  // for conversation cumulative totals (computed from SUM of per-message costs).
-  // Sending absolute cumulative totals here would overwrite correct SUM-based values.
-
-  // Save end marker to pending-sessions/ (metadata only — NO cumulative token totals,
-  // as they would overwrite the watcher's correct SUM-based values)
+  // Save end marker to pending-sessions/ with real transcript-based cumulative cost data
+  // (watcher reads this on next poll and updates conversation totals)
   try {
     if (!fs.existsSync(PENDING_DIR)) fs.mkdirSync(PENDING_DIR, { recursive: true });
     const pendingPath = path.join(PENDING_DIR, `${sessionId}.json`);
@@ -263,6 +294,10 @@ async function cmdEnd() {
       startedAt: startedAt || pending.startedAt,
       ended_at: now,
       phase: 'end',
+      total_input_tokens: tokensIn,
+      total_output_tokens: tokensOut,
+      total_cost: cost?.total_cost || 0,
+      total_baseline_cost: baselineCost || 0,
     });
     fs.writeFileSync(pendingPath, JSON.stringify(pending, null, 2), 'utf-8');
   } catch {}

@@ -32,6 +32,27 @@
   <div id="cacheEmpty" style="display:none;text-align:center;padding:20px;color:#888;font-size:13px;">暂无缓存数据（需先有 API 调用记录）</div>
 </div>
 
+<!-- Context Window Stats -->
+<div class="card" style="margin-top:20px;">
+  <h3 style="font-size:14px;margin-bottom:12px;">上下文窗口占比 <span style="font-size:11px;color:#888;font-weight:normal;">（每次 API 调用输入占模型最大窗口的百分比）</span></h3>
+  <div id="ctxSummary" style="display:flex;gap:20px;flex-wrap:wrap;margin-bottom:12px;"></div>
+  <table id="ctxTable">
+    <thead>
+      <tr>
+        <th>模型</th>
+        <th>调用次数</th>
+        <th>平均占比</th>
+        <th>最大占比</th>
+        <th>>50% 次数</th>
+        <th>>80% 次数</th>
+      </tr>
+    </thead>
+    <tbody id="ctxBody"></tbody>
+  </table>
+  <div id="ctxEmpty" style="display:none;text-align:center;padding:20px;color:#888;font-size:13px;">暂无上下文窗口数据</div>
+  <div id="ctxDist" style="margin-top:12px;font-size:13px;"></div>
+</div>
+
 <!-- Message Type Breakdown (user vs A2A) -->
 <div class="card" style="margin-top:20px;">
   <h3 style="font-size:14px;margin-bottom:12px;">消息类型统计（用户 vs A2A）</h3>
@@ -119,8 +140,14 @@ async function loadStats() {
 
   document.getElementById('summaryCards').innerHTML =
     '<div class="card">' +
-      '<div class="stat-value">' + (tData.summary.total_input / 1000).toFixed(1) + 'K</div>' +
-      '<div class="stat-label">总输入 Token (' + range + ')</div>' +
+      '<div style="font-size:12px;color:#2e7d32;">缓存输入</div>' +
+      '<div class="stat-value" style="color:#2e7d32;">' + (tData.summary.total_input ? ((tData.summary.cached_input || 0) / 1000).toFixed(1) + 'K' : '0K') + '</div>' +
+      '<div class="stat-label">缓存 Token (' + range + ')</div>' +
+    '</div>' +
+    '<div class="card">' +
+      '<div style="font-size:12px;color:#1565c0;">未缓存输入</div>' +
+      '<div class="stat-value" style="color:#1565c0;">' + (tData.summary.total_input ? (((tData.summary.total_input - (tData.summary.cached_input || 0)) / 1000).toFixed(1) + 'K') : '0K') + '</div>' +
+      '<div class="stat-label">未缓存 Token (' + range + ')</div>' +
     '</div>' +
     '<div class="card">' +
       '<div class="stat-value">' + (tData.summary.total_output / 1000).toFixed(1) + 'K</div>' +
@@ -200,6 +227,61 @@ async function loadStats() {
   } else {
     cacheEmpty.style.display = 'block';
     cacheFoot.style.display = 'none';
+  }
+
+  // Context window stats
+  const ctxRes = await fetch('/api/stats/context-window?range=' + range);
+  const ctxData = await ctxRes.json();
+  const ctxS = ctxData.summary;
+
+  document.getElementById('ctxSummary').innerHTML =
+    '<div style="min-width:120px;">' +
+      '<div style="font-size:24px;font-weight:700;color:#1565c0;">' + (ctxS.avg_pct || 0) + '%</div>' +
+      '<div style="font-size:12px;color:#888;">平均占比</div>' +
+    '</div>' +
+    '<div style="min-width:120px;">' +
+      '<div style="font-size:24px;font-weight:700;color:' + (ctxS.max_pct > 80 ? '#c62828' : '#2e7d32') + ';">' + (ctxS.max_pct || 0) + '%</div>' +
+      '<div style="font-size:12px;color:#888;">最大占比</div>' +
+    '</div>' +
+    '<div style="min-width:120px;">' +
+      '<div style="font-size:24px;font-weight:700;">' + (ctxS.total_calls || 0) + '</div>' +
+      '<div style="font-size:12px;color:#888;">总调用次数</div>' +
+    '</div>';
+
+  const ctxBody = document.getElementById('ctxBody');
+  const ctxEmpty = document.getElementById('ctxEmpty');
+  const ctxDist = document.getElementById('ctxDist');
+
+  if (ctxData.by_model && ctxData.by_model.length > 0) {
+    ctxBody.style.display = '';
+    ctxEmpty.style.display = 'none';
+    ctxBody.innerHTML = ctxData.by_model.map(function(m) {
+      const maxColor = m.max_pct > 80 ? '#c62828' : m.max_pct > 50 ? '#e65100' : '#2e7d32';
+      return '<tr>' +
+        '<td><strong>' + esc(m.model) + '</strong></td>' +
+        '<td>' + m.call_count + '</td>' +
+        '<td>' + m.avg_pct + '%</td>' +
+        '<td style="font-weight:600;color:' + maxColor + ';">' + m.max_pct + '%</td>' +
+        '<td>' + m.over_50_count + '</td>' +
+        '<td>' + (m.over_80_count || 0) + '</td>' +
+        '</tr>';
+    }).join('');
+
+    // Distribution bar
+    const d = ctxS.distribution || {};
+    const totalDist = d.total || 1;
+    const barHtml = '<div style="display:flex;height:20px;border-radius:4px;overflow:hidden;margin-bottom:6px;">' +
+      (d['0-10%'] ? '<div style="flex:' + (d['0-10%']/totalDist*100).toFixed(1) + ';background:#4caf50;display:flex;align-items:center;justify-content:center;font-size:10px;color:#fff;min-width:20px;">' + d['0-10%'] + '</div>' : '') +
+      (d['10-25%'] ? '<div style="flex:' + (d['10-25%']/totalDist*100).toFixed(1) + ';background:#8bc34a;display:flex;align-items:center;justify-content:center;font-size:10px;color:#fff;min-width:20px;">' + d['10-25%'] + '</div>' : '') +
+      (d['25-50%'] ? '<div style="flex:' + (d['25-50%']/totalDist*100).toFixed(1) + ';background:#ff9800;display:flex;align-items:center;justify-content:center;font-size:10px;color:#fff;min-width:20px;">' + d['25-50%'] + '</div>' : '') +
+      (d['50-80%'] ? '<div style="flex:' + (d['50-80%']/totalDist*100).toFixed(1) + ';background:#f44336;display:flex;align-items:center;justify-content:center;font-size:10px;color:#fff;min-width:20px;">' + d['50-80%'] + '</div>' : '') +
+      (d['80%+'] ? '<div style="flex:' + (d['80%+']/totalDist*100).toFixed(1) + ';background:#b71c1c;display:flex;align-items:center;justify-content:center;font-size:10px;color:#fff;min-width:20px;">' + d['80%+'] + '</div>' : '') +
+      '</div>';
+    ctxDist.innerHTML = '<div style="font-size:11px;color:#888;margin-bottom:4px;">分布：<span style="color:#4caf50;">0-10%</span> <span style="color:#8bc34a;">10-25%</span> <span style="color:#ff9800;">25-50%</span> <span style="color:#f44336;">50-80%</span> <span style="color:#b71c1c;">>80%</span></div>' + barHtml;
+  } else {
+    ctxBody.style.display = 'none';
+    ctxEmpty.style.display = 'block';
+    ctxDist.innerHTML = '';
   }
 
   // Message-type breakdown

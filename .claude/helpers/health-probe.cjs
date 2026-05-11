@@ -74,7 +74,7 @@ async function _probeVendor(vendorName) {
     // 使用 chat/completions 端点（所有供应商都支持）
     const response = await client.post("/chat/completions", {
       model: vendorName === "deepseek" ? "deepseek-chat" :
-             vendorName === "minimax" ? "minimax-m1" :
+             vendorName === "minimax" ? "minimax-2.7" :
              "gpt-3.5-turbo",
       messages: [{ role: "user", content: "ok" }],
       max_tokens: 2,

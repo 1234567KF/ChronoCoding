@@ -842,6 +842,7 @@ Team Lead 将执行计划展示给用户：
 3. **用户输入命令的处理：**
    - 用户输入 `fast` → `node .claude/helpers/hang-state-manager.cjs --dashboard-off`（隐藏看板，继续执行）
    - 用户输入 `status` → `node .claude/helpers/hang-state-manager.cjs --sync-and-show`（刷新看板并展示）
+   - 用户输入 `compress` → **调用 ctx_compress 工具** 压缩上下文，然后调 `node .claude/helpers/hang-state-manager.cjs --sync-and-show` 刷新看板。回复用户："上下文已压缩。"
    - 用户输入 `stop` → Pipeline 暂停，保留 hang-state 状态，回复用户当前进度和恢复方法
 
 4. **看板输出的位置**：看板插入在你回复的最前面，看板和实际回复内容之间空一行。

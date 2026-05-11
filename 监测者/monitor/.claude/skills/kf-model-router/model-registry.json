@@ -61,30 +61,17 @@
       },
       "models": [
         {
-          "id": "minimax-m1-thinking",
-          "family": "thinking",
-          "description": "MiniMax M1 Thinking — deep reasoning",
-          "capabilities": ["deep-reasoning", "planning", "architecture"],
-          "costPer1KInput": 2.0,
-          "costPer1KOutput": 10.0,
+          "id": "minimax-2.7",
+          "family": "pro",
+          "description": "MiniMax 2.7 — general purpose",
+          "capabilities": ["deep-reasoning", "code", "chat", "review", "testing", "docs", "planning", "architecture"],
+          "costPer1KInput": 1.0,
+          "costPer1KOutput": 5.0,
           "cacheHitCostPer1KInput": null,
           "supportsCache": false,
-          "priority": 2,
-          "defaultFor": [],
-          "providerModelId": "minimax-m1-thinking"
-        },
-        {
-          "id": "minimax-m1-fast",
-          "family": "fast",
-          "description": "MiniMax M1 Fast — efficient execution",
-          "capabilities": ["code", "chat", "docs", "review", "testing", "ui-prototype"],
-          "costPer1KInput": 0.5,
-          "costPer1KOutput": 2.0,
-          "cacheHitCostPer1KInput": null,
-          "supportsCache": false,
-          "priority": 11,
+          "priority": 10,
           "defaultFor": ["docs", "ui-prototype"],
-          "providerModelId": "minimax-m1-fast"
+          "providerModelId": "minimax-2.7"
         }
       ]
     },

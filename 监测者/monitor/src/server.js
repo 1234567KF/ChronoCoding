@@ -124,6 +124,9 @@ const TRACE_FILE = path.join(PROJECT_ROOT, '.claude-flow', 'data', 'skill-traces
 const CURSOR_FILE = path.join(PROJECT_ROOT, '.claude-flow', 'data', 'watcher-cursor.json');
 const PENDING_DIR = path.join(PROJECT_ROOT, '.claude-flow', 'data', 'pending-sessions');
 const CLEARED_FLAG_PATH = path.join(PROJECT_ROOT, '.claude-flow', 'data', 'cleared-flag.json');
+const SESSION_STATE_PATH = path.join(PROJECT_ROOT, '.claude-flow', 'data', 'session-state.json');
+
+let _clearWatcherInterval = null;
 
 app.post('/api/clear', (req, res) => {
   try {
@@ -132,29 +135,24 @@ app.post('/api/clear', (req, res) => {
       return res.status(400).json({ error: 'Missing confirm: true', hint: 'Send { "confirm": true } to acknowledge data loss' });
     }
 
-    // 1. Clear DB tables
-    db.prepare('DELETE FROM skill_calls').run();
-    db.prepare('DELETE FROM messages').run();
-    db.prepare('DELETE FROM token_daily_stats').run();
-    db.prepare('DELETE FROM conversations').run();
+    // 0. Pause watcher to prevent re-import during clear
+    const { stopWatcher, startWatcher } = require('./watcher');
+    stopWatcher();
 
-    // 2. Clear trace source file — truncateSync, retry once if locked
+    // 1. Delete source files FIRST (before DB) — prevents watcher re-import
+    // 1a. Delete session-state.json — was the root cause of old sessions reappearing
+    try { if (fs.existsSync(SESSION_STATE_PATH)) fs.unlinkSync(SESSION_STATE_PATH); } catch {}
+
+    // 1b. Clear trace source file — truncateSync, retry once if locked
     try { fs.truncateSync(TRACE_FILE, 0); } catch { try { fs.truncateSync(TRACE_FILE, 0); } catch {} }
 
-    // Read trace file line count AFTER truncate attempt (for cursor safety on lock failure)
-    let traceLineCount = 0;
-    try {
-      const raw = fs.readFileSync(TRACE_FILE, 'utf-8').trim();
-      traceLineCount = raw ? raw.split('\n').filter(Boolean).length : 0;
-    } catch {}
-
-    // 3. Clear pending sessions
+    // 1c. Clear pending sessions
     if (fs.existsSync(PENDING_DIR)) {
       const files = fs.readdirSync(PENDING_DIR).filter(f => f.endsWith('.json'));
       for (const f of files) fs.unlinkSync(path.join(PENDING_DIR, f));
     }
 
-    // 4. Delete all transcript .jsonl files (prevent re-import)
+    // 1d. Delete all transcript .jsonl files (prevent re-import)
     const os = require('os');
     const HOME_DIR = process.env.USERPROFILE || process.env.HOME || '';
     const PROJECT_NAME = path.basename(PROJECT_ROOT);
@@ -167,21 +165,36 @@ app.post('/api/clear', (req, res) => {
       }
     }
 
-    // 5. Clean up transcriptOffsets from cursor file
+    // 2. Reset watcher cursor to 0 (source files are gone)
     let cursorData = {};
     try { cursorData = JSON.parse(fs.readFileSync(CURSOR_FILE, 'utf-8')); } catch {}
     delete cursorData.transcriptOffsets;
-    cursorData.offset = traceLineCount;
+    cursorData.offset = 0;
     cursorData.updatedAt = new Date().toISOString();
     fs.writeFileSync(CURSOR_FILE, JSON.stringify(cursorData), 'utf-8');
 
-    // 6. Remove cleared-flag (no longer needed — transcript files are gone)
+    // 3. Clear DB tables (after source files, so no re-import possible)
+    db.prepare('DELETE FROM skill_calls').run();
+    db.prepare('DELETE FROM messages').run();
+    db.prepare('DELETE FROM token_daily_stats').run();
+    db.prepare('DELETE FROM review_reruns').run();
+    db.prepare('DELETE FROM conversations').run();
+
+    // 4. Remove cleared-flag
     try { if (fs.existsSync(CLEARED_FLAG_PATH)) fs.unlinkSync(CLEARED_FLAG_PATH); } catch {}
+
+    // 5. Restart watcher (clean slate)
+    startWatcher(15000);
 
     console.log(`[monitor] All data cleared, ${deletedTranscriptFiles} transcript file(s) deleted`);
     res.json({ ok: true, deletedTranscriptFiles });
   } catch (err) {
     console.error('[monitor] Clear error:', err.message);
+    // Try to restart watcher even on error
+    try {
+      const { startWatcher } = require('./watcher');
+      startWatcher(15000);
+    } catch {}
     res.status(500).json({ error: err.message });
   }
 });

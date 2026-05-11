@@ -172,27 +172,27 @@ Agent 共享（在同一个项目内的 agents 共享记忆）
 │       ├── kf-model-router/   # 模型路由
 │       ├── kf-prd-generator/  # PRD 生成
 │       ├── kf-triple-collaboration/ # 三方协作
-    │       ├── kf-reverse-spec/  # 存量代码→Spec 逆向
+│       ├── kf-reverse-spec/  # 存量代码→Spec 逆向
 │       ├── kf-ui-prototype-generator/ # UI 原型
 │       ├── kf-image-editor/      # AI 自然语言 P 图
 │       ├── kf-kb-envoy/          # Knowledge Base Envoy
-    │       ├── kf-add-skill/      # 技能安装管家
+│       ├── kf-add-skill/      # 技能安装管家
 │       ├── kf-doc-consistency/   # 文档一致性自检
 │       ├── kf-go/                # 工作流导航
 │       ├── kf-skill-design-expert/ # Skill 设计
 │       ├── kf-token-tracker/     # Token全量追踪 + 技能调用链路
-    │       ├── kf-exa-code/       # Exa Code — Web 规模代码上下文引擎
+│       ├── kf-exa-code/       # Exa Code — Web 规模代码上下文引擎
 │       ├── kf-scrapling/      # Web 爬虫 + 反反爬
-    │       ├── kf-grant-research/ # 课题申报研究助手
-    	    │       ├── kf-langextract/     # LLM 驱动结构化提取
-	    │       ├── kf-evolution/          # 进化机制：AI 自我优化与迭代
-	    │       ├── kf-monitor/            # 监测者仪表盘：Token 追踪 + 重审检测
-	    │       ├── kf-safe-router/        # 安全路由组件库（密钥隔离/断路器/限流）
-	    │       ├── kf-saver/              # 会话成本节省追踪
-	    │       ├── kf-smart-router/       # 多供应商模型适配器插件库
-	    │       ├── lambda-lang/          # Agent-to-Agent 原生语言（340+ 原子，7 域，3x 压缩）
-	    │       ├── claude-code-pro/      # Token 高效调度（智能跳过 + 回调替代轮询）
-	    │       ├── lean-ctx/             # 上下文压缩引擎，90+ 压缩模式 + CCP
+│       ├── kf-grant-research/ # 课题申报研究助手
+│       ├── kf-langextract/     # LLM 驱动结构化提取
+│       ├── kf-evolution/          # 进化机制：AI 自我优化与迭代
+│       ├── kf-monitor/            # 监测者仪表盘：Token 追踪 + 重审检测
+│       ├── kf-safe-router/        # 安全路由组件库（密钥隔离/断路器/限流）
+│       ├── kf-saver/              # 会话成本节省追踪
+│       ├── kf-smart-router/       # 多供应商模型适配器插件库
+│       ├── lambda-lang/          # Agent-to-Agent 原生语言（340+ 原子，7 域，3x 压缩）
+│       ├── claude-code-pro/      # Token 高效调度（智能跳过 + 回调替代轮询）
+│       ├── lean-ctx/             # 上下文压缩引擎，90+ 压缩模式 + CCP
 │       ├── gspowers/          # SOP 导航（上游）
 │       ├── gstack/            # 产品流程（上游）
 │       └── ... (+66 来自 jeffallan/claude-skills)  # 第三方技能合集

@@ -12,8 +12,9 @@
       <th>会话</th>
       <th>模型</th>
       <th>消息</th>
-      <th>输入 (缓存/总)</th>
+      <th>缓存 / 未缓存</th>
       <th>输出</th>
+      <th>单次峰值</th>
       <th>花费 (¥)</th>
       <th>节省 (¥)</th>
       <th>Agent</th>
@@ -94,12 +95,25 @@ function renderList(json) {
     const totalIn = c.total_input_tokens || 0;
     const totalOut = c.total_output_tokens || 0;
     const totalCost = c.total_cost || 0;
+    const contextMax = c.context_max || 0;
+
+    // Peak single-call input (capped at model max context)
+    const peakUser = c.msg_breakdown?.user?.peak_input || 0;
+    const peakA2a = c.msg_breakdown?.a2a?.peak_input || 0;
+    const peakInput = Math.max(peakUser, peakA2a);
+    function peakBadge(peak) {
+      if (!peak) return '<span style="color:#999;font-size:11px;">-</span>';
+      return '<span style="font-weight:600;font-size:12px;">' + peak.toLocaleString() + '</span>';
+    }
     const baselineCost = c.total_baseline_cost || 0;
 
     // Cache from msg_breakdown (best available)
     const userCache = c.msg_breakdown?.user?.cached_input || 0;
     const a2aCache = c.msg_breakdown?.a2a?.cached_input || 0;
     const totalCache = userCache + a2aCache;
+    const userUncached = c.msg_breakdown?.user?.uncached_input || 0;
+    const a2aUncached = c.msg_breakdown?.a2a?.uncached_input || 0;
+    const totalUncached = userUncached + a2aUncached;
 
     // Content preview
     const preview = c.last_user_message ? esc(c.last_user_message.slice(0, 80)) + (c.last_user_message.length > 80 ? '...' : '') : '<span style="color:#999;font-size:11px;">-</span>';
@@ -108,8 +122,9 @@ function renderList(json) {
       '<td><strong>' + esc(title) + '</strong></td>' +
       '<td>' + modelStr + '</td>' +
       '<td><span class="badge badge-user">' + userMsgCount + '</span> <span class="badge badge-a2a">' + a2aCount + '</span></td>' +
-      '<td style="color:#2e7d32;">' + totalCache.toLocaleString() + ' / ' + totalIn.toLocaleString() + '</td>' +
+      '<td><span style="color:#2e7d32;">' + totalCache.toLocaleString() + '</span> / <span style="color:#1565c0;">' + totalUncached.toLocaleString() + '</span></td>' +
       '<td>' + totalOut.toLocaleString() + '</td>' +
+      '<td>' + peakBadge(peakInput) + '</td>' +
       '<td class="cost-pos">' + (totalCost > 0 ? '¥' + totalCost.toFixed(4) : '-') + '</td>' +
       '<td class="cost-save">' + (baselineCost > 0 ? '¥' + (baselineCost - totalCost).toFixed(4) + ' (' + ((baselineCost - totalCost) / baselineCost * 100).toFixed(1) + '%)' : '-') + '</td>' +
       '<td>' + agentStr + '</td>' +

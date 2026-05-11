@@ -7,7 +7,7 @@
 const fs = require('fs');
 const path = require('path');
 const { getDB } = require('./db');
-const { calcCost, calcBaselineCost, MODEL_PRICES, MODEL_ALIASES } = require('./pricing');
+const { calcCost, calcBaselineCost, calcContextWindowPct, MODEL_PRICES, MODEL_ALIASES } = require('./pricing');
 
 function resolveModel(raw) {
   if (!raw) return null;
@@ -48,8 +48,8 @@ function importTraces() {
 
   const db = getDB();
   const insertMsg = db.prepare(
-    `INSERT INTO messages (conversation_id, role, content, input_tokens, output_tokens, cache_hit, input_cost, output_cost, cache_cost, baseline_cost, model, created_at)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+    `INSERT INTO messages (conversation_id, role, content, input_tokens, output_tokens, cache_hit, input_cost, output_cost, cache_cost, baseline_cost, model, context_window_pct, created_at)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
   );
   const insertSkill = db.prepare(
     `INSERT INTO skill_calls (message_id, skill_name, skill_type, input_tokens, output_tokens, duration_ms, status, agent_name, agent_team)
@@ -110,6 +110,8 @@ function importTraces() {
       if (dedupKeys.has(dk)) { imported++; continue; }
       dedupKeys.add(dk);
 
+      const ctxPct = calcContextWindowPct(model, entry.tokens_in || 0, entry.cache_hit || 0);
+
       const msg = insertMsg.run(
         convId, 'assistant', entry.note || '',
         entry.tokens_in || 0, entry.tokens_out || 0,
@@ -118,6 +120,7 @@ function importTraces() {
         cost?.cache_cost ?? null,
         baseline?.total_cost ?? null,
         model,
+        ctxPct,
         now
       );
 
@@ -193,10 +196,10 @@ function importSessionState() {
     ).run(state.sessionId, state.sessionId, `会话 ${state.sessionId.slice(0, 16)}`, state.model || null, now, state.restoredFrom || null);
 
     const insertMsg = db.prepare(
-      `INSERT INTO messages (conversation_id, role, content, input_tokens, output_tokens, cache_hit, model, created_at)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?)`
+      `INSERT INTO messages (conversation_id, role, content, input_tokens, output_tokens, cache_hit, model, context_window_pct, created_at)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`
     );
-    insertMsg.run(state.sessionId, 'assistant', '会话开始', 0, 0, 0, null, now);
+    insertMsg.run(state.sessionId, 'assistant', '会话开始', 0, 0, 0, null, 0, now);
 
     return true;
   } catch { return false; }

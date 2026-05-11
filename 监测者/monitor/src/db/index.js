@@ -83,6 +83,34 @@ function initDB() {
     }
   } catch {}
 
+  // Migration: add context_window_pct to messages (per-message context window usage)
+  try {
+    const msgColsCtx = db.pragma('table_info(messages)');
+    if (!msgColsCtx.some(c => c.name === 'context_window_pct')) {
+      db.exec('ALTER TABLE messages ADD COLUMN context_window_pct REAL');
+    }
+  } catch {}
+
+  // Backfill existing messages with NULL context_window_pct where model is known
+  try {
+    // flash → 1M (物理上限 1M), pro → 1M, minimax → 128K
+    db.exec(`UPDATE messages SET context_window_pct = ROUND(((COALESCE(input_tokens,0) + COALESCE(cache_hit,0)) * 100.0 / 1000000), 2)
+             WHERE context_window_pct IS NULL AND model IN ('deepseek-v4-flash', 'deepseek-v4-pro')`);
+    db.exec(`UPDATE messages SET context_window_pct = ROUND(((COALESCE(input_tokens,0) + COALESCE(cache_hit,0)) * 100.0 / 128000), 2)
+             WHERE context_window_pct IS NULL AND model IN ('minimax-2.7')`);
+    // For aliased models, fallback: 1M (most models support large context)
+    db.exec(`UPDATE messages SET context_window_pct = ROUND(((COALESCE(input_tokens,0) + COALESCE(cache_hit,0)) * 100.0 / 1000000), 2)
+             WHERE context_window_pct IS NULL AND model IS NOT NULL AND model != ''`);
+  } catch {}
+
+  // Migration 2: recalculate ALL context_window_pct from raw tokens (in case denominator changed)
+  try {
+    db.exec(`UPDATE messages SET context_window_pct = ROUND(((COALESCE(input_tokens,0) + COALESCE(cache_hit,0)) * 100.0 / 1000000), 2)
+             WHERE model IN ('deepseek-v4-flash', 'deepseek-v4-pro')`);
+    db.exec(`UPDATE messages SET context_window_pct = ROUND(((COALESCE(input_tokens,0) + COALESCE(cache_hit,0)) * 100.0 / 200000), 2)
+             WHERE model IN ('minimax-2.7')`);
+  } catch {}
+
   // Migration: add review_reruns table (re-review trigger tracking)
   try {
     const tables = db.prepare("SELECT name FROM sqlite_master WHERE type='table' AND name='review_reruns'").all();

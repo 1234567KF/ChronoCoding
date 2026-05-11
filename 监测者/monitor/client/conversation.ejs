@@ -32,7 +32,7 @@ function teamStyle(team) {
   document.getElementById('convHeader').innerHTML = `
     <h2>${esc(conv.title || conv.session_id || '(无标题)')}</h2>
     <div style="font-size:13px;color:#888;margin-top:4px;">
-      总输入(缓存+未缓存): ${conv.total_input_tokens?.toLocaleString() || 0} |
+      缓存: ${conv.typeSummary.reduce((s, t) => s + (t.cached_input || 0), 0).toLocaleString()} / 未缓存: ${conv.typeSummary.reduce((s, t) => s + (t.uncached_input || 0), 0).toLocaleString()} |
       输出: ${conv.total_output_tokens?.toLocaleString() || 0} |
       总花费: ${conv.total_cost ? '¥' + conv.total_cost.toFixed(4) : '-'} |
       ${(conv.total_baseline_cost || 0) > 0 ? '基线: ¥' + conv.total_baseline_cost.toFixed(4) + ' | 节省: <span class="cost-save">¥' + ((conv.total_baseline_cost || 0) - (conv.total_cost || 0)).toFixed(4) + ' (' + (((conv.total_baseline_cost || 0) > 0 ? ((conv.total_baseline_cost - (conv.total_cost || 0)) / conv.total_baseline_cost * 100) : 0).toFixed(1)) + '%)</span> | ' : ''}
@@ -49,7 +49,8 @@ function teamStyle(team) {
       const isUser = t.role === 'user';
       const label = isUser ? '👤 用户消息' : '🤖 助手消息';
       const badgeCls = isUser ? 'badge-user' : 'badge-a2a';
-      const totalCost = (t.input_cost_sum || 0) + (t.output_cost_sum || 0) + (t.cache_cost_sum || 0);
+      const totalCost = (t.input_cost_sum || 0) + (t.output_cost_sum || 0) + (t.cache_cost || 0);
+      const cacheCost = t.cache_cost || 0;
       return `<div style="background:#fff;border-radius:8px;padding:12px 16px;box-shadow:0 1px 3px rgba(0,0,0,0.1);min-width:200px;flex:1;">
         <div style="font-size:13px;font-weight:600;color:#1a1a2e;">${label}</div>
         <div style="font-size:11px;color:#888;margin-bottom:6px;">${t.msg_count} 条消息</div>
@@ -58,6 +59,7 @@ function teamStyle(team) {
           <span class="badge badge-input">未缓存 ${(t.uncached_input || 0).toLocaleString()}</span>
           <span class="badge badge-output">输出 ${(t.total_output || 0).toLocaleString()}</span>
           <span class="cost-pos">¥${totalCost.toFixed(4)}</span>
+          ${!isUser && cacheCost > 0 ? `<span style="font-size:10px;color:#888;">内含缓存费 ¥${cacheCost.toFixed(4)}</span>` : ''}
         </div>
       </div>`;
     }).join('');
@@ -89,8 +91,11 @@ function teamStyle(team) {
   const hasAgents = conv.agentBreakdown && conv.agentBreakdown.length > 0;
   for (const msg of conv.messages) {
     const isUser = msg.role === 'user';
+    const isSkillMsg = (msg.skillCalls || []).some(s => s.skill_name);
     const hasAgent = (msg.skillCalls || []).some(s => s.agent_name);
-    const roleLabel = isUser ? '👤 用户' : (hasAgent ? '🤖 A2A' : '💬 助手');
+    const roleLabel = isUser
+      ? (isSkillMsg ? '🤖 A2A 技能' : '👤 用户')
+      : (hasAgent ? '🤖 A2A Agent' : (isSkillMsg ? '💬 助手 (含技能)' : '💬 助手'));
 
     // For user messages with empty content in agent conversations, show appropriate text
     let displayContent = msg.content || '';
@@ -147,6 +152,11 @@ function teamStyle(team) {
           <span class="badge badge-input">未缓存输入: ${(msg.uncached_input || 0).toLocaleString()}</span>
           ${cacheBadge}
           <span class="badge badge-output">输出: ${(msg.output_tokens || 0).toLocaleString()}</span>
+          ${msg.context_window_pct != null
+            ? (msg.context_window_pct > 100
+              ? `<span class="badge" style="background:#fff3e0;color:#e65100;" title="多API调用累积，单次上限1M tok">上下文: ${msg.context_window_pct}% (多调用累积)</span>`
+              : `<span class="badge" style="background:${msg.context_window_pct > 80 ? '#ffebee' : msg.context_window_pct > 50 ? '#fff3e0' : '#e8f5e9'};color:${msg.context_window_pct > 80 ? '#c62828' : msg.context_window_pct > 50 ? '#e65100' : '#2e7d32'};">上下文: ${msg.context_window_pct}%</span>`)
+            : ''}
           <span class="cost-pos">花费: ¥${totalCost.toFixed(6)}</span>
           ${msgBaseline > 0 ? `<span style="font-size:11px;color:#666;">基线: ¥${msgBaseline.toFixed(6)}</span> <span class="cost-save">节省: ¥${msgSaving.toFixed(6)}</span>` : ''}
           ${msg.created_at ? `<span style="font-size:11px;color:#999;">${new Date(msg.created_at).toLocaleString('zh-CN')}</span>` : ''}

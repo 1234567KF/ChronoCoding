@@ -9,9 +9,9 @@
  * - 记录每次降级决策
  *
  * 默认降级链：
- *   deepseek-v4-pro → deepseek-v4-flash → minimax-m1 → codex → 抛异常
- *   deepseek-v4-flash → deepseek-v4-pro → minimax-m1 → codex → 抛异常
- *   minimax-m1 → deepseek-v4-flash → codex → 抛异常
+ *   deepseek-v4-pro → deepseek-v4-flash → minimax-2.7 → codex → 抛异常
+ *   deepseek-v4-flash → deepseek-v4-pro → minimax-2.7 → codex → 抛异常
+ *   minimax-2.7 → deepseek-v4-flash → codex → 抛异常
  *   codex → deepseek-v4-flash → 抛异常
  */
 
@@ -23,9 +23,9 @@ const rateLimiter = require("./rate-limiter.cjs");
 // 默认降级链
 // ============================================================
 const DEFAULT_CHAINS = {
-  "deepseek-v4-pro": ["deepseek-v4-pro", "deepseek-v4-flash", "minimax-m1", "codex"],
-  "deepseek-v4-flash": ["deepseek-v4-flash", "deepseek-v4-pro", "minimax-m1", "codex"],
-  "minimax-m1": ["minimax-m1", "deepseek-v4-flash", "codex"],
+  "deepseek-v4-pro": ["deepseek-v4-pro", "deepseek-v4-flash", "minimax-2.7", "codex"],
+  "deepseek-v4-flash": ["deepseek-v4-flash", "deepseek-v4-pro", "minimax-2.7", "codex"],
+  "minimax-2.7": ["minimax-2.7", "deepseek-v4-flash", "codex"],
   "codex": ["codex", "deepseek-v4-flash"],
 };
 

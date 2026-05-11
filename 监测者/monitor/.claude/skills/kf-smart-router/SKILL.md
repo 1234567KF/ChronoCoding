@@ -1,7 +1,7 @@
 ---
 name: kf-smart-router
 description: |
-  全自动多模型智能调度系统。分析任务语义，动态分配最优模型（DeepSeek Pro/Flash + MiniMax-M1 + OpenAI Codex/4o-mini）。
+  全自动多模型智能调度系统。分析任务语义，动态分配最优模型（DeepSeek Pro/Flash + MiniMax 2.7 + OpenAI Codex/4o-mini）。
   多供应商路由 + 断路器 + 降级链 + 密钥隔离。零配置，运行时内存调度。
   触发语："智能路由"、"模型调度"、"多模型路由"、"smart router"。
 triggers:
@@ -86,7 +86,7 @@ graph:
 |------|--------|------|---------|---------|---------|
 | deepseek-v4-flash | DeepSeek | chat | 日常编码/审查/文档 | 低 | DEEPSEEK_API_KEY |
 | deepseek-v4-pro | DeepSeek | reasoning | 架构/深度 debug/计划 | 中 | DEEPSEEK_API_KEY |
-| minimax-m1 | MiniMax | reasoning | 长上下文/强推理 | 中 | MINIMAX_API_KEY |
+| minimax-2.7 | MiniMax | reasoning | 长上下文/强推理 | 低 | MINIMAX_API_KEY |
 | openai-codex | OpenAI | code | 代码生成 | 低 | OPENAI_API_KEY |
 | openai-4o-mini | OpenAI | chat | 简单 QA/格式化 | 极低 | OPENAI_API_KEY |
 
@@ -111,7 +111,7 @@ CLOSED (正常) ──连续失败≥5──→ OPEN (熔断)
 ## 降级链示例
 
 ```
-deepseek-v4-pro → minimax-m1 → openai-codex → deepseek-v4-flash → SAFE_MODE
+deepseek-v4-pro → minimax-2.7 → openai-codex → deepseek-v4-flash → SAFE_MODE
 deepseek-v4-flash → openai-4o-mini → openai-codex → deepseek-v4-pro → SAFE_MODE
 ```
 
@@ -168,7 +168,7 @@ const decision = await router.route({
 });
 
 console.log(decision.model.id);        // "deepseek-v4-pro"
-console.log(decision.fallbackChain);   // ["deepseek-v4-pro", "minimax-m1", ...]
+console.log(decision.fallbackChain);   // ["deepseek-v4-pro", "minimax-2.7", ...]
 console.log(decision.confidence);      // 0.95
 
 // 直接获取 agent model 参数
@@ -209,7 +209,7 @@ kf-smart-router model ID → Claude Code Agent model string:
 | kf-smart-router ID | Agent model | 等级 |
 |-------------------|-------------|------|
 | deepseek-v4-pro | opus | pro 级推理 |
-| minimax-m1 | opus | pro 级推理 |
+| minimax-2.7 | opus | pro 级推理 |
 | deepseek-v4-flash | sonnet | flash 级执行 |
 | openai-codex | sonnet | 代码专用 |
 | openai-4o-mini | haiku | 轻量级 |

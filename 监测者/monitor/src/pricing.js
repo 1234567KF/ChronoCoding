@@ -4,6 +4,13 @@ let MODEL_PRICES = {
   'deepseek-v4-pro':   { input: 3, output: 6, cache_read: 0.025 },
 };
 
+// 各模型最大上下文窗口（用于计算上下文窗口占比）
+const MODEL_MAX_CONTEXT = {
+  'deepseek-v4-flash': 1_000_000,
+  'deepseek-v4-pro': 1_000_000,
+  'minimax-2.7': 200_000,
+};
+
 const MODEL_ALIASES = {
   'pro':   'deepseek-v4-pro',
   'flash': 'deepseek-v4-flash',
@@ -279,9 +286,24 @@ function getPricingInfo() {
   };
 }
 
+/**
+ * 计算上下文窗口占比（%）
+ * @param {string} model - 模型 ID
+ * @param {number} inputTokens - 未缓存输入 token 数
+ * @param {number} cacheHit - 缓存命中 token 数
+ * @returns {number|null} 百分比值（0-100），未知模型返回 null
+ */
+function calcContextWindowPct(model, inputTokens, cacheHit) {
+  const maxCtx = MODEL_MAX_CONTEXT[model] || MODEL_MAX_CONTEXT[MODEL_ALIASES[model]];
+  if (!maxCtx || maxCtx <= 0) return null;
+  const total = (inputTokens || 0) + (cacheHit || 0);
+  return parseFloat(((total / maxCtx) * 100).toFixed(2));
+}
+
 module.exports = {
-  MODEL_PRICES, MODEL_ALIASES,
+  MODEL_PRICES, MODEL_ALIASES, MODEL_MAX_CONTEXT,
   calcCost, calcBaselineCost, calcSkillBaseline,
   classifySavingSkills, SKILL_SAVING_CONFIG,
   fetchOfficialPrices, getModelPrice, getPricingInfo,
+  calcContextWindowPct,
 };
