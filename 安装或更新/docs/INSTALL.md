@@ -1283,6 +1283,8 @@ D:\your-project\
 | `/prd-generator` | PRD 文档生成 | kf-prd-generator |
 | `triple [任务]` | 通用三方协作 | kf-triple-collaboration |
 | `模型路由` / `省模式` | 模型智能路由（全自动） | kf-model-router |
+| `智能路由` / `模型调度` / `多模型路由` / `smart router` / `路由调度` / `多模型` | 多供应商模型适配器插件库 | kf-smart-router |
+| `安全路由` / `safe router` / `断路器` / `限流` | 安全路由组件库：密钥隔离、断路器、令牌桶限流、降级链 | kf-safe-router |
 | `Harness 评审` / `五根铁律审计` | Skill 质量审计 | kf-skill-design-expert |
 | `/token-tracker` / `/skill-monitor` / `技能监控` / `使用率` / `token成本` | Token全量追踪 + 技能调用链路 + 成本估算 | kf-token-tracker |
 | `爬虫` / `抓取` / `scrape` / `反反爬` | Web 爬虫 + 反反爬 | kf-scrapling |

@@ -96,6 +96,8 @@ claude
 | `triple [任务]`           | 🆕 通用三方协作（轻量版 `/夯`）   | kf-triple-collaboration |
 | `/对齐` / `说下你的理解`  | 🆕 对齐工作流                     | kf-alignment         |
 | `模型路由` / `省模式`     | 🆕 模型智能路由                   | kf-model-router      |
+| `智能路由` / `模型调度` / `多模型路由` / `smart router` / `路由调度` / `多模型` | 🆕 多供应商模型适配器插件库 | kf-smart-router |
+| `安全路由` / `safe router` / `断路器` / `限流` | 🆕 安全路由组件库：密钥隔离、断路器、降级链 | kf-safe-router |
 | `spec coding`             | 🆕 Spec 驱动开发                   | kf-spec       |
 | `P图` / `改图` / `修图` / `去水印` | 🆕 AI 自然语言 P 图，无需打开编辑器  | kf-image-editor |
 | `摄入文件` / `ingest` / `lint` / `检查知识库` / `更新知识库` | 🆕 知识库全生命周期管理（知识库/raw/ → 知识库/wiki/ → CLAUDE.md） | kf-kb-envoy |
