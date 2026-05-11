@@ -166,6 +166,108 @@ function complete() {
   return { ok: true, state };
 }
 
+// ─── Sync progress from hammer-bridge state ───
+function syncFromHammer() {
+  const state = getState();
+  if (!state) return { ok: false, error: 'No active hang session. Run --init first.' };
+
+  const hammerStatusFile = path.join(ROOT, '.claude-flow', 'hammer-state', '.hammer-status.json');
+  if (!fs.existsSync(hammerStatusFile)) {
+    return { ok: false, error: 'No hammer-bridge state found. Start Phase 2 first.' };
+  }
+
+  try {
+    const hammer = JSON.parse(fs.readFileSync(hammerStatusFile, 'utf8'));
+
+    // Calculate team progress from completed/failed lists
+    const completedByTeam = {};
+    const failedByTeam = {};
+    const totalByTeam = {};
+    const teams = ['red', 'blue', 'green'];
+
+    for (const team of teams) {
+      completedByTeam[team] = 0;
+      failedByTeam[team] = 0;
+      totalByTeam[team] = 0;
+    }
+
+    // Count completed agents by team
+    if (hammer.completed) {
+      for (const agent of hammer.completed) {
+        const team = agent.team;
+        if (teams.includes(team)) completedByTeam[team]++;
+      }
+    }
+
+    // Count failed agents by team
+    if (hammer.failed) {
+      for (const agent of hammer.failed) {
+        const team = agent.team;
+        if (teams.includes(team)) failedByTeam[team]++;
+      }
+    }
+
+    // Count total agents for each team
+    // Auto-infer total from batches or use completed+failed+running
+    const allAgents = [
+      ...(hammer.completed || []),
+      ...(hammer.failed || []),
+      ...(hammer.running_agents || []).map(id => {
+        const parts = id.split('/');
+        return { team: parts[0] || 'unknown' };
+      })
+    ];
+    for (const agent of allAgents) {
+      const team = agent.team;
+      if (teams.includes(team)) totalByTeam[team]++;
+    }
+
+    // Fallback: if no agent-level counts, use total_agents equally distributed
+    const hasAgentData = Object.values(totalByTeam).some(v => v > 0);
+    if (!hasAgentData && hammer.total_agents) {
+      const perTeam = Math.ceil(hammer.total_agents / 3);
+      for (const team of teams) totalByTeam[team] = perTeam;
+    }
+
+    for (const team of teams) {
+      const total = totalByTeam[team] || 1;
+      const done = completedByTeam[team] || 0;
+      const failed = failedByTeam[team] || 0;
+
+      let percent = Math.round(((done * 100) + (failed * 50)) / total);
+
+      state.team_progress[team] = {
+        stage: state.current_stage || 'stage_0',
+        percent: Math.min(100, Math.max(0, percent))
+      };
+    }
+
+    // Update session-level stats
+    if (hammer.completed_agents !== undefined) {
+      state.completed_agents = hammer.completed_agents;
+    }
+    if (hammer.failed_agents !== undefined) {
+      state.failed_agents = hammer.failed_agents;
+    }
+    if (hammer.total_agents !== undefined) {
+      state.total_agents = hammer.total_agents;
+    }
+    state.session_id = hammer.session_id || state.session_id;
+
+    writeState(state);
+    return { ok: true, state };
+  } catch (err) {
+    return { ok: false, error: `Failed to sync hammer state: ${err.message}` };
+  }
+}
+
+// ─── Sync from hammer and force display ───
+function syncAndShow() {
+  const syncResult = syncFromHammer();
+  const board = dashboard();
+  return { sync: syncResult, board };
+}
+
 // ─── Check if recovery is needed ───
 function isRecoveryNeeded() {
   const state = getState();
@@ -336,6 +438,20 @@ function remove() {
 // ─── CLI ───
 function cli() {
   const args = process.argv.slice(2);
+
+  if (args.includes('--sync')) {
+    const result = syncFromHammer();
+    console.log(JSON.stringify(result, null, 2));
+    if (result.ok) console.log('\n' + dashboard());
+    process.exit(result.ok ? 0 : 1);
+  }
+
+  if (args.includes('--sync-and-show')) {
+    const result = syncAndShow();
+    // Only output the dashboard (for Team Lead injection)
+    console.log(syncAndShow().board);
+    process.exit(0);
+  }
 
   if (args.includes('--init')) {
     const nameIdx = args.indexOf('--init') + 1;

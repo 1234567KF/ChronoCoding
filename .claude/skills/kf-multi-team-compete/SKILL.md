@@ -818,33 +818,37 @@ Team Lead 将执行计划展示给用户：
 ---
 
 
-### Phase 1.6 — 进展看板（P0.7 新增）
+### Phase 1.6 — 进展看板（P0.7 已实施，强制集成）
 
-> Team Lead 每次交互前 MUST 基于 hang-state.json 输出可视化看板。
-> 类似 gspowers 的 state-based navigation 模式，给用户清晰的阶段感知。
+> **强制规则**：本阶段定义看板的硬性集成要求。以下规则适用于整个 Pipeline 从 Phase 2 到 Phase 6 的所有团队交互。
 
-#### 看板格式（Pipeline 执行中）
+#### 硬性规则（Team Lead 必须遵守，违规按 bug 记）
 
-退出手动 Node调用 生成看板输出：
+1. **你回复用户的每一条消息，必须以看板开头。**
+   具体格式：
+   ```
+   {node .claude/helpers/hang-state-manager.cjs --sync-and-show 的输出}
 
-```
-node .claude/helpers/hang-state-manager.cjs --dashboard
-```
+   {你的实际回复内容}
+   ```
+   如果没有先执行 `node .claude/helpers/hang-state-manager.cjs --sync-and-show` 并粘贴其输出，你不应该发送任何用户可见的回复。
 
-直接注入到 Team Lead 交互消息最前部（共享前缀之后）。
-用户输入 `fast` / `status` / `stop` 时调用对应命令：
-- `fast` → `node .claude/helpers/hang-state-manager.cjs --dashboard-off`
-- `status` → `node .claude/helpers/hang-state-manager.cjs --dashboard`
-- `stop` → pipeline 暂停，不更新 hang-state 状态
+2. **每次 Pipeline 阶段推进时，必须调用进度更新：**
+   - Agent spawn 后 → `node .claude/helpers/hammer-bridge.cjs agent-spawn --team <队> --agent <名> --task-id <阶段>`
+   - Agent 完成后 → `node .claude/helpers/hammer-bridge.cjs agent-done --team <队> --agent <名> --output <路径>`
+   - 每次 agent-done 后 → `node .claude/helpers/hang-state-manager.cjs --sync`（同步进度到 hang-state）
+   - 每阶段（Stage 0-5）全部完成后 → `node .claude/helpers/hang-state-manager.cjs --sync --phase <阶段>`（同时推进 Phase）
 
-#### 看板规则
+3. **用户输入命令的处理：**
+   - 用户输入 `fast` → `node .claude/helpers/hang-state-manager.cjs --dashboard-off`（隐藏看板，继续执行）
+   - 用户输入 `status` → `node .claude/helpers/hang-state-manager.cjs --sync-and-show`（刷新看板并展示）
+   - 用户输入 `stop` → Pipeline 暂停，保留 hang-state 状态，回复用户当前进度和恢复方法
 
-- 每次 Team Lead 交互前 MUST 读取 hang-state.json 生成看板
-- 窄终端（width < 60 chars）降级为单行:
-  
-- 用户输入  → 当前会话隐藏看板（写到 hang-state.json 的 show_dashboard: false）
-- 用户输入  → 刷新看板（重新读取 hang-state.json）
-- 用户输入  → 暂停 Pipeline，保留状态
+4. **看板输出的位置**：看板插入在你回复的最前面，看板和实际回复内容之间空一行。
+
+5. **窄终端处理**：不需要降级，看板输出会自动适配。
+
+6. **违规后果**：如果你的回复缺少看板（除用户要求 `fast` 模式外），视为不完整的回复。
 
 #### 状态图标
 
@@ -868,6 +872,8 @@ node .claude/helpers/hang-state-manager.cjs --dashboard
      - 若用户指定 --watch → node .claude/helpers/hammer-bridge.cjs init --task "<任务名>" --total-agents <N> --mode watch
      - 若用户指定 --with-tests → Stage 2 编码 agent prompt 追加单元测试伴随指令；Stage 3 测试专家验收标准增加测试文件存在性检查
      - 否则 → node .claude/helpers/hammer-bridge.cjs init --task "<任务名>" --total-agents <N>
+     ⚠️ hammer init 后 MUST 立即初始化 hang-state:
+       node .claude/helpers/hang-state-manager.cjs --init "<任务名>" --depth C
 1. swarm_init → hierarchical-mesh
 2. 为每队创建 Pipeline DAG: Stage0→Stage1→Stage2→Stage3→Stage4→Stage5
 3. 并行 spawn 三队的 Stage 0 agent（run_in_background: true, model: "sonnet"）
@@ -958,8 +964,12 @@ node .claude/helpers/hang-state-manager.cjs --dashboard
 4. Pipeline 继续推进：Stage 1→Stage 2→...→Stage 5（反转门控通过后全自动）
    每阶段完成时调用:
      node .claude/helpers/hammer-bridge.cjs agent-done --team <队名> --agent <agent名> --output <产物文件> [--tokens-in N --tokens-out N]
+     ⚠️ agent-done 后立即同步进度:
+       node .claude/helpers/hang-state-manager.cjs --sync
    每阶段失败时调用:
      node .claude/helpers/hammer-bridge.cjs agent-fail --team <队名> --agent <agent名> --error "<原因>" --max-attempts 3 --max-backoff 300000
+     ⚠️ agent-fail 后立即同步进度:
+       node .claude/helpers/hang-state-manager.cjs --sync
    ⚠️ 重试机制：失败后协调者检查重试队列到期时间，到期后重新 spawn 该 agent（agent-spawn 中的 attempt 自增）
      node .claude/helpers/hammer-bridge.cjs retry  # 列出到期重试
     若 agent 3 次重试均失败 → exhausted → 该团队该阶段标记为永久失败，协调者决定是否降级
@@ -971,6 +981,9 @@ node .claude/helpers/hang-state-manager.cjs --dashboard
      node .claude/helpers/hammer-bridge.cjs status
      # 或通过 Symphony API: curl http://localhost:3456/api/v1/state
      # 或读取 A2A 通知: ls .claude-flow/hammer-state/a2a-notifications/
+   ⚠️ 每次用户可见回复前 MUST 执行:
+     node .claude/helpers/hang-state-manager.cjs --sync-and-show
+   并将该命令的输出作为你回复的第一段内容（见 Phase 1.6 硬性规则）。
 6. 收集各队 Stage 5 最终方案
    生成最终摘要:
      node .claude/helpers/hammer-bridge.cjs summary --task "<任务名>"
@@ -1178,6 +1191,10 @@ done
 
 > **角色约束**：裁判是**单一 agent**（不拆分，不 spawn 子 agent），以绝对客观中立视角评分。
 
+⚠️ 进入 Phase 3 前 MUST 执行:
+  node .claude/helpers/hang-state-manager.cjs --sync-and-show
+  将看板输出作为本阶段第一段内容展示给用户。
+
 裁判以客观中立视角，调用 `kf-alignment` 对齐评分标准后逐一评分：
 
 ```
@@ -1309,6 +1326,10 @@ Token 消耗: {N}K additional
 ### Phase 4 — 汇总融合（初版）
 
 > **角色约束**：汇总者是**汇总团队负责人**，可按需 spawn 子 agent 来 pipeline 执行（Phase 6）。Phase 4 阶段由汇总者本人完成初版融合。
+
+⚠️ 进入 Phase 4 前 MUST 执行:
+  node .claude/helpers/hang-state-manager.cjs --sync-and-show
+  将看板输出作为本阶段第一段内容展示给用户。
 
 根据分差选择融合策略：
 
