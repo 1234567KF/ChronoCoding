@@ -37,33 +37,20 @@
     },
     {
       "name": "minimax",
-      "apiKey": "sk-cp-NkIxrvseL24IuUURo8Q2P4ESkx6TR7TSRpfwVQskmqge86P38lXJx2eDw8KA7DtD4CgNUEh77YHuixsLSdAHcY0CsKOfBz7l89JVHUJMr_oOjlGdQYmhlww",
+      "apiKey": "${MINIMAX_API_KEY}",
       "baseUrl": "https://api.minimax.chat/v1",
       "models": [
         {
-          "id": "minimax-m1-thinking",
-          "family": "thinking",
-          "description": "MiniMax M1 Thinking — deep reasoning",
-          "capabilities": ["deep-reasoning", "planning", "architecture"],
-          "costPer1KInput": 2.0,
-          "costPer1KOutput": 10.0,
+          "id": "minimax-2.7",
+          "family": "pro",
+          "description": "MiniMax 2.7 — general purpose",
+          "capabilities": ["deep-reasoning", "code", "chat", "review", "testing", "docs", "planning", "architecture"],
+          "costPer1KInput": 1.0,
+          "costPer1KOutput": 5.0,
           "supportsCache": false,
-          "priority": 2,
+          "priority": 5,
           "defaultFor": [],
-          "providerModelId": "minimax-m1-thinking",
-          "adapter": "minimax"
-        },
-        {
-          "id": "minimax-m1-fast",
-          "family": "fast",
-          "description": "MiniMax M1 Fast — efficient execution",
-          "capabilities": ["code", "chat", "docs", "review", "testing", "ui-prototype"],
-          "costPer1KInput": 0.5,
-          "costPer1KOutput": 2.0,
-          "supportsCache": false,
-          "priority": 11,
-          "defaultFor": ["review", "docs", "ui-prototype", "simple-qa"],
-          "providerModelId": "minimax-m1-fast",
+          "providerModelId": "minimax-2.7",
           "adapter": "minimax"
         }
       ]
