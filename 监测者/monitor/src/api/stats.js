@@ -27,6 +27,12 @@ router.get('/stats/tokens', (req, res) => {
      JOIN conversations c ON m.conversation_id = c.id
      WHERE date(c.started_at) >= ?`
   ).get(since);
+  const convTotals = db.prepare(
+    `SELECT
+       COALESCE(SUM(total_cost), 0) as total_cost,
+       COALESCE(SUM(total_baseline_cost), 0) as total_baseline_cost
+     FROM conversations WHERE date(started_at) >= ?`
+  ).get(since);
   const statsTotals = db.prepare(
     `SELECT
        COALESCE(SUM(total_input), 0) as total_input,
@@ -36,12 +42,12 @@ router.get('/stats/tokens', (req, res) => {
      FROM token_daily_stats WHERE date >= ?`
   ).get(since);
 
-  // Merge: use max of both sources (messages authoritative for costs, daily_stats for token counts)
+  // Merge: use max of all sources (conversations.total_cost is most complete when set)
   const summary = {
     total_input: Math.max(statsTotals.total_input, msgTotals.total_input),
     total_output: Math.max(statsTotals.total_output, msgTotals.total_output),
-    total_cost: msgTotals.total_cost || statsTotals.total_cost || 0,
-    total_baseline_cost: msgTotals.total_baseline_cost || statsTotals.total_baseline_cost || 0,
+    total_cost: Math.max(msgTotals.total_cost, convTotals.total_cost, statsTotals.total_cost),
+    total_baseline_cost: Math.max(msgTotals.total_baseline_cost, convTotals.total_baseline_cost, statsTotals.total_baseline_cost),
   };
 
   res.json({ daily, summary, range, pricing: getPricingInfo() });
