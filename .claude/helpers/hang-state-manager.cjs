@@ -276,6 +276,48 @@ function isRecoveryNeeded() {
   return true;
 }
 
+// ─── Get session context stats ───
+function getContextStats() {
+  // Try multiple possible paths for session-cost.json
+  const possiblePaths = [
+    path.join(ROOT, '监测者', 'monitor', '.claude', 'session-cost.json'),
+    path.join(ROOT, '.claude', 'session-cost.json'),
+  ];
+
+  let sessionData = null;
+  for (const p of possiblePaths) {
+    if (fs.existsSync(p)) {
+      try {
+        sessionData = JSON.parse(fs.readFileSync(p, 'utf8'));
+        break;
+      } catch { /* try next */ }
+    }
+  }
+
+  if (!sessionData) return null;
+
+  const inputTokens = sessionData.input_tokens || 0;
+  const outputTokens = sessionData.output_tokens || 0;
+  const cacheRead = sessionData.cache_read_tokens || 0;
+  const apiCalls = sessionData.api_calls || 0;
+
+  // Compute derived stats
+  const totalTokens = inputTokens + outputTokens;
+  const cacheHitRate = (inputTokens + cacheRead) > 0
+    ? Math.round((cacheRead / (inputTokens + cacheRead)) * 100)
+    : 0;
+
+  return {
+    input_tokens: inputTokens,
+    output_tokens: outputTokens,
+    cache_read: cacheRead,
+    cache_hit_rate: cacheHitRate,
+    api_calls: apiCalls,
+    total_tokens: totalTokens,
+    model: sessionData.model || 'unknown',
+  };
+}
+
 // ─── Progress bar (ASCII) ───
 function progressBar(percent, width) {
   const w = width || 16;
@@ -330,6 +372,20 @@ function dashboard() {
   }
   lines.push(`│${' '.repeat(W - 2)}│`);
 
+  // Session context stats
+  const ctx = getContextStats();
+  if (ctx) {
+    const limit = state.context_limit || 200000;
+    const usedPct = Math.min(100, Math.round((ctx.input_tokens / limit) * 100));
+    const ctxBar = progressBar(usedPct, 12);
+    const ctxLine = `  Context: ${ctxBar} (${(ctx.input_tokens / 1000).toFixed(0)}K/${(limit / 1000).toFixed(0)}K)`;
+    lines.push(`│${ctxLine.padEnd(W - 2)}│`);
+
+    const cacheStr = `  Cache: ${(ctx.cache_read / 1000000).toFixed(1)}M hits  ${ctx.cache_hit_rate}%  ${ctx.api_calls}calls`;
+    lines.push(`│${cacheStr.padEnd(W - 2)}│`);
+    lines.push(`│${' '.repeat(W - 2)}│`);
+  }
+
   // Artifacts
   const artifacts = Object.entries(state.artifacts || {});
   if (artifacts.length > 0) {
@@ -347,7 +403,8 @@ function dashboard() {
   }
 
   lines.push(`│${' '.repeat(W - 2)}│`);
-  lines.push(`│  输入 fast 跳过看板 │ status 刷新 │ stop 暂停        │`);
+  lines.push(`│  输入 fast 跳过看板 │ status 刷新 │ compress 压缩  │`);
+  lines.push(`│  stop 暂停                                      │`);
   lines.push(`└${'─'.repeat(W - 2)} ┘`);
 
   return lines.join('\n');
@@ -450,6 +507,23 @@ function cli() {
     const result = syncAndShow();
     // Only output the dashboard (for Team Lead injection)
     console.log(syncAndShow().board);
+    process.exit(0);
+  }
+
+  if (args.includes('--ctx')) {
+    const ctx = getContextStats();
+    if (!ctx) {
+      console.log('⚠️ 无会话数据。请先开始一个夯会话。');
+      process.exit(0);
+    }
+    const limit = 200000;
+    const usedPct = Math.min(100, Math.round((ctx.input_tokens / limit) * 100));
+    console.log(`Context: ${usedPct}% (${(ctx.input_tokens/1000).toFixed(0)}K/${(limit/1000).toFixed(0)}K tokens)`);
+    console.log(`Cache:   ${(ctx.cache_read/1000000).toFixed(1)}M hits @ ${ctx.cache_hit_rate}%`);
+    console.log(`Calls:   ${ctx.api_calls} API calls`);
+    console.log(`Model:   ${ctx.model}`);
+    console.log('');
+    console.log(`压缩提示: 输入 compress 让 Team Lead 调用 ctx_compress 精简上下文。`);
     process.exit(0);
   }
 
@@ -578,6 +652,9 @@ module.exports = {
   generateHandoff,
   complete,
   remove,
+  syncFromHammer,
+  syncAndShow,
+  getContextStats,
   VALID_DEPTHS,
   DEPTH_LABELS,
   DEPTH_STAGES,
