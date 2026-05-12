@@ -1,0 +1,22 @@
+{
+  "env": {
+    "ANTHROPIC_AUTH_TOKEN": "sk-your-api-key",
+    "ANTHROPIC_BASE_URL": "https://api.deepseek.com/anthropic",
+    "DEEPSEEK_API_KEY": "sk-your-api-key",
+    "MINIMAX_API_KEY": "sk-minimax-your-api-key",
+    "KIMI_API_KEY": "sk-kimi-your-api-key",
+    "CLAUDE_CODE_ALWAYS_THINKING": "0",
+    "CLAUDE_CODE_ENABLE_THINKING": "0",
+    "CLAUDE_CODE_NO_FLICKER": "1",
+    "CLAUDE_CODE_PROGRESS_BARS": "1",
+    "CLAUDE_CODE_STREAM_DELAY": "0",
+    "CLAUDE_CODE_STREAM_OUTPUT": "1",
+    "CLAUDE_CODE_VERBOSE": "1",
+    "FORCE_COLOR": "3"
+  },
+  "model": "deepseek-v4-pro",
+  "outputStyle": "stream",
+  "viewMode": "verbose",
+  "theme": "dark",
+  "verbose": true
+}
