@@ -3,10 +3,13 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "monitor": "cd monitor && node src/server.js"
+    "monitor": "cd .claude/projects/monitor/monitor && node src/server.js"
   },
   "dependencies": {
     "axios": "^1.16.0",
     "puppeteer-core": "^24.43.0"
+  },
+  "devDependencies": {
+    "js-yaml": "^4.1.1"
   }
 }

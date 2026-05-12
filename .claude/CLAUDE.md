@@ -1,6 +1,6 @@
 # AI编程智驾 — 项目配置
 
-> 总纲：[AICoding原则.docx](安装或更新/docs/AICoding原则.docx) — AI编程修炼手册2026
+> 总纲：[AICoding原则.docx](docs/install/AICoding原则.docx) — AI编程修炼手册2026
 
 本项目是 AI 编程工作台的完整技能集合，遵循**稳、省、准、测的准、夯、快、懂**六大原则。
 
@@ -22,10 +22,8 @@
 | `kf-multi-team-compete`     | **`/夯`**  | 夯     | **主入口**，自动调用 12 个技能 + Pipeline 引擎                                                                                               | 红蓝绿队多 Agent 并发竞争评审                                                                                    |
 | `kf-alignment`              | `/对齐`          | 懂     | 被 kf-spec、`/夯`、kf-prd-generator 自动调用                                                                                                     | 对齐工作流：动前谈理解，动后谈 diff                                                                              |
 | `kf-autoresearch`           | —                 | 准     | Pipeline + Loop，自动调用 kf-model-router                                                                                                          | Karpathy 自主 ML 实验：改 train.py→5分钟训练→验证val_bpb→循环                                                 |
-| `kf-model-router`           | 模型路由           | 省     | **自动触发**：所有技能启动时自动检查并切换模型；支持多供应商（DeepSeek + MiniMax + OpenAI）动态路由                                                    | 模型智能路由：多供应商动态调度，用户无感                                                                     |
+| `kf-model-router`           | 模型路由/智能路由/安全路由 | 省+稳+准 | **自动触发**：全自动多模型智能路由引擎（DeepSeek Pro/Flash + MiniMax 2.7 + Kimi K2.5），语义分类+加权评分+断路器+降级链+令牌桶限流+密钥隔离 | 三位一体路由引擎：省（模型性价比）+ 稳（断路器/限流/密钥隔离）+ 准（语义分析精准分配） |
 | `kf-monitor`                | —                 | 测的准  | 独立，监测者仪表盘：Token 追踪 + 重审触发检测 + 成本分析                                                                                             | 监测者：SQLite + Express 仪表盘，独立于 Agent 自报的数据采集与分析                                              |
-| `kf-smart-router`          | —                  | 省     | 独立，被 kf-model-router 按 adapter 引用                                                                                                          | 多供应商模型适配器插件库：DeepSeek/MiniMax/OpenAI 统一 adapter 接口                                                      |
-| `kf-safe-router`           | —                  | 省     | 独立，被 kf-model-router 按需引用安全模块                                                                                                          | 安全路由组件库：密钥隔离、断路器、令牌桶限流、降级链                                                                      |
 | `kf-saver`                  | —                 | 省     | 独立，会话成本节省追踪：自动记录每次 API 调用的 token 节省数据                                                                                       | 节省追踪器：Hook 注入，自动记录技能节省效果到 monitor DB                                                           |
 | `kf-prd-generator`          | `/prd-generator` | 快     | 自动调用 kf-alignment（产出后 Hook 对齐）；被 `/夯` Pre-Stage 自动调用                                                                           | SDD Excel → PRD 生成器                                                                                          |
 | `kf-triple-collaboration`   | triple             | 夯     | 内部 spawn（轻量版 `/夯`）                                                                                                                       | 三方协作评审                                                                                                     |
@@ -59,7 +57,6 @@
 ├── CLAUDE.md                  # 本文件
 ├── settings.json              # Claude Code 配置
 ├── settings.local.json        # 本地覆盖配置
-├── model-config.json          # 多供应商模型统一配置
 ├── install-local.ps1          # Windows 安装脚本
 ├── install-local.sh           # Linux/macOS 安装脚本
 ├── helpers/                   # Hook 处理器 + 审计脚本
@@ -105,8 +102,6 @@
     ├── kf-langextract/       # LLM 驱动结构化提取
     ├── kf-monitor/            # 监测者仪表盘：Token 追踪 + 重审检测
     ├── kf-saver/              # 会话成本节省追踪
-    ├── kf-safe-router/        # 安全路由组件库（密钥隔离/断路器/限流）
-    ├── kf-smart-router/       # 多供应商模型适配器插件库
     ├── lean-ctx/             # 上下文压缩引擎，90+ 压缩模式 + CCP
     ├── lambda-lang/          # Agent-to-Agent 原生语言（340+ 原子，7 域，3x 压缩）
     ├── claude-code-pro/      # Token 高效调度（智能跳过 + 回调替代轮询）
@@ -140,9 +135,7 @@ claude
 | `/gspowers`                                                          | gspowers                  | 稳     | Pipeline 引擎被 `/夯` 集成                                      |
 | `/prd-generator`                                                     | kf-prd-generator          | 快     | 自动调用 kf-alignment                                             |
 | `triple [任务]`                                                      | kf-triple-collaboration   | 夯     | 轻量版 `/夯`                                                    |
-| `模型路由` / `省模式` / `多供应商` / `smart router`               | kf-model-router           | 省     | **全自动**，用户无感；支持 DeepSeek + MiniMax + OpenAI 动态路由 |
-| `智能路由` / `模型调度` / `多模型路由` / `smart router` / `路由调度` / `多模型` | kf-smart-router | 省 | 多供应商模型适配器插件库，被 kf-model-router 按 adapter 引用 |
-| `安全路由` / `safe router` / `断路器` / `限流`                   | kf-safe-router            | 省     | 被 kf-model-router 按需引用安全组件                                |
+| `模型路由` / `省模式` / `智能路由` / `模型调度` / `smart router` / `安全路由` / `safe router` / `断路器` / `限流` / `多供应商` / `多模型` | kf-model-router | 省+稳+准 | **全自动**：语义分类+加权评分+断路器+降级链+令牌桶限流+密钥隔离；支持 DeepSeek + MiniMax + Kimi 动态路由 |
 | `Harness 评审` / `五根铁律审计`                                    | kf-skill-design-expert    | 稳     | 全路径扫描，评分矩阵 + 缺陷分级                                   |
 | `/token-tracker` / `/skill-monitor` / `技能监控` / `使用率` / `token成本` | kf-token-tracker | 准     | Token全量追踪 + 技能调用追踪 + 成本估算                           |
 | `P图` / `改图` / `修图` / `去水印`                             | kf-image-editor           | 快     | AI 自然语言 P 图，被 `/夯` Stage 2/5 调用                       |
@@ -169,7 +162,7 @@ claude
 ```
 用户触发 "/夯 [任务]"
   │
-  ├─ kf-model-router 多供应商动态路由（DeepSeek/MiniMax/OpenAI 自动分流）
+  ├─ kf-model-router 多供应商动态路由（DeepSeek/MiniMax/Kimi 自动分流）
   │
   ├─ claude-code-pro 智能调度 → 判断是否需要 spawn（<3 文件则跳过，省 10K-15K token）
   │
@@ -213,10 +206,10 @@ claude
 
 ## 更多信息
 
-- [AICoding原则.docx](安装或更新/docs/AICoding原则.docx) — 修炼总纲
-- [安装或更新/AICoding.md](安装或更新/AICoding.md) — 单文件入口（给 AI 看）
-- [INSTALL.md](安装或更新/docs/INSTALL.md) — AI 安装指南
-- [MANUAL.md](安装或更新/docs/MANUAL.md) — 用户使用手册
+- [AICoding原则.docx](docs/install/AICoding原则.docx) — 修炼总纲
+- [docs/install/AICoding.md](docs/install/AICoding.md) — 单文件入口（给 AI 看）
+- [INSTALL.md](docs/install/INSTALL.md) — AI 安装指南
+- [MANUAL.md](docs/install/MANUAL.md) — 用户使用手册
 - [memory/MEMORY.md](memory/MEMORY.md) — 跨会话记忆索引
 - [memory/harness-audit-history.md](memory/harness-audit-history.md) — Harness 评审历史
 

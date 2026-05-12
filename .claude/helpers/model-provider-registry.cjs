@@ -90,7 +90,7 @@ function transformConfigToRegistry(config) {
       envKey,
       healthEndpoint: p.healthEndpoint || "/models",
       adapter,
-      adapterPath: p.adapterPath || "skills/kf-smart-router/providers/",
+      adapterPath: p.adapterPath || "skills/kf-model-router/providers/",
       rateLimit: p.rateLimit || null,
       models: (p.models || []).map((m) => ({
         id: m.id,
@@ -355,7 +355,7 @@ function getProvider(providerId) {
     envKey: p.envKey,
     healthEndpoint: p.healthEndpoint,
     adapter: p.adapter || null,
-    adapterPath: p.adapterPath || "skills/kf-smart-router/providers/",
+    adapterPath: p.adapterPath || "skills/kf-model-router/providers/",
     rateLimit: p.rateLimit || null,
   };
 }
@@ -377,7 +377,7 @@ function getProviderAdapter(providerId) {
  */
 function getProviderAdapterPath(providerId) {
   const p = getProvider(providerId);
-  return p ? p.adapterPath : "skills/kf-smart-router/providers/";
+  return p ? p.adapterPath : "skills/kf-model-router/providers/";
 }
 
 /**

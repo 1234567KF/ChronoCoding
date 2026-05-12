@@ -1,0 +1,3206 @@
+{
+  "generated": "2026-05-11T23:45:49.887Z",
+  "stats": {
+    "total": 99,
+    "by_source": {
+      "local": 33,
+      "jeffallan": 66,
+      "other": 0
+    },
+    "by_domain": {
+      "frontend": 7,
+      "api-architecture": 6,
+      "platform": 7,
+      "devops": 5,
+      "infrastructure": 12,
+      "quality": 9,
+      "language": 12,
+      "backend": 7,
+      "specialized": 3,
+      "workflow": 3,
+      "data-ml": 6,
+      "security": 3,
+      "knowledge": 7,
+      "architecture": 3,
+      "general": 2,
+      "planning": 4,
+      "data": 1,
+      "skill-design": 1,
+      "ui-prototype": 1
+    },
+    "by_severity": {
+      "P0": 6,
+      "P1": 93
+    }
+  },
+  "entries": [
+    {
+      "name": "angular-architect",
+      "prefix": "",
+      "source": "jeffallan",
+      "description_short": "Generates Angular 17+ standalone components, configures advanced routing with...",
+      "triggers": [
+        "Angular",
+        "Angular 17",
+        "standalone components",
+        "signals",
+        "RxJS",
+        "NgRx",
+        "Angular performance",
+        "Angular routing",
+        "Angular testing"
+      ],
+      "domain": "frontend",
+      "role": "specialist",
+      "scope": "implementation",
+      "pattern": null,
+      "recommended_model": null,
+      "severity": "P1",
+      "stages": [
+        1
+      ],
+      "integrated_skills": [],
+      "related_skills": [
+        "typescript-pro",
+        "test-master"
+      ],
+      "agent_for": "前端专家"
+    },
+    {
+      "name": "api-designer",
+      "prefix": "",
+      "source": "jeffallan",
+      "description_short": "Use when designing REST or GraphQL APIs, creating OpenAPI specifications, or ...",
+      "triggers": [
+        "API design",
+        "REST API",
+        "OpenAPI",
+        "API specification",
+        "API architecture",
+        "resource modeling",
+        "API versioning",
+        "GraphQL schema",
+        "API documentation"
+      ],
+      "domain": "api-architecture",
+      "role": "architect",
+      "scope": "design",
+      "pattern": null,
+      "recommended_model": null,
+      "severity": "P1",
+      "stages": [
+        1
+      ],
+      "integrated_skills": [],
+      "related_skills": [
+        "graphql-architect",
+        "fastapi-expert",
+        "nestjs-expert",
+        "spring-boot-engineer",
+        "security-reviewer"
+      ],
+      "agent_for": "后端专家"
+    },
+    {
+      "name": "architecture-designer",
+      "prefix": "",
+      "source": "jeffallan",
+      "description_short": "Use when designing new high-level system architecture, reviewing existing des...",
+      "triggers": [
+        "architecture",
+        "system design",
+        "design pattern",
+        "microservices",
+        "scalability",
+        "ADR",
+        "technical design",
+        "infrastructure"
+      ],
+      "domain": "api-architecture",
+      "role": "expert",
+      "scope": "design",
+      "pattern": null,
+      "recommended_model": null,
+      "severity": "P1",
+      "stages": [
+        1
+      ],
+      "integrated_skills": [],
+      "related_skills": [
+        "fullstack-guardian",
+        "devops-engineer",
+        "secure-code-guardian",
+        "microservices-architect",
+        "code-reviewer"
+      ],
+      "agent_for": "前端设计师"
+    },
+    {
+      "name": "atlassian-mcp",
+      "prefix": "",
+      "source": "local",
+      "description_short": "Integrates with Atlassian products to manage project tracking and documentati...",
+      "triggers": [
+        "Jira",
+        "Confluence",
+        "Atlassian",
+        "MCP",
+        "tickets",
+        "issues",
+        "wiki",
+        "JQL",
+        "CQL",
+        "sprint",
+        "backlog",
+        "project management"
+      ],
+      "domain": "platform",
+      "role": "expert",
+      "scope": "implementation",
+      "pattern": null,
+      "recommended_model": null,
+      "severity": "P1",
+      "stages": [
+        1
+      ],
+      "integrated_skills": [],
+      "related_skills": [
+        "mcp-developer",
+        "api-designer",
+        "security-reviewer"
+      ],
+      "agent_for": null
+    },
+    {
+      "name": "chaos-engineer",
+      "prefix": "",
+      "source": "jeffallan",
+      "description_short": "Designs chaos experiments, creates failure injection frameworks, and facilita...",
+      "triggers": [
+        "chaos engineering",
+        "resilience testing",
+        "failure injection",
+        "game day",
+        "blast radius",
+        "chaos experiment",
+        "fault injection",
+        "Chaos Monkey",
+        "Litmus Chaos",
+        "antifragile"
+      ],
+      "domain": "devops",
+      "role": "specialist",
+      "scope": "implementation",
+      "pattern": null,
+      "recommended_model": null,
+      "severity": "P1",
+      "stages": [
+        3
+      ],
+      "integrated_skills": [],
+      "related_skills": [
+        "sre-engineer",
+        "devops-engineer",
+        "kubernetes-specialist"
+      ],
+      "agent_for": "QA 专家"
+    },
+    {
+      "name": "claude-code-pro",
+      "prefix": "",
+      "source": "local",
+      "description_short": "Token 高效调度器 — 知道何时不 spawn Agent（<3 文件跳过，省 10K-15K token），回调替代轮询（省 80-97%）。被 `...",
+      "triggers": [
+        "ccp",
+        "智能调度",
+        "回调",
+        "claude-code-pro"
+      ],
+      "domain": "infrastructure",
+      "role": "infrastructure",
+      "scope": "multi-agent",
+      "pattern": null,
+      "recommended_model": null,
+      "severity": "P1",
+      "stages": [
+        1,
+        2
+      ],
+      "integrated_skills": [],
+      "related_skills": [
+        "lambda-lang",
+        "kf-multi-team-compete"
+      ],
+      "agent_for": null
+    },
+    {
+      "name": "cli-developer",
+      "prefix": "",
+      "source": "jeffallan",
+      "description_short": "Use when building CLI tools, implementing argument parsing, or adding interac...",
+      "triggers": [
+        "CLI",
+        "command-line",
+        "terminal app",
+        "argument parsing",
+        "shell completion",
+        "interactive prompt",
+        "progress bar",
+        "commander",
+        "click",
+        "typer",
+        "cobra"
+      ],
+      "domain": "devops",
+      "role": "specialist",
+      "scope": "implementation",
+      "pattern": null,
+      "recommended_model": null,
+      "severity": "P1",
+      "stages": [
+        2
+      ],
+      "integrated_skills": [],
+      "related_skills": [
+        "devops-engineer"
+      ],
+      "agent_for": "前端设计师"
+    },
+    {
+      "name": "cloud-architect",
+      "prefix": "",
+      "source": "jeffallan",
+      "description_short": "Designs cloud architectures, creates migration plans, generates cost optimiza...",
+      "triggers": [
+        "AWS",
+        "Azure",
+        "GCP",
+        "Google Cloud",
+        "cloud migration",
+        "cloud architecture",
+        "multi-cloud",
+        "cloud cost",
+        "Well-Architected",
+        "landing zone",
+        "cloud security",
+        "disaster recovery",
+        "cloud native",
+        "serverless architecture"
+      ],
+      "domain": "infrastructure",
+      "role": "architect",
+      "scope": "infrastructure",
+      "pattern": null,
+      "recommended_model": null,
+      "severity": "P1",
+      "stages": [
+        1
+      ],
+      "integrated_skills": [],
+      "related_skills": [
+        "devops-engineer",
+        "kubernetes-specialist",
+        "terraform-engineer",
+        "security-reviewer",
+        "microservices-architect",
+        "monitoring-expert"
+      ],
+      "agent_for": "安全专家"
+    },
+    {
+      "name": "code-documenter",
+      "prefix": "",
+      "source": "jeffallan",
+      "description_short": "Generates, formats, and validates technical documentation — including docstri...",
+      "triggers": [
+        "documentation",
+        "docstrings",
+        "OpenAPI",
+        "Swagger",
+        "JSDoc",
+        "comments",
+        "API docs",
+        "tutorials",
+        "user guides",
+        "doc site"
+      ],
+      "domain": "quality",
+      "role": "specialist",
+      "scope": "implementation",
+      "pattern": null,
+      "recommended_model": null,
+      "severity": "P1",
+      "stages": [
+        1
+      ],
+      "integrated_skills": [],
+      "related_skills": [
+        "spec-miner",
+        "fullstack-guardian",
+        "code-reviewer"
+      ],
+      "agent_for": "文档专家"
+    },
+    {
+      "name": "code-reviewer",
+      "prefix": "",
+      "source": "jeffallan",
+      "description_short": "Analyzes code diffs and files to identify bugs, security vulnerabilities (SQL...",
+      "triggers": [
+        "code review",
+        "PR review",
+        "pull request",
+        "review code",
+        "code quality"
+      ],
+      "domain": "quality",
+      "role": "specialist",
+      "scope": "review",
+      "pattern": null,
+      "recommended_model": null,
+      "severity": "P1",
+      "stages": [
+        4
+      ],
+      "integrated_skills": [],
+      "related_skills": [
+        "security-reviewer",
+        "test-master",
+        "architecture-designer"
+      ],
+      "agent_for": "Code Review 专家"
+    },
+    {
+      "name": "cpp-pro",
+      "prefix": "",
+      "source": "jeffallan",
+      "description_short": "Writes, optimizes, and debugs C++ applications using modern C++20/23 features...",
+      "triggers": [
+        "C++",
+        "C++20",
+        "C++23",
+        "modern C++",
+        "template metaprogramming",
+        "systems programming",
+        "performance optimization",
+        "SIMD",
+        "memory management",
+        "CMake"
+      ],
+      "domain": "language",
+      "role": "specialist",
+      "scope": "implementation",
+      "pattern": null,
+      "recommended_model": null,
+      "severity": "P1",
+      "stages": [
+        1
+      ],
+      "integrated_skills": [],
+      "related_skills": [
+        "rust-engineer",
+        "embedded-systems"
+      ],
+      "agent_for": "后端专家"
+    },
+    {
+      "name": "csharp-developer",
+      "prefix": "",
+      "source": "jeffallan",
+      "description_short": "Use when building C# applications with .NET 8+, ASP.NET Core APIs, or Blazor ...",
+      "triggers": [
+        "C#",
+        ".NET",
+        "ASP.NET Core",
+        "Blazor",
+        "Entity Framework",
+        "EF Core",
+        "Minimal API",
+        "MAUI",
+        "SignalR"
+      ],
+      "domain": "language",
+      "role": "specialist",
+      "scope": "implementation",
+      "pattern": null,
+      "recommended_model": null,
+      "severity": "P1",
+      "stages": [
+        1
+      ],
+      "integrated_skills": [],
+      "related_skills": [
+        "api-designer",
+        "database-optimizer",
+        "devops-engineer"
+      ],
+      "agent_for": "后端专家"
+    },
+    {
+      "name": "database-optimizer",
+      "prefix": "",
+      "source": "jeffallan",
+      "description_short": "Optimizes database queries and improves performance across PostgreSQL and MyS...",
+      "triggers": [
+        "database optimization",
+        "slow query",
+        "query performance",
+        "database tuning",
+        "index optimization",
+        "execution plan",
+        "EXPLAIN ANALYZE",
+        "database performance",
+        "PostgreSQL optimization",
+        "MySQL optimization"
+      ],
+      "domain": "infrastructure",
+      "role": "specialist",
+      "scope": "optimization",
+      "pattern": null,
+      "recommended_model": null,
+      "severity": "P1",
+      "stages": [
+        1
+      ],
+      "integrated_skills": [],
+      "related_skills": [
+        "devops-engineer",
+        "postgres-pro",
+        "graphql-architect"
+      ],
+      "agent_for": "前端设计师"
+    },
+    {
+      "name": "debugging-wizard",
+      "prefix": "",
+      "source": "jeffallan",
+      "description_short": "Parses error messages, traces execution flow through stack traces, correlates...",
+      "triggers": [
+        "debug",
+        "error",
+        "bug",
+        "exception",
+        "traceback",
+        "stack trace",
+        "troubleshoot",
+        "not working",
+        "crash",
+        "fix issue"
+      ],
+      "domain": "quality",
+      "role": "specialist",
+      "scope": "analysis",
+      "pattern": null,
+      "recommended_model": null,
+      "severity": "P1",
+      "stages": [
+        3
+      ],
+      "integrated_skills": [],
+      "related_skills": [
+        "test-master",
+        "fullstack-guardian",
+        "monitoring-expert"
+      ],
+      "agent_for": "后端专家"
+    },
+    {
+      "name": "devops-engineer",
+      "prefix": "",
+      "source": "jeffallan",
+      "description_short": "Creates Dockerfiles, configures CI/CD pipelines, writes Kubernetes manifests,...",
+      "triggers": [
+        "DevOps",
+        "CI/CD",
+        "deployment",
+        "Docker",
+        "Kubernetes",
+        "Terraform",
+        "GitHub Actions",
+        "infrastructure",
+        "platform engineering",
+        "incident response",
+        "on-call",
+        "self-service"
+      ],
+      "domain": "devops",
+      "role": "engineer",
+      "scope": "implementation",
+      "pattern": null,
+      "recommended_model": null,
+      "severity": "P1",
+      "stages": [
+        1
+      ],
+      "integrated_skills": [],
+      "related_skills": [
+        "terraform-engineer",
+        "kubernetes-specialist",
+        "sre-engineer",
+        "monitoring-expert",
+        "security-reviewer"
+      ],
+      "agent_for": "基础设施专家"
+    },
+    {
+      "name": "django-expert",
+      "prefix": "",
+      "source": "jeffallan",
+      "description_short": "Use when building Django web applications or REST APIs with Django REST Frame...",
+      "triggers": [
+        "Django",
+        "DRF",
+        "Django REST Framework",
+        "Django ORM",
+        "Django model",
+        "serializer",
+        "viewset",
+        "Python web"
+      ],
+      "domain": "backend",
+      "role": "specialist",
+      "scope": "implementation",
+      "pattern": null,
+      "recommended_model": null,
+      "severity": "P1",
+      "stages": [
+        1
+      ],
+      "integrated_skills": [],
+      "related_skills": [
+        "fullstack-guardian",
+        "fastapi-expert",
+        "test-master"
+      ],
+      "agent_for": "后端专家"
+    },
+    {
+      "name": "dotnet-core-expert",
+      "prefix": "",
+      "source": "jeffallan",
+      "description_short": "Use when building .NET 8 applications with minimal APIs, clean architecture, ...",
+      "triggers": [
+        ".NET Core",
+        ".NET 8",
+        "ASP.NET Core",
+        "C# 12",
+        "minimal API",
+        "Entity Framework Core",
+        "microservices .NET",
+        "CQRS",
+        "MediatR"
+      ],
+      "domain": "backend",
+      "role": "specialist",
+      "scope": "implementation",
+      "pattern": null,
+      "recommended_model": null,
+      "severity": "P1",
+      "stages": [
+        1
+      ],
+      "integrated_skills": [],
+      "related_skills": [
+        "fullstack-guardian",
+        "microservices-architect",
+        "cloud-architect",
+        "test-master"
+      ],
+      "agent_for": "基础设施专家"
+    },
+    {
+      "name": "embedded-systems",
+      "prefix": "",
+      "source": "jeffallan",
+      "description_short": "Use when developing firmware for microcontrollers, implementing RTOS applicat...",
+      "triggers": [
+        "embedded systems",
+        "firmware",
+        "microcontroller",
+        "RTOS",
+        "FreeRTOS",
+        "STM32",
+        "ESP32",
+        "bare metal",
+        "interrupt",
+        "DMA",
+        "real-time"
+      ],
+      "domain": "specialized",
+      "role": "specialist",
+      "scope": "implementation",
+      "pattern": null,
+      "recommended_model": null,
+      "severity": "P1",
+      "stages": [
+        2
+      ],
+      "integrated_skills": [],
+      "related_skills": [],
+      "agent_for": "后端专家"
+    },
+    {
+      "name": "fastapi-expert",
+      "prefix": "",
+      "source": "jeffallan",
+      "description_short": "Use when building high-performance async Python APIs with FastAPI and Pydanti...",
+      "triggers": [
+        "FastAPI",
+        "Pydantic",
+        "async Python",
+        "Python API",
+        "REST API Python",
+        "SQLAlchemy async",
+        "JWT authentication",
+        "OpenAPI",
+        "Swagger Python"
+      ],
+      "domain": "backend",
+      "role": "specialist",
+      "scope": "implementation",
+      "pattern": null,
+      "recommended_model": null,
+      "severity": "P1",
+      "stages": [
+        1
+      ],
+      "integrated_skills": [],
+      "related_skills": [
+        "fullstack-guardian",
+        "django-expert",
+        "test-master"
+      ],
+      "agent_for": "文档专家"
+    },
+    {
+      "name": "feature-forge",
+      "prefix": "",
+      "source": "jeffallan",
+      "description_short": "Conducts structured requirements workshops to produce feature specifications,...",
+      "triggers": [
+        "requirements",
+        "specification",
+        "feature definition",
+        "user stories",
+        "EARS",
+        "planning"
+      ],
+      "domain": "workflow",
+      "role": "specialist",
+      "scope": "design",
+      "pattern": null,
+      "recommended_model": null,
+      "severity": "P1",
+      "stages": [
+        2
+      ],
+      "integrated_skills": [],
+      "related_skills": [
+        "fullstack-guardian",
+        "spec-miner",
+        "test-master"
+      ],
+      "agent_for": "后端专家"
+    },
+    {
+      "name": "fine-tuning-expert",
+      "prefix": "",
+      "source": "jeffallan",
+      "description_short": "Use when fine-tuning LLMs, training custom models, or adapting foundation mod...",
+      "triggers": [
+        "fine-tuning",
+        "fine tuning",
+        "finetuning",
+        "LoRA",
+        "QLoRA",
+        "PEFT",
+        "adapter tuning",
+        "transfer learning",
+        "model training",
+        "custom model",
+        "LLM training",
+        "instruction tuning",
+        "RLHF",
+        "model optimization",
+        "quantization"
+      ],
+      "domain": "data-ml",
+      "role": "expert",
+      "scope": "implementation",
+      "pattern": null,
+      "recommended_model": null,
+      "severity": "P1",
+      "stages": [
+        1
+      ],
+      "integrated_skills": [],
+      "related_skills": [
+        "devops-engineer"
+      ],
+      "agent_for": "后端专家"
+    },
+    {
+      "name": "flutter-expert",
+      "prefix": "",
+      "source": "jeffallan",
+      "description_short": "Use when building cross-platform applications with Flutter 3+ and Dart. Invok...",
+      "triggers": [
+        "Flutter",
+        "Dart",
+        "widget",
+        "Riverpod",
+        "Bloc",
+        "GoRouter",
+        "cross-platform"
+      ],
+      "domain": "frontend",
+      "role": "specialist",
+      "scope": "implementation",
+      "pattern": null,
+      "recommended_model": null,
+      "severity": "P1",
+      "stages": [
+        1
+      ],
+      "integrated_skills": [],
+      "related_skills": [
+        "react-native-expert",
+        "test-master",
+        "fullstack-guardian"
+      ],
+      "agent_for": "前端专家"
+    },
+    {
+      "name": "fullstack-guardian",
+      "prefix": "",
+      "source": "jeffallan",
+      "description_short": "Builds security-focused full-stack web applications by implementing integrate...",
+      "triggers": [
+        "fullstack",
+        "implement feature",
+        "build feature",
+        "create API",
+        "frontend and backend",
+        "full stack",
+        "new feature",
+        "implement",
+        "microservices",
+        "websocket",
+        "real-time",
+        "deployment pipeline",
+        "monorepo",
+        "architecture decision",
+        "technology selection",
+        "end-to-end"
+      ],
+      "domain": "security",
+      "role": "expert",
+      "scope": "implementation",
+      "pattern": null,
+      "recommended_model": null,
+      "severity": "P1",
+      "stages": [
+        2
+      ],
+      "integrated_skills": [],
+      "related_skills": [
+        "feature-forge",
+        "test-master",
+        "devops-engineer",
+        "secure-code-guardian",
+        "architecture-designer",
+        "react-expert",
+        "typescript-pro"
+      ],
+      "agent_for": "安全专家"
+    },
+    {
+      "name": "game-developer",
+      "prefix": "",
+      "source": "jeffallan",
+      "description_short": "Use when building game systems, implementing Unity/Unreal Engine features, or...",
+      "triggers": [
+        "Unity",
+        "Unreal Engine",
+        "game development",
+        "ECS architecture",
+        "game physics",
+        "multiplayer networking",
+        "game optimization",
+        "shader programming",
+        "game AI"
+      ],
+      "domain": "specialized",
+      "role": "specialist",
+      "scope": "implementation",
+      "pattern": null,
+      "recommended_model": null,
+      "severity": "P1",
+      "stages": [
+        2
+      ],
+      "integrated_skills": [],
+      "related_skills": [],
+      "agent_for": "前端设计师"
+    },
+    {
+      "name": "golang-pro",
+      "prefix": "",
+      "source": "jeffallan",
+      "description_short": "Implements concurrent Go patterns using goroutines and channels, designs and ...",
+      "triggers": [
+        "Go",
+        "Golang",
+        "goroutines",
+        "channels",
+        "gRPC",
+        "microservices Go",
+        "Go generics",
+        "concurrent programming",
+        "Go interfaces"
+      ],
+      "domain": "language",
+      "role": "specialist",
+      "scope": "implementation",
+      "pattern": null,
+      "recommended_model": null,
+      "severity": "P1",
+      "stages": [
+        1
+      ],
+      "integrated_skills": [],
+      "related_skills": [
+        "devops-engineer",
+        "microservices-architect",
+        "test-master"
+      ],
+      "agent_for": "QA 专家"
+    },
+    {
+      "name": "graphql-architect",
+      "prefix": "",
+      "source": "jeffallan",
+      "description_short": "Use when designing GraphQL schemas, implementing Apollo Federation, or buildi...",
+      "triggers": [
+        "GraphQL",
+        "Apollo Federation",
+        "GraphQL schema",
+        "API graph",
+        "GraphQL subscriptions",
+        "Apollo Server",
+        "schema design",
+        "GraphQL resolvers",
+        "DataLoader"
+      ],
+      "domain": "api-architecture",
+      "role": "architect",
+      "scope": "design",
+      "pattern": null,
+      "recommended_model": null,
+      "severity": "P1",
+      "stages": [
+        1
+      ],
+      "integrated_skills": [],
+      "related_skills": [
+        "api-designer",
+        "microservices-architect",
+        "database-optimizer"
+      ],
+      "agent_for": "前端设计师"
+    },
+    {
+      "name": "gspowers",
+      "prefix": "",
+      "source": "local",
+      "description_short": "AI 开发全流程编排器。协调 gstack（产品/架构）和 superpowers（工程/测试）。\n运行 /gspowers 查看当前进度和下一步操作。可...",
+      "triggers": [],
+      "domain": "quality",
+      "role": "orchestrator",
+      "scope": "review",
+      "pattern": null,
+      "recommended_model": null,
+      "severity": "P1",
+      "stages": [
+        1,
+        3
+      ],
+      "integrated_skills": [],
+      "related_skills": [],
+      "agent_for": null
+    },
+    {
+      "name": "gstack",
+      "prefix": "",
+      "source": "local",
+      "description_short": "Fast headless browser for QA testing and site dogfooding. Navigate pages, int...",
+      "triggers": [
+        "browse this page",
+        "take a screenshot",
+        "navigate to url",
+        "inspect the page"
+      ],
+      "domain": "quality",
+      "role": "tool",
+      "scope": "review",
+      "pattern": null,
+      "recommended_model": null,
+      "severity": "P1",
+      "stages": [
+        3
+      ],
+      "integrated_skills": [],
+      "related_skills": [],
+      "agent_for": null
+    },
+    {
+      "name": "java-architect",
+      "prefix": "",
+      "source": "jeffallan",
+      "description_short": "Use when building, configuring, or debugging enterprise Java applications wit...",
+      "triggers": [
+        "Spring Boot",
+        "Java",
+        "microservices",
+        "Spring Cloud",
+        "JPA",
+        "Hibernate",
+        "WebFlux",
+        "reactive",
+        "Java Enterprise"
+      ],
+      "domain": "language",
+      "role": "architect",
+      "scope": "implementation",
+      "pattern": null,
+      "recommended_model": null,
+      "severity": "P1",
+      "stages": [
+        1
+      ],
+      "integrated_skills": [],
+      "related_skills": [
+        "fullstack-guardian",
+        "api-designer",
+        "devops-engineer",
+        "database-optimizer"
+      ],
+      "agent_for": "安全专家"
+    },
+    {
+      "name": "javascript-pro",
+      "prefix": "",
+      "source": "jeffallan",
+      "description_short": "Writes, debugs, and refactors JavaScript code using modern ES2023+ features, ...",
+      "triggers": [
+        "JavaScript",
+        "ES2023",
+        "async await",
+        "Node.js",
+        "vanilla JavaScript",
+        "Web Workers",
+        "Fetch API",
+        "browser API",
+        "module system"
+      ],
+      "domain": "language",
+      "role": "specialist",
+      "scope": "implementation",
+      "pattern": null,
+      "recommended_model": null,
+      "severity": "P1",
+      "stages": [
+        1
+      ],
+      "integrated_skills": [],
+      "related_skills": [
+        "fullstack-guardian"
+      ],
+      "agent_for": "前端专家"
+    },
+    {
+      "name": "kf-add-skill",
+      "prefix": "kf",
+      "source": "local",
+      "description_short": "Use when the user wants to add, install, or integrate a new skill/plugin to t...",
+      "triggers": [],
+      "domain": "knowledge",
+      "role": "tool",
+      "scope": "on-demand",
+      "pattern": "pipeline + inversion",
+      "recommended_model": null,
+      "severity": "P1",
+      "stages": [
+        1
+      ],
+      "integrated_skills": [
+        "kf-model-router",
+        "kf-skill-design-expert",
+        "kf-doc-consistency"
+      ],
+      "related_skills": [],
+      "agent_for": null
+    },
+    {
+      "name": "kf-alignment",
+      "prefix": "kf",
+      "source": "local",
+      "description_short": "对齐工作流 — \"懂\"原则。动前谈理解打算，动后谈diff。确保 AI 和用户在同一认知层面。触发词：\"对齐\"、\"/alignment\"、\"说下你的理解\"...",
+      "triggers": [],
+      "domain": "architecture",
+      "role": "tool",
+      "scope": "on-demand",
+      "pattern": null,
+      "recommended_model": "pro",
+      "severity": "P0",
+      "stages": [
+        0
+      ],
+      "integrated_skills": [],
+      "related_skills": [],
+      "agent_for": null
+    },
+    {
+      "name": "kf-autoresearch",
+      "prefix": "kf",
+      "source": "local",
+      "description_short": "Karpathy's autoresearch — autonomous ML experiment agent that runs overnight ...",
+      "triggers": [],
+      "domain": "knowledge",
+      "role": "tool",
+      "scope": "always",
+      "pattern": "pipeline",
+      "recommended_model": null,
+      "severity": "P1",
+      "stages": [
+        1
+      ],
+      "integrated_skills": [
+        "kf-model-router"
+      ],
+      "related_skills": [],
+      "agent_for": null
+    },
+    {
+      "name": "kf-browser-ops",
+      "prefix": "kf",
+      "source": "local",
+      "description_short": "浏览器自动化操作。打开页面、截图、填写表单、点击元素、验证状态、\n复现Bug、跑用户流程。优先使用 gstack 内置 browse，降级到 Playwr...",
+      "triggers": [
+        "browser-ops",
+        "浏览器操作",
+        "浏览器自动化",
+        "自动复现",
+        "跑测试用例"
+      ],
+      "domain": "quality",
+      "role": "orchestrator",
+      "scope": "pipeline",
+      "pattern": null,
+      "recommended_model": "flash",
+      "severity": "P0",
+      "stages": [
+        3
+      ],
+      "integrated_skills": [],
+      "related_skills": [],
+      "agent_for": null
+    },
+    {
+      "name": "kf-code-review-graph",
+      "prefix": "kf",
+      "source": "local",
+      "description_short": "代码审查依赖图谱。分析变更文件的依赖关系，生成审查优先级地图，\n识别涟漪效应（ripple effects），检查测试覆盖缺口。\n运行 /review-g...",
+      "triggers": [
+        "review-graph",
+        "审查图谱",
+        "代码审查图谱",
+        "依赖图谱"
+      ],
+      "domain": "quality",
+      "role": "tool",
+      "scope": "review",
+      "pattern": null,
+      "recommended_model": "flash",
+      "severity": "P0",
+      "stages": [
+        4
+      ],
+      "integrated_skills": [
+        "kf-alignment"
+      ],
+      "related_skills": [],
+      "agent_for": null
+    },
+    {
+      "name": "kf-doc-consistency",
+      "prefix": "kf",
+      "source": "local",
+      "description_short": "Checks global document consistency across the project after a new skill is in...",
+      "triggers": [],
+      "domain": "platform",
+      "role": "utility",
+      "scope": "on-demand",
+      "pattern": "pipeline + reviewer",
+      "recommended_model": null,
+      "severity": "P1",
+      "stages": [
+        1,
+        2
+      ],
+      "integrated_skills": [
+        "kf-model-router"
+      ],
+      "related_skills": [],
+      "agent_for": null
+    },
+    {
+      "name": "kf-evolution",
+      "prefix": "kf",
+      "source": "local",
+      "description_short": "进化机制 — 个体+团队记忆沉淀系统。记录专家经验、团队编队历史，\n实现\"越用越好\"的持续进化。\n触发词：\"进化\"、\"记忆沉淀\"、\"专家记忆\"、\"团队记忆...",
+      "triggers": [
+        "进化",
+        "记忆沉淀",
+        "专家记忆",
+        "团队记忆",
+        "经验积累"
+      ],
+      "domain": "platform",
+      "role": "tool",
+      "scope": "on-demand",
+      "pattern": null,
+      "recommended_model": "flash",
+      "severity": "P1",
+      "stages": [
+        2
+      ],
+      "integrated_skills": [
+        "kf-multi-team-compete",
+        "kf-saver"
+      ],
+      "related_skills": [],
+      "agent_for": null
+    },
+    {
+      "name": "kf-exa-code",
+      "prefix": "kf",
+      "source": "local",
+      "description_short": "Web-Scale Context Engine for AI Coding. Proactively detects knowledge gaps du...",
+      "triggers": [
+        "exa-code",
+        "查代码示例",
+        "找API用法",
+        "找SDK用法",
+        "库怎么用",
+        "查库文档",
+        "技术查漏",
+        "补知识",
+        "code example",
+        "代码搜索"
+      ],
+      "domain": "knowledge",
+      "role": "tool",
+      "scope": "implementation",
+      "pattern": "pipeline + tool-wrapper + inversion",
+      "recommended_model": null,
+      "severity": "P1",
+      "stages": [
+        1
+      ],
+      "integrated_skills": [],
+      "related_skills": [],
+      "agent_for": null
+    },
+    {
+      "name": "kf-go",
+      "prefix": "kf",
+      "source": "local",
+      "description_short": "AI编程智驾工作流导航。显示整体开发路径、当前进度、下一步操作。\n触发词：/go、/导航、/开始、工作流。适合安装完成后不知道该做什么时使用。\n",
+      "triggers": [
+        "/go",
+        "/导航",
+        "/开始",
+        "工作流",
+        "接下来做什么",
+        "下一步"
+      ],
+      "domain": "general",
+      "role": "tool",
+      "scope": "on-demand",
+      "pattern": "pipeline + inversion",
+      "recommended_model": "flash",
+      "severity": "P1",
+      "stages": [
+        1,
+        2
+      ],
+      "integrated_skills": [
+        "kf-prd-generator",
+        "kf-ui-prototype-generator",
+        "kf-spec",
+        "kf-multi-team-compete",
+        "kf-code-review-graph",
+        "kf-alignment",
+        "kf-web-search",
+        "kf-scrapling",
+        "kf-opencli",
+        "kf-browser-ops",
+        "kf-image-editor",
+        "kf-markdown-to-docx-skill",
+        "kf-grant-research",
+        "kf-doc-consistency",
+        "kf-add-skill",
+        "kf-triple-collaboration",
+        "kf-skill-design-expert",
+        "kf-model-router"
+      ],
+      "related_skills": [],
+      "agent_for": null
+    },
+    {
+      "name": "kf-grant-research",
+      "prefix": "kf",
+      "source": "local",
+      "description_short": "Use when the user wants to prepare research grant proposals — search top jour...",
+      "triggers": [],
+      "domain": "knowledge",
+      "role": "tool",
+      "scope": "on-demand",
+      "pattern": "pipeline + inversion + generator",
+      "recommended_model": null,
+      "severity": "P0",
+      "stages": [
+        1
+      ],
+      "integrated_skills": [
+        "kf-model-router",
+        "kf-scrapling",
+        "kf-web-search",
+        "kf-alignment",
+        "kf-add-skill"
+      ],
+      "related_skills": [],
+      "agent_for": null
+    },
+    {
+      "name": "kf-image-editor",
+      "prefix": "kf",
+      "source": "local",
+      "description_short": "AI 自然语言图片编辑。基于 Nano Banana（Gemini）MCP，无需打开任何图片编辑器，\n直接用中文描述即可完成 P图、改图、生图、风格迁移、...",
+      "triggers": [
+        "P图",
+        "改图",
+        "修图",
+        "生成图片",
+        "图片编辑",
+        "抠图",
+        "去水印",
+        "换背景",
+        "老照片修复"
+      ],
+      "domain": "planning",
+      "role": "orchestrator",
+      "scope": "pipeline",
+      "pattern": "tool-wrapper",
+      "recommended_model": "flash",
+      "severity": "P1",
+      "stages": [
+        2
+      ],
+      "integrated_skills": [],
+      "related_skills": [],
+      "agent_for": null
+    },
+    {
+      "name": "kf-kb-envoy",
+      "prefix": "kf",
+      "source": "local",
+      "description_short": "Knowledge Base Envoy — Karpathy LLM Wiki 模式知识库全生命周期管理",
+      "triggers": [],
+      "domain": "platform",
+      "role": "tool",
+      "scope": "on-demand",
+      "pattern": null,
+      "recommended_model": null,
+      "severity": "P1",
+      "stages": [
+        1,
+        2
+      ],
+      "integrated_skills": [],
+      "related_skills": [],
+      "agent_for": null
+    },
+    {
+      "name": "kf-langextract",
+      "prefix": "kf",
+      "source": "local",
+      "description_short": "Use when the user pastes or provides unstructured text and wants structured d...",
+      "triggers": [],
+      "domain": "data",
+      "role": "tool",
+      "scope": "on-demand",
+      "pattern": "tool-wrapper+generator+pipeline",
+      "recommended_model": null,
+      "severity": "P1",
+      "stages": [
+        2
+      ],
+      "integrated_skills": [
+        "kf-model-router"
+      ],
+      "related_skills": [],
+      "agent_for": null
+    },
+    {
+      "name": "kf-model-router",
+      "prefix": "kf",
+      "source": "local",
+      "description_short": "全自动多模型智能路由引擎 — \"省+稳+准\"三位一体。多供应商动态调度（DeepSeek Pro/Flash + MiniMax 2.7 + Kimi K...",
+      "triggers": [
+        "模型路由",
+        "切换模型",
+        "省模式",
+        "智能路由",
+        "模型调度",
+        "多模型路由",
+        "smart router",
+        "路由调度",
+        "多模型",
+        "安全路由",
+        "safe router",
+        "断路器",
+        "限流"
+      ],
+      "domain": "infrastructure",
+      "role": "utility",
+      "scope": "always",
+      "pattern": null,
+      "recommended_model": null,
+      "severity": "P1",
+      "stages": [
+        1,
+        2
+      ],
+      "integrated_skills": [
+        "kf-spec",
+        "kf-multi-team-compete",
+        "kf-alignment",
+        "kf-prd-generator",
+        "kf-code-review-graph",
+        "kf-web-search",
+        "kf-triple-collaboration",
+        "kf-browser-ops"
+      ],
+      "related_skills": [],
+      "agent_for": null
+    },
+    {
+      "name": "kf-monitor",
+      "prefix": "kf",
+      "source": "local",
+      "description_short": "监测者 Agent — 全链路可观测性。缓存命中率仪表盘、成本实时统计、异常模式标记。\n触发词：\"监测\"、\"监控\"、\"面板\"、\"状态\"、\"成本面板\"、\"缓...",
+      "triggers": [
+        "监测",
+        "监控",
+        "面板",
+        "状态",
+        "成本面板",
+        "缓存面板",
+        "缓存"
+      ],
+      "domain": "infrastructure",
+      "role": "utility",
+      "scope": "on-demand",
+      "pattern": null,
+      "recommended_model": "flash",
+      "severity": "P1",
+      "stages": [
+        1,
+        2
+      ],
+      "integrated_skills": [
+        "kf-token-tracker",
+        "kf-saver"
+      ],
+      "related_skills": [],
+      "agent_for": null
+    },
+    {
+      "name": "kf-multi-team-compete",
+      "prefix": "kf",
+      "source": "local",
+      "description_short": "多团队竞争评审（中文别称：夯）。swarm 启动真实多 Agent 并发，红蓝绿队各含开发者 agent 按 Pipeline 流水线协作，\n裁判+汇总师...",
+      "triggers": [
+        "夯",
+        "多团队竞争",
+        "竞争评审",
+        "裁判对比",
+        "多方案对比",
+        "/夯"
+      ],
+      "domain": "architecture",
+      "role": "orchestrator",
+      "scope": "pipeline",
+      "pattern": "pipeline + inversion + reviewer",
+      "recommended_model": null,
+      "severity": "P1",
+      "stages": [
+        5
+      ],
+      "integrated_skills": [
+        "kf-alignment",
+        "kf-code-review-graph",
+        "kf-spec",
+        "kf-ui-prototype-generator",
+        "kf-browser-ops",
+        "kf-web-search",
+        "kf-scrapling",
+        "kf-opencli",
+        "kf-exa-code",
+        "kf-prd-generator",
+        "kf-model-router",
+        "kf-image-editor",
+        "skill-creator"
+      ],
+      "related_skills": [],
+      "agent_for": null
+    },
+    {
+      "name": "kf-opencli",
+      "prefix": "kf",
+      "source": "local",
+      "description_short": "OpenCLI — 把任意网站变成命令行工具。AI 原生的浏览器自动化框架，100+ 平台内建适配器，\n通过 Chrome Extension 复用已登录...",
+      "triggers": [
+        "opencli",
+        "平台抓取",
+        "热榜",
+        "知乎热榜",
+        "B站热门",
+        "微博热搜",
+        "小红书",
+        "抖音",
+        "GitHub trending",
+        "HackerNews",
+        "Twitter trending",
+        "Reddit",
+        "数据直取",
+        "CLI抓取",
+        "浏览器自动化"
+      ],
+      "domain": "knowledge",
+      "role": "orchestrator",
+      "scope": "pipeline",
+      "pattern": "tool-wrapper",
+      "recommended_model": "flash",
+      "severity": "P1",
+      "stages": [
+        1
+      ],
+      "integrated_skills": [
+        "kf-alignment",
+        "kf-web-search",
+        "kf-scrapling"
+      ],
+      "related_skills": [],
+      "agent_for": null
+    },
+    {
+      "name": "kf-prd-generator",
+      "prefix": "kf",
+      "source": "local",
+      "description_short": "Transform business requirements (verbal/Excel/document) into structured Markd...",
+      "triggers": [],
+      "domain": "planning",
+      "role": "tool",
+      "scope": "pipeline",
+      "pattern": "inversion + generator",
+      "recommended_model": "flash",
+      "severity": "P0",
+      "stages": [
+        0
+      ],
+      "integrated_skills": [
+        "kf-alignment"
+      ],
+      "related_skills": [],
+      "agent_for": null
+    },
+    {
+      "name": "kf-reverse-spec",
+      "prefix": "kf",
+      "source": "local",
+      "description_short": "Use when needing to understand an existing codebase, reverse-engineer project...",
+      "triggers": [],
+      "domain": "planning",
+      "role": "tool",
+      "scope": "pipeline",
+      "pattern": "pipeline",
+      "recommended_model": null,
+      "severity": "P1",
+      "stages": [
+        1
+      ],
+      "integrated_skills": [
+        "kf-model-router",
+        "kf-web-search",
+        "kf-alignment",
+        "kf-code-review-graph"
+      ],
+      "related_skills": [],
+      "agent_for": null
+    },
+    {
+      "name": "kf-saver",
+      "prefix": "kf",
+      "source": "local",
+      "description_short": "节流者 Agent — 缓存监控 + 成本控制 + 模型路由强化。\n自动检测 KV Cache 命中率，低于阈值时优化 system prompt。\n触发...",
+      "triggers": [
+        "节省",
+        "省模式",
+        "成本优化",
+        "缓存分析",
+        "token节省",
+        "cache分析",
+        "/节省"
+      ],
+      "domain": "infrastructure",
+      "role": "utility",
+      "scope": "always",
+      "pattern": null,
+      "recommended_model": "flash",
+      "severity": "P1",
+      "stages": [
+        1,
+        2
+      ],
+      "integrated_skills": [
+        "kf-model-router",
+        "kf-token-tracker",
+        "lean-ctx"
+      ],
+      "related_skills": [],
+      "agent_for": null
+    },
+    {
+      "name": "kf-scrapling",
+      "prefix": "kf",
+      "source": "local",
+      "description_short": "Web 爬虫抓取数据。基于 Scrapling（Python 库），支持反反爬绕过（Cloudflare Turnstile）、隐身浏览器、自适应元素追踪...",
+      "triggers": [
+        "爬虫",
+        "抓取",
+        "爬取",
+        "scrape",
+        "crawl",
+        "数据采集",
+        "网页抓取",
+        "反反爬"
+      ],
+      "domain": "knowledge",
+      "role": "orchestrator",
+      "scope": "pipeline",
+      "pattern": "tool-wrapper",
+      "recommended_model": "flash",
+      "severity": "P1",
+      "stages": [
+        1
+      ],
+      "integrated_skills": [
+        "kf-alignment"
+      ],
+      "related_skills": [],
+      "agent_for": null
+    },
+    {
+      "name": "kf-skill-design-expert",
+      "prefix": "kf",
+      "source": "local",
+      "description_short": "Expert in 5 Skill design patterns (Tool Wrapper / Generator / Reviewer / Inve...",
+      "triggers": [],
+      "domain": "skill-design",
+      "role": "specialist",
+      "scope": "review",
+      "pattern": "inversion + tool-wrapper",
+      "recommended_model": "pro",
+      "severity": "P1",
+      "stages": [
+        4
+      ],
+      "integrated_skills": [],
+      "related_skills": [],
+      "agent_for": null
+    },
+    {
+      "name": "kf-spec",
+      "prefix": "kf",
+      "source": "local",
+      "description_short": "协调 Spec Coding 全流程，从原始需求到结构化 Spec 文档再到分步实施。触发词：\"spec coding\"、\"写spec文档\"、\"规范编程\"...",
+      "triggers": [],
+      "domain": "planning",
+      "role": "tool",
+      "scope": "pipeline",
+      "pattern": "pipeline + inversion",
+      "recommended_model": null,
+      "severity": "P0",
+      "stages": [
+        0
+      ],
+      "integrated_skills": [
+        "kf-alignment",
+        "kf-model-router"
+      ],
+      "related_skills": [],
+      "agent_for": null
+    },
+    {
+      "name": "kf-token-tracker",
+      "prefix": "kf",
+      "source": "local",
+      "description_short": "Token全量追踪 + 技能调用链路追踪。追踪所有模型调用的Token消耗、缓存命中率、成本估算，附带技能调用追踪。\n触发词：/token-tracker...",
+      "triggers": [
+        "/token-tracker",
+        "token-tracker",
+        "/skill-monitor",
+        "skill-monitor",
+        "技能监控",
+        "使用率",
+        "调用链路",
+        "技能清单",
+        "token成本",
+        "cost"
+      ],
+      "domain": "infrastructure",
+      "role": "utility",
+      "scope": "on-demand",
+      "pattern": null,
+      "recommended_model": "flash",
+      "severity": "P1",
+      "stages": [
+        1,
+        2
+      ],
+      "integrated_skills": [],
+      "related_skills": [],
+      "agent_for": null
+    },
+    {
+      "name": "kf-triple-collaboration",
+      "prefix": "kf",
+      "source": "local",
+      "description_short": "Red Team vs Blue Team vs Judge - Triple agent collaboration for comprehensive...",
+      "triggers": [],
+      "domain": "architecture",
+      "role": "orchestrator",
+      "scope": "pipeline",
+      "pattern": null,
+      "recommended_model": "pro",
+      "severity": "P1",
+      "stages": [
+        1,
+        2
+      ],
+      "integrated_skills": [],
+      "related_skills": [],
+      "agent_for": null
+    },
+    {
+      "name": "kf-ui-prototype-generator",
+      "prefix": "kf",
+      "source": "local",
+      "description_short": "Generate zero-dependency, theme-switchable HTML prototypes from PRD documents...",
+      "triggers": [],
+      "domain": "ui-prototype",
+      "role": "tool",
+      "scope": "on-demand",
+      "pattern": "generator",
+      "recommended_model": "flash",
+      "severity": "P1",
+      "stages": [
+        2
+      ],
+      "integrated_skills": [
+        "kf-alignment"
+      ],
+      "related_skills": [],
+      "agent_for": null
+    },
+    {
+      "name": "kf-web-search",
+      "prefix": "kf",
+      "source": "local",
+      "description_short": "多引擎智能搜索。针对国内开发、技术文档、国际资料三种场景，\n自动选择最优搜索策略和关键词组合。支持精确搜索、站点限定、时间过滤。\n可被 kf-multi-...",
+      "triggers": [
+        "web-search",
+        "网络搜索",
+        "搜索资料",
+        "查文档",
+        "搜索教程",
+        "搜索最新"
+      ],
+      "domain": "knowledge",
+      "role": "orchestrator",
+      "scope": "pipeline",
+      "pattern": null,
+      "recommended_model": "flash",
+      "severity": "P1",
+      "stages": [
+        1
+      ],
+      "integrated_skills": [],
+      "related_skills": [],
+      "agent_for": null
+    },
+    {
+      "name": "kotlin-specialist",
+      "prefix": "",
+      "source": "jeffallan",
+      "description_short": "Provides idiomatic Kotlin implementation patterns including coroutine concurr...",
+      "triggers": [
+        "Kotlin",
+        "coroutines",
+        "Kotlin Multiplatform",
+        "KMP",
+        "Jetpack Compose",
+        "Ktor",
+        "Flow",
+        "Android Kotlin",
+        "suspend function"
+      ],
+      "domain": "language",
+      "role": "specialist",
+      "scope": "implementation",
+      "pattern": null,
+      "recommended_model": null,
+      "severity": "P1",
+      "stages": [
+        1
+      ],
+      "integrated_skills": [],
+      "related_skills": [
+        "test-master"
+      ],
+      "agent_for": "前端设计师"
+    },
+    {
+      "name": "kubernetes-specialist",
+      "prefix": "",
+      "source": "jeffallan",
+      "description_short": "Use when deploying or managing Kubernetes workloads. Invoke to create deploym...",
+      "triggers": [
+        "Kubernetes",
+        "K8s",
+        "kubectl",
+        "Helm",
+        "container orchestration",
+        "pod deployment",
+        "RBAC",
+        "NetworkPolicy",
+        "Ingress",
+        "StatefulSet",
+        "Operator",
+        "CRD",
+        "CustomResourceDefinition",
+        "ArgoCD",
+        "Flux",
+        "GitOps",
+        "Istio",
+        "Linkerd",
+        "service mesh",
+        "multi-cluster",
+        "cost optimization",
+        "VPA",
+        "spot instances"
+      ],
+      "domain": "infrastructure",
+      "role": "specialist",
+      "scope": "infrastructure",
+      "pattern": null,
+      "recommended_model": null,
+      "severity": "P1",
+      "stages": [
+        1
+      ],
+      "integrated_skills": [],
+      "related_skills": [
+        "devops-engineer",
+        "cloud-architect",
+        "sre-engineer",
+        "terraform-engineer",
+        "security-reviewer",
+        "chaos-engineer"
+      ],
+      "agent_for": "安全专家"
+    },
+    {
+      "name": "lambda-lang",
+      "prefix": "",
+      "source": "local",
+      "description_short": "Agent-to-Agent 原生通信语言 — 340+ 原子指令，7 域（a2a/evo/code/...），3x 压缩。自动注入到多 Agent 并发...",
+      "triggers": [
+        "lambda",
+        "agent communication",
+        "!ta ct",
+        "@v2.0#h",
+        "agent通信"
+      ],
+      "domain": "infrastructure",
+      "role": "infrastructure",
+      "scope": "multi-agent",
+      "pattern": null,
+      "recommended_model": null,
+      "severity": "P1",
+      "stages": [
+        1,
+        2
+      ],
+      "integrated_skills": [],
+      "related_skills": [
+        "claude-code-pro",
+        "kf-multi-team-compete"
+      ],
+      "agent_for": null
+    },
+    {
+      "name": "laravel-specialist",
+      "prefix": "",
+      "source": "jeffallan",
+      "description_short": "Build and configure Laravel 10+ applications, including creating Eloquent mod...",
+      "triggers": [
+        "Laravel",
+        "Eloquent",
+        "PHP framework",
+        "Laravel API",
+        "Artisan",
+        "Blade templates",
+        "Laravel queues",
+        "Livewire",
+        "Laravel testing",
+        "Sanctum",
+        "Horizon"
+      ],
+      "domain": "backend",
+      "role": "specialist",
+      "scope": "implementation",
+      "pattern": null,
+      "recommended_model": null,
+      "severity": "P1",
+      "stages": [
+        1
+      ],
+      "integrated_skills": [],
+      "related_skills": [
+        "fullstack-guardian",
+        "test-master",
+        "devops-engineer",
+        "security-reviewer"
+      ],
+      "agent_for": "后端专家"
+    },
+    {
+      "name": "lean-ctx",
+      "prefix": "",
+      "source": "local",
+      "description_short": "Context Engineering Layer — 90+ 压缩模式，Shell + Claude Code 双通道 hook，CCP 跨会话持久化。...",
+      "triggers": [
+        "lean-ctx",
+        "context compression",
+        "token savings",
+        "ctx_read",
+        "ctx_shell",
+        "ctx_search",
+        "ctx_tree",
+        "ctx_edit"
+      ],
+      "domain": "infrastructure",
+      "role": "infrastructure",
+      "scope": "global",
+      "pattern": null,
+      "recommended_model": null,
+      "severity": "P1",
+      "stages": [
+        1
+      ],
+      "integrated_skills": [],
+      "related_skills": [
+        "context-mode",
+        "claude-mem",
+        "claude-code-pro"
+      ],
+      "agent_for": null
+    },
+    {
+      "name": "legacy-modernizer",
+      "prefix": "",
+      "source": "jeffallan",
+      "description_short": "Designs incremental migration strategies, identifies service boundaries, prod...",
+      "triggers": [
+        "legacy modernization",
+        "strangler fig",
+        "incremental migration",
+        "technical debt",
+        "legacy refactoring",
+        "system migration",
+        "legacy system",
+        "modernize codebase"
+      ],
+      "domain": "specialized",
+      "role": "specialist",
+      "scope": "architecture",
+      "pattern": null,
+      "recommended_model": null,
+      "severity": "P1",
+      "stages": [
+        2
+      ],
+      "integrated_skills": [],
+      "related_skills": [
+        "test-master",
+        "devops-engineer"
+      ],
+      "agent_for": "后端专家"
+    },
+    {
+      "name": "markdown-to-docx",
+      "prefix": "",
+      "source": "jeffallan",
+      "description_short": "Convert one Markdown file or a top-level folder of Markdown articles into DOC...",
+      "triggers": [],
+      "domain": "general",
+      "role": "tool",
+      "scope": "on-demand",
+      "pattern": null,
+      "recommended_model": "flash",
+      "severity": "P1",
+      "stages": [
+        1,
+        2
+      ],
+      "integrated_skills": [],
+      "related_skills": [],
+      "agent_for": "后端专家"
+    },
+    {
+      "name": "mcp-developer",
+      "prefix": "",
+      "source": "jeffallan",
+      "description_short": "Use when building, debugging, or extending MCP servers or clients that connec...",
+      "triggers": [
+        "MCP",
+        "Model Context Protocol",
+        "MCP server",
+        "MCP client",
+        "Claude integration",
+        "AI tools",
+        "context protocol",
+        "JSON-RPC"
+      ],
+      "domain": "api-architecture",
+      "role": "specialist",
+      "scope": "implementation",
+      "pattern": null,
+      "recommended_model": null,
+      "severity": "P1",
+      "stages": [
+        2
+      ],
+      "integrated_skills": [],
+      "related_skills": [
+        "fastapi-expert",
+        "typescript-pro",
+        "security-reviewer",
+        "devops-engineer"
+      ],
+      "agent_for": "前端专家"
+    },
+    {
+      "name": "microservices-architect",
+      "prefix": "",
+      "source": "jeffallan",
+      "description_short": "Designs distributed system architectures, decomposes monoliths into bounded-c...",
+      "triggers": [
+        "microservices",
+        "service mesh",
+        "distributed systems",
+        "service boundaries",
+        "domain-driven design",
+        "event sourcing",
+        "CQRS",
+        "saga pattern",
+        "Kubernetes microservices",
+        "Istio",
+        "distributed tracing"
+      ],
+      "domain": "api-architecture",
+      "role": "architect",
+      "scope": "system-design",
+      "pattern": null,
+      "recommended_model": null,
+      "severity": "P1",
+      "stages": [
+        1
+      ],
+      "integrated_skills": [],
+      "related_skills": [
+        "devops-engineer",
+        "kubernetes-specialist",
+        "graphql-architect",
+        "architecture-designer",
+        "monitoring-expert"
+      ],
+      "agent_for": "后端专家"
+    },
+    {
+      "name": "ml-pipeline",
+      "prefix": "",
+      "source": "jeffallan",
+      "description_short": "Designs and implements production-grade ML pipeline infrastructure: configure...",
+      "triggers": [
+        "ML pipeline",
+        "MLflow",
+        "Kubeflow",
+        "feature engineering",
+        "model training",
+        "experiment tracking",
+        "feature store",
+        "hyperparameter tuning",
+        "pipeline orchestration",
+        "model registry",
+        "training workflow",
+        "MLOps",
+        "model deployment",
+        "data pipeline",
+        "model versioning"
+      ],
+      "domain": "data-ml",
+      "role": "expert",
+      "scope": "implementation",
+      "pattern": null,
+      "recommended_model": null,
+      "severity": "P1",
+      "stages": [
+        1
+      ],
+      "integrated_skills": [],
+      "related_skills": [
+        "devops-engineer",
+        "kubernetes-specialist",
+        "cloud-architect",
+        "python-pro"
+      ],
+      "agent_for": "基础设施专家"
+    },
+    {
+      "name": "monitoring-expert",
+      "prefix": "",
+      "source": "jeffallan",
+      "description_short": "Configures monitoring systems, implements structured logging pipelines, creat...",
+      "triggers": [
+        "monitoring",
+        "observability",
+        "logging",
+        "metrics",
+        "tracing",
+        "alerting",
+        "Prometheus",
+        "Grafana",
+        "DataDog",
+        "APM",
+        "performance testing",
+        "load testing",
+        "profiling",
+        "capacity planning",
+        "bottleneck"
+      ],
+      "domain": "devops",
+      "role": "specialist",
+      "scope": "implementation",
+      "pattern": null,
+      "recommended_model": null,
+      "severity": "P1",
+      "stages": [
+        3
+      ],
+      "integrated_skills": [],
+      "related_skills": [
+        "devops-engineer",
+        "debugging-wizard",
+        "architecture-designer"
+      ],
+      "agent_for": "QA 专家"
+    },
+    {
+      "name": "nestjs-expert",
+      "prefix": "",
+      "source": "jeffallan",
+      "description_short": "Creates and configures NestJS modules, controllers, services, DTOs, guards, a...",
+      "triggers": [
+        "NestJS",
+        "Nest",
+        "Node.js backend",
+        "TypeScript backend",
+        "dependency injection",
+        "controller",
+        "service",
+        "module",
+        "guard",
+        "interceptor"
+      ],
+      "domain": "backend",
+      "role": "specialist",
+      "scope": "implementation",
+      "pattern": null,
+      "recommended_model": null,
+      "severity": "P1",
+      "stages": [
+        1
+      ],
+      "integrated_skills": [],
+      "related_skills": [
+        "fullstack-guardian",
+        "test-master",
+        "devops-engineer"
+      ],
+      "agent_for": "QA 专家"
+    },
+    {
+      "name": "nextjs-developer",
+      "prefix": "",
+      "source": "jeffallan",
+      "description_short": "Use when building Next.js 14+ applications with App Router, server components...",
+      "triggers": [
+        "Next.js",
+        "Next.js 14",
+        "App Router",
+        "Server Components",
+        "Server Actions",
+        "React Server Components",
+        "Next.js deployment",
+        "Vercel",
+        "Next.js performance"
+      ],
+      "domain": "frontend",
+      "role": "specialist",
+      "scope": "implementation",
+      "pattern": null,
+      "recommended_model": null,
+      "severity": "P1",
+      "stages": [
+        1
+      ],
+      "integrated_skills": [],
+      "related_skills": [
+        "typescript-pro"
+      ],
+      "agent_for": "前端专家"
+    },
+    {
+      "name": "pandas-pro",
+      "prefix": "",
+      "source": "jeffallan",
+      "description_short": "Performs pandas DataFrame operations for data analysis, manipulation, and tra...",
+      "triggers": [
+        "pandas",
+        "DataFrame",
+        "data manipulation",
+        "data cleaning",
+        "aggregation",
+        "groupby",
+        "merge",
+        "join",
+        "time series",
+        "data wrangling",
+        "pivot table",
+        "data transformation"
+      ],
+      "domain": "data-ml",
+      "role": "expert",
+      "scope": "implementation",
+      "pattern": null,
+      "recommended_model": null,
+      "severity": "P1",
+      "stages": [
+        1
+      ],
+      "integrated_skills": [],
+      "related_skills": [
+        "python-pro"
+      ],
+      "agent_for": "数据专家"
+    },
+    {
+      "name": "php-pro",
+      "prefix": "",
+      "source": "jeffallan",
+      "description_short": "Use when building PHP applications with modern PHP 8.3+ features, Laravel, or...",
+      "triggers": [
+        "PHP",
+        "Laravel",
+        "Symfony",
+        "Composer",
+        "PHPStan",
+        "PSR",
+        "PHP API",
+        "Eloquent",
+        "Doctrine"
+      ],
+      "domain": "language",
+      "role": "specialist",
+      "scope": "implementation",
+      "pattern": null,
+      "recommended_model": null,
+      "severity": "P1",
+      "stages": [
+        1
+      ],
+      "integrated_skills": [],
+      "related_skills": [
+        "fullstack-guardian",
+        "fastapi-expert"
+      ],
+      "agent_for": "后端专家"
+    },
+    {
+      "name": "playwright-expert",
+      "prefix": "",
+      "source": "jeffallan",
+      "description_short": "Use when writing E2E tests with Playwright, setting up test infrastructure, o...",
+      "triggers": [
+        "Playwright",
+        "E2E test",
+        "end-to-end",
+        "browser testing",
+        "automation",
+        "UI testing",
+        "visual testing"
+      ],
+      "domain": "quality",
+      "role": "specialist",
+      "scope": "testing",
+      "pattern": null,
+      "recommended_model": null,
+      "severity": "P1",
+      "stages": [
+        3
+      ],
+      "integrated_skills": [],
+      "related_skills": [
+        "test-master",
+        "react-expert",
+        "devops-engineer"
+      ],
+      "agent_for": "QA 专家"
+    },
+    {
+      "name": "postgres-pro",
+      "prefix": "",
+      "source": "jeffallan",
+      "description_short": "Use when optimizing PostgreSQL queries, configuring replication, or implement...",
+      "triggers": [
+        "PostgreSQL",
+        "Postgres",
+        "EXPLAIN ANALYZE",
+        "pg_stat",
+        "JSONB",
+        "streaming replication",
+        "logical replication",
+        "VACUUM",
+        "PostGIS",
+        "pgvector"
+      ],
+      "domain": "infrastructure",
+      "role": "specialist",
+      "scope": "implementation",
+      "pattern": null,
+      "recommended_model": null,
+      "severity": "P1",
+      "stages": [
+        1
+      ],
+      "integrated_skills": [],
+      "related_skills": [
+        "database-optimizer",
+        "devops-engineer",
+        "sre-engineer"
+      ],
+      "agent_for": "后端专家"
+    },
+    {
+      "name": "prompt-engineer",
+      "prefix": "",
+      "source": "jeffallan",
+      "description_short": "Writes, refactors, and evaluates prompts for LLMs — generating optimized prom...",
+      "triggers": [
+        "prompt engineering",
+        "prompt optimization",
+        "chain-of-thought",
+        "few-shot learning",
+        "prompt testing",
+        "LLM prompts",
+        "prompt evaluation",
+        "system prompts",
+        "structured outputs",
+        "prompt design",
+        "context management",
+        "lost-in-the-middle",
+        "context degradation",
+        "token optimization",
+        "attention budget"
+      ],
+      "domain": "data-ml",
+      "role": "expert",
+      "scope": "design",
+      "pattern": null,
+      "recommended_model": null,
+      "severity": "P1",
+      "stages": [
+        2,
+        3
+      ],
+      "integrated_skills": [],
+      "related_skills": [
+        "test-master",
+        "rag-architect",
+        "debugging-wizard"
+      ],
+      "agent_for": "QA 专家"
+    },
+    {
+      "name": "python-pro",
+      "prefix": "",
+      "source": "jeffallan",
+      "description_short": "Use when building Python 3.11+ applications requiring type safety, async prog...",
+      "triggers": [
+        "Python development",
+        "type hints",
+        "async Python",
+        "pytest",
+        "mypy",
+        "dataclasses",
+        "Python best practices",
+        "Pythonic code"
+      ],
+      "domain": "language",
+      "role": "specialist",
+      "scope": "implementation",
+      "pattern": null,
+      "recommended_model": null,
+      "severity": "P1",
+      "stages": [
+        1
+      ],
+      "integrated_skills": [],
+      "related_skills": [
+        "fastapi-expert",
+        "devops-engineer"
+      ],
+      "agent_for": "QA 专家"
+    },
+    {
+      "name": "rag-architect",
+      "prefix": "",
+      "source": "jeffallan",
+      "description_short": "Designs and implements production-grade RAG systems by chunking documents, ge...",
+      "triggers": [
+        "RAG",
+        "retrieval-augmented generation",
+        "vector search",
+        "embeddings",
+        "semantic search",
+        "vector database",
+        "document retrieval",
+        "knowledge base",
+        "context retrieval",
+        "similarity search"
+      ],
+      "domain": "data-ml",
+      "role": "architect",
+      "scope": "system-design",
+      "pattern": null,
+      "recommended_model": null,
+      "severity": "P1",
+      "stages": [
+        1
+      ],
+      "integrated_skills": [],
+      "related_skills": [
+        "python-pro",
+        "database-optimizer",
+        "monitoring-expert",
+        "api-designer"
+      ],
+      "agent_for": "数据专家"
+    },
+    {
+      "name": "rails-expert",
+      "prefix": "",
+      "source": "jeffallan",
+      "description_short": "Rails 7+ specialist that optimizes Active Record queries with includes/eager_...",
+      "triggers": [
+        "Rails",
+        "Ruby on Rails",
+        "Hotwire",
+        "Turbo Frames",
+        "Turbo Streams",
+        "Action Cable",
+        "Active Record",
+        "Sidekiq",
+        "RSpec Rails"
+      ],
+      "domain": "backend",
+      "role": "specialist",
+      "scope": "implementation",
+      "pattern": null,
+      "recommended_model": null,
+      "severity": "P1",
+      "stages": [
+        1
+      ],
+      "integrated_skills": [],
+      "related_skills": [
+        "fullstack-guardian",
+        "database-optimizer"
+      ],
+      "agent_for": "QA 专家"
+    },
+    {
+      "name": "react-expert",
+      "prefix": "",
+      "source": "jeffallan",
+      "description_short": "Use when building React 18+ applications in .jsx or .tsx files, Next.js App R...",
+      "triggers": [
+        "React",
+        "JSX",
+        "hooks",
+        "useState",
+        "useEffect",
+        "useContext",
+        "Server Components",
+        "React 19",
+        "Suspense",
+        "TanStack Query",
+        "Redux",
+        "Zustand",
+        "component",
+        "frontend"
+      ],
+      "domain": "frontend",
+      "role": "specialist",
+      "scope": "implementation",
+      "pattern": null,
+      "recommended_model": null,
+      "severity": "P1",
+      "stages": [
+        1
+      ],
+      "integrated_skills": [],
+      "related_skills": [
+        "fullstack-guardian",
+        "playwright-expert",
+        "test-master"
+      ],
+      "agent_for": "前端专家"
+    },
+    {
+      "name": "react-native-expert",
+      "prefix": "",
+      "source": "jeffallan",
+      "description_short": "Builds, optimizes, and debugs cross-platform mobile applications with React N...",
+      "triggers": [
+        "React Native",
+        "Expo",
+        "mobile app",
+        "iOS",
+        "Android",
+        "cross-platform",
+        "native module"
+      ],
+      "domain": "frontend",
+      "role": "specialist",
+      "scope": "implementation",
+      "pattern": null,
+      "recommended_model": null,
+      "severity": "P1",
+      "stages": [
+        2
+      ],
+      "integrated_skills": [],
+      "related_skills": [
+        "react-expert",
+        "flutter-expert",
+        "test-master"
+      ],
+      "agent_for": "前端专家"
+    },
+    {
+      "name": "rust-engineer",
+      "prefix": "",
+      "source": "jeffallan",
+      "description_short": "Writes, reviews, and debugs idiomatic Rust code with memory safety and zero-c...",
+      "triggers": [
+        "Rust",
+        "Cargo",
+        "ownership",
+        "borrowing",
+        "lifetimes",
+        "async Rust",
+        "tokio",
+        "zero-cost abstractions",
+        "memory safety",
+        "systems programming"
+      ],
+      "domain": "language",
+      "role": "specialist",
+      "scope": "implementation",
+      "pattern": null,
+      "recommended_model": null,
+      "severity": "P1",
+      "stages": [
+        1
+      ],
+      "integrated_skills": [],
+      "related_skills": [
+        "test-master"
+      ],
+      "agent_for": "后端专家"
+    },
+    {
+      "name": "salesforce-developer",
+      "prefix": "",
+      "source": "jeffallan",
+      "description_short": "Writes and debugs Apex code, builds Lightning Web Components, optimizes SOQL ...",
+      "triggers": [
+        "Salesforce",
+        "Apex",
+        "Lightning Web Components",
+        "LWC",
+        "SOQL",
+        "SOSL",
+        "Visualforce",
+        "Salesforce DX",
+        "governor limits",
+        "triggers",
+        "platform events",
+        "CRM integration",
+        "Sales Cloud",
+        "Service Cloud"
+      ],
+      "domain": "platform",
+      "role": "expert",
+      "scope": "implementation",
+      "pattern": null,
+      "recommended_model": null,
+      "severity": "P1",
+      "stages": [
+        2
+      ],
+      "integrated_skills": [],
+      "related_skills": [
+        "api-designer",
+        "java-architect",
+        "cloud-architect",
+        "devops-engineer"
+      ],
+      "agent_for": "基础设施专家"
+    },
+    {
+      "name": "secure-code-guardian",
+      "prefix": "",
+      "source": "jeffallan",
+      "description_short": "Use when implementing authentication/authorization, securing user input, or p...",
+      "triggers": [
+        "security",
+        "authentication",
+        "authorization",
+        "encryption",
+        "OWASP",
+        "vulnerability",
+        "secure coding",
+        "password",
+        "JWT",
+        "OAuth"
+      ],
+      "domain": "security",
+      "role": "specialist",
+      "scope": "implementation",
+      "pattern": null,
+      "recommended_model": null,
+      "severity": "P1",
+      "stages": [
+        3
+      ],
+      "integrated_skills": [],
+      "related_skills": [
+        "fullstack-guardian",
+        "security-reviewer",
+        "architecture-designer"
+      ],
+      "agent_for": "安全专家"
+    },
+    {
+      "name": "security-reviewer",
+      "prefix": "",
+      "source": "jeffallan",
+      "description_short": "Identifies security vulnerabilities, generates structured audit reports with ...",
+      "triggers": [
+        "security review",
+        "vulnerability scan",
+        "SAST",
+        "security audit",
+        "penetration test",
+        "code audit",
+        "security analysis",
+        "infrastructure security",
+        "DevSecOps",
+        "cloud security",
+        "compliance audit"
+      ],
+      "domain": "security",
+      "role": "specialist",
+      "scope": "review",
+      "pattern": null,
+      "recommended_model": null,
+      "severity": "P1",
+      "stages": [
+        3
+      ],
+      "integrated_skills": [],
+      "related_skills": [
+        "secure-code-guardian",
+        "code-reviewer",
+        "devops-engineer",
+        "cloud-architect",
+        "kubernetes-specialist",
+        "api-designer",
+        "mcp-developer"
+      ],
+      "agent_for": "Code Review 专家"
+    },
+    {
+      "name": "shopify-expert",
+      "prefix": "",
+      "source": "jeffallan",
+      "description_short": "Builds and debugs Shopify themes (.liquid files, theme.json, sections), devel...",
+      "triggers": [
+        "Shopify",
+        "Liquid",
+        "Storefront API",
+        "Shopify Plus",
+        "Hydrogen",
+        "Shopify app",
+        "checkout extensions",
+        "Shopify Functions",
+        "App Bridge",
+        "theme development",
+        "e-commerce",
+        "Polaris"
+      ],
+      "domain": "platform",
+      "role": "expert",
+      "scope": "implementation",
+      "pattern": null,
+      "recommended_model": null,
+      "severity": "P1",
+      "stages": [
+        2
+      ],
+      "integrated_skills": [],
+      "related_skills": [
+        "react-expert",
+        "graphql-architect",
+        "api-designer"
+      ],
+      "agent_for": "前端专家"
+    },
+    {
+      "name": "spark-engineer",
+      "prefix": "",
+      "source": "jeffallan",
+      "description_short": "Use when writing Spark jobs, debugging performance issues, or configuring clu...",
+      "triggers": [
+        "Apache Spark",
+        "PySpark",
+        "Spark SQL",
+        "distributed computing",
+        "big data",
+        "DataFrame API",
+        "RDD",
+        "Spark Streaming",
+        "structured streaming",
+        "data partitioning",
+        "Spark performance",
+        "cluster computing",
+        "data processing pipeline"
+      ],
+      "domain": "data-ml",
+      "role": "expert",
+      "scope": "implementation",
+      "pattern": null,
+      "recommended_model": null,
+      "severity": "P1",
+      "stages": [
+        1
+      ],
+      "integrated_skills": [],
+      "related_skills": [
+        "python-pro",
+        "sql-pro",
+        "devops-engineer"
+      ],
+      "agent_for": "数据专家"
+    },
+    {
+      "name": "spec-miner",
+      "prefix": "",
+      "source": "jeffallan",
+      "description_short": "Reverse-engineering specialist that extracts specifications from existing cod...",
+      "triggers": [
+        "reverse engineer",
+        "legacy code",
+        "code analysis",
+        "undocumented",
+        "understand codebase",
+        "existing system"
+      ],
+      "domain": "workflow",
+      "role": "specialist",
+      "scope": "review",
+      "pattern": null,
+      "recommended_model": null,
+      "severity": "P1",
+      "stages": [
+        1
+      ],
+      "integrated_skills": [],
+      "related_skills": [
+        "feature-forge",
+        "fullstack-guardian",
+        "architecture-designer"
+      ],
+      "agent_for": "文档专家"
+    },
+    {
+      "name": "spring-boot-engineer",
+      "prefix": "",
+      "source": "jeffallan",
+      "description_short": "Generates Spring Boot 3.x configurations, creates REST controllers, implement...",
+      "triggers": [
+        "Spring Boot",
+        "Spring Framework",
+        "Spring Cloud",
+        "Spring Security",
+        "Spring Data JPA",
+        "Spring WebFlux",
+        "Microservices Java",
+        "Java REST API",
+        "Reactive Java"
+      ],
+      "domain": "backend",
+      "role": "specialist",
+      "scope": "implementation",
+      "pattern": null,
+      "recommended_model": null,
+      "severity": "P1",
+      "stages": [
+        1
+      ],
+      "integrated_skills": [],
+      "related_skills": [
+        "java-architect",
+        "database-optimizer",
+        "microservices-architect",
+        "devops-engineer"
+      ],
+      "agent_for": "安全专家"
+    },
+    {
+      "name": "sql-pro",
+      "prefix": "",
+      "source": "jeffallan",
+      "description_short": "Optimizes SQL queries, designs database schemas, and troubleshoots performanc...",
+      "triggers": [
+        "SQL optimization",
+        "query performance",
+        "database design",
+        "PostgreSQL",
+        "MySQL",
+        "SQL Server",
+        "window functions",
+        "CTEs",
+        "query tuning",
+        "EXPLAIN plan",
+        "database indexing"
+      ],
+      "domain": "language",
+      "role": "specialist",
+      "scope": "implementation",
+      "pattern": null,
+      "recommended_model": null,
+      "severity": "P1",
+      "stages": [
+        2
+      ],
+      "integrated_skills": [],
+      "related_skills": [
+        "devops-engineer"
+      ],
+      "agent_for": "前端设计师"
+    },
+    {
+      "name": "sre-engineer",
+      "prefix": "",
+      "source": "jeffallan",
+      "description_short": "Defines service level objectives, creates error budget policies, designs inci...",
+      "triggers": [
+        "SRE",
+        "site reliability",
+        "SLO",
+        "SLI",
+        "error budget",
+        "incident management",
+        "chaos engineering",
+        "toil reduction",
+        "on-call",
+        "MTTR"
+      ],
+      "domain": "devops",
+      "role": "specialist",
+      "scope": "implementation",
+      "pattern": null,
+      "recommended_model": null,
+      "severity": "P1",
+      "stages": [
+        1
+      ],
+      "integrated_skills": [],
+      "related_skills": [
+        "devops-engineer",
+        "cloud-architect",
+        "kubernetes-specialist"
+      ],
+      "agent_for": "基础设施专家"
+    },
+    {
+      "name": "swift-expert",
+      "prefix": "",
+      "source": "jeffallan",
+      "description_short": "Builds iOS/macOS/watchOS/tvOS applications, implements SwiftUI views and stat...",
+      "triggers": [
+        "Swift",
+        "SwiftUI",
+        "iOS development",
+        "macOS development",
+        "async/await Swift",
+        "Combine",
+        "UIKit",
+        "Vapor"
+      ],
+      "domain": "language",
+      "role": "specialist",
+      "scope": "implementation",
+      "pattern": null,
+      "recommended_model": null,
+      "severity": "P1",
+      "stages": [
+        1
+      ],
+      "integrated_skills": [],
+      "related_skills": [],
+      "agent_for": "后端专家"
+    },
+    {
+      "name": "terraform-engineer",
+      "prefix": "",
+      "source": "jeffallan",
+      "description_short": "Use when implementing infrastructure as code with Terraform across AWS, Azure...",
+      "triggers": [
+        "Terraform",
+        "infrastructure as code",
+        "IaC",
+        "terraform module",
+        "terraform state",
+        "AWS provider",
+        "Azure provider",
+        "GCP provider",
+        "terraform plan",
+        "terraform apply"
+      ],
+      "domain": "infrastructure",
+      "role": "specialist",
+      "scope": "implementation",
+      "pattern": null,
+      "recommended_model": null,
+      "severity": "P1",
+      "stages": [
+        1
+      ],
+      "integrated_skills": [],
+      "related_skills": [
+        "cloud-architect",
+        "devops-engineer",
+        "kubernetes-specialist"
+      ],
+      "agent_for": "QA 专家"
+    },
+    {
+      "name": "test-master",
+      "prefix": "",
+      "source": "jeffallan",
+      "description_short": "Generates test files, creates mocking strategies, analyzes code coverage, des...",
+      "triggers": [
+        "test",
+        "testing",
+        "QA",
+        "unit test",
+        "integration test",
+        "E2E",
+        "coverage",
+        "performance test",
+        "security test",
+        "regression",
+        "test strategy",
+        "test automation",
+        "test framework",
+        "quality metrics",
+        "defect",
+        "exploratory",
+        "usability",
+        "accessibility",
+        "localization",
+        "manual testing",
+        "shift-left",
+        "quality gate",
+        "flaky test",
+        "test maintenance"
+      ],
+      "domain": "quality",
+      "role": "specialist",
+      "scope": "testing",
+      "pattern": null,
+      "recommended_model": null,
+      "severity": "P1",
+      "stages": [
+        3
+      ],
+      "integrated_skills": [],
+      "related_skills": [
+        "fullstack-guardian",
+        "playwright-expert",
+        "devops-engineer",
+        "debugging-wizard",
+        "code-reviewer",
+        "feature-forge"
+      ],
+      "agent_for": "安全专家"
+    },
+    {
+      "name": "the-fool",
+      "prefix": "",
+      "source": "jeffallan",
+      "description_short": "Use when challenging ideas, plans, decisions, or proposals using structured c...",
+      "triggers": [
+        "play the fool",
+        "devil's advocate",
+        "challenge this",
+        "stress test",
+        "poke holes",
+        "what could go wrong",
+        "red team",
+        "pre-mortem",
+        "test my assumptions"
+      ],
+      "domain": "workflow",
+      "role": "expert",
+      "scope": "review",
+      "pattern": null,
+      "recommended_model": null,
+      "severity": "P1",
+      "stages": [
+        1,
+        2
+      ],
+      "integrated_skills": [],
+      "related_skills": [
+        "architecture-designer",
+        "code-reviewer",
+        "feature-forge"
+      ],
+      "agent_for": "后端专家"
+    },
+    {
+      "name": "typescript-pro",
+      "prefix": "",
+      "source": "jeffallan",
+      "description_short": "Implements advanced TypeScript type systems, creates custom type guards, util...",
+      "triggers": [
+        "TypeScript",
+        "generics",
+        "type safety",
+        "conditional types",
+        "mapped types",
+        "tRPC",
+        "tsconfig",
+        "type guards",
+        "discriminated unions"
+      ],
+      "domain": "language",
+      "role": "specialist",
+      "scope": "implementation",
+      "pattern": null,
+      "recommended_model": null,
+      "severity": "P1",
+      "stages": [
+        1
+      ],
+      "integrated_skills": [],
+      "related_skills": [
+        "fullstack-guardian",
+        "api-designer"
+      ],
+      "agent_for": "前端专家"
+    },
+    {
+      "name": "vue-expert",
+      "prefix": "",
+      "source": "jeffallan",
+      "description_short": "Builds Vue 3 components with Composition API patterns, configures Nuxt 3 SSR/...",
+      "triggers": [
+        "Vue 3",
+        "Composition API",
+        "Nuxt",
+        "Pinia",
+        "Vue composables",
+        "reactive",
+        "ref",
+        "Vue Router",
+        "Vite Vue",
+        "Quasar",
+        "Capacitor",
+        "PWA",
+        "service worker",
+        "Fastify SSR",
+        "sourcemap",
+        "Vite config",
+        "build optimization"
+      ],
+      "domain": "frontend",
+      "role": "specialist",
+      "scope": "implementation",
+      "pattern": null,
+      "recommended_model": null,
+      "severity": "P1",
+      "stages": [
+        1
+      ],
+      "integrated_skills": [],
+      "related_skills": [
+        "typescript-pro",
+        "fullstack-guardian"
+      ],
+      "agent_for": "前端专家"
+    },
+    {
+      "name": "vue-expert-js",
+      "prefix": "",
+      "source": "jeffallan",
+      "description_short": "Creates Vue 3 components, builds vanilla JS composables, configures Vite proj...",
+      "triggers": [
+        "Vue JavaScript",
+        "Vue without TypeScript",
+        "Vue JSDoc",
+        "Vue JS only",
+        "Vue vanilla JavaScript",
+        ".mjs Vue",
+        "Vue no TS"
+      ],
+      "domain": "frontend",
+      "role": "specialist",
+      "scope": "implementation",
+      "pattern": null,
+      "recommended_model": null,
+      "severity": "P1",
+      "stages": [
+        1
+      ],
+      "integrated_skills": [],
+      "related_skills": [
+        "vue-expert",
+        "javascript-pro"
+      ],
+      "agent_for": "前端专家"
+    },
+    {
+      "name": "websocket-engineer",
+      "prefix": "",
+      "source": "jeffallan",
+      "description_short": "Use when building real-time communication systems with WebSockets or Socket.I...",
+      "triggers": [
+        "WebSocket",
+        "Socket.IO",
+        "real-time communication",
+        "bidirectional messaging",
+        "pub/sub",
+        "server push",
+        "live updates",
+        "chat systems",
+        "presence tracking"
+      ],
+      "domain": "api-architecture",
+      "role": "specialist",
+      "scope": "implementation",
+      "pattern": null,
+      "recommended_model": null,
+      "severity": "P1",
+      "stages": [
+        1
+      ],
+      "integrated_skills": [],
+      "related_skills": [
+        "fastapi-expert",
+        "nestjs-expert",
+        "devops-engineer",
+        "monitoring-expert",
+        "security-reviewer"
+      ],
+      "agent_for": "后端专家"
+    },
+    {
+      "name": "wordpress-pro",
+      "prefix": "",
+      "source": "jeffallan",
+      "description_short": "Develops custom WordPress themes and plugins, creates and registers Gutenberg...",
+      "triggers": [
+        "WordPress",
+        "WooCommerce",
+        "Gutenberg",
+        "WordPress theme",
+        "WordPress plugin",
+        "custom blocks",
+        "ACF",
+        "WordPress REST API",
+        "hooks",
+        "filters",
+        "WordPress performance",
+        "WordPress security"
+      ],
+      "domain": "platform",
+      "role": "expert",
+      "scope": "implementation",
+      "pattern": null,
+      "recommended_model": null,
+      "severity": "P1",
+      "stages": [
+        2
+      ],
+      "integrated_skills": [],
+      "related_skills": [
+        "php-pro",
+        "laravel-specialist",
+        "fullstack-guardian",
+        "security-reviewer"
+      ],
+      "agent_for": "安全专家"
+    }
+  ]
+}

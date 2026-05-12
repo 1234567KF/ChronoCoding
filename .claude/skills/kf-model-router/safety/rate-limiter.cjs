@@ -17,7 +17,7 @@ const registry = require("./model-provider-registry.cjs");
 const DEFAULT_LIMITS = {
   deepseek: { capacity: 16, fillRate: 0.26, maxQueueTime: 5000, refillInterval: 1000 },
   minimax: { capacity: 24, fillRate: 0.4, maxQueueTime: 5000, refillInterval: 1000 },
-  kimi: { capacity: 16, fillRate: 0.26, maxQueueTime: 5000, refillInterval: 1000 },
+  kimi: { capacity: 20, fillRate: 0.33, maxQueueTime: 5000, refillInterval: 1000 },
 };
 
 // ─── 令牌桶存储 ────────────────────────────────────────────────────────

@@ -1,361 +1,125 @@
-# AICoding 项目本地完整安装脚本
-# 将所有技能和配置安装到项目本地的 .claude/ 目录
-# 支持离线安装：从 AICoding 项目复制，无需网络下载
-
-param(
-    [switch]$DryRun,           # 预览模式
-    [switch]$SkipGspowers,     # 跳过 gspowers
-    [switch]$SkipGstack,       # 跳过 gstack
-    [switch]$SkipPipeline      # 跳过 Pipeline 扩展
-)
+#!/usr/bin/env pwsh
+<#
+.SYNOPSIS
+    AI编程智驾 — 本地安装/更新脚本 (Windows)
+.DESCRIPTION
+    生成 settings.local.json 模板，引导填写 API 密钥，安装全局依赖。
+    安全：生成的 settings.local.json 已加入 .gitignore，不会提交密钥。
+#>
 
 $ErrorActionPreference = "Stop"
-$SCRIPT_DIR = $PSScriptRoot
-$PROJECT_ROOT = Split-Path $SCRIPT_DIR -Parent
-$AUTOCODING_ROOT = Split-Path $PROJECT_ROOT -Parent
+$ClaudeDir = Join-Path $PSScriptRoot ".claude"
+if (!(Test-Path $ClaudeDir)) { $ClaudeDir = $PSScriptRoot }
 
-Write-Host ""
-Write-Host "╔═══════════════════════════════════════════════════════════╗" -ForegroundColor Cyan
-Write-Host "║  AICoding 项目本地安装                                 ║" -ForegroundColor Cyan
-Write-Host "║  - 15 个 kf- 系列技能（稳省准测的准夯快懂）              ║" -ForegroundColor Cyan
-Write-Host "║  - gspowers SOP 导航（上游）                             ║" -ForegroundColor Cyan
-Write-Host "║  - gstack 产品流程框架（上游）                           ║" -ForegroundColor Cyan
-Write-Host "╚═══════════════════════════════════════════════════════════╝" -ForegroundColor Cyan
-Write-Host ""
-Write-Host "项目目录: $PROJECT_ROOT" -ForegroundColor White
-Write-Host ""
+$LocalConfig = Join-Path $ClaudeDir "settings.local.json"
+$Gitignore = Join-Path $PSScriptRoot ".gitignore"
 
-# ═══════════════════════════════════════════════════════════════
-# 创建目录结构
-# ═══════════════════════════════════════════════════════════════
-Write-Host "[1/5] 创建目录结构..." -ForegroundColor Yellow
-
-$dirs = @(
-    "$SCRIPT_DIR\skills\gspowers\references",
-    "$SCRIPT_DIR\skills\gspowers\references\backups",
-    "$SCRIPT_DIR\skills\gstack",
-    "$SCRIPT_DIR\settings.d",
-    "$PROJECT_ROOT\.claude-flow"
-)
-
-foreach ($dir in $dirs) {
-    if (!(Test-Path $dir)) {
-        New-Item -ItemType Directory -Force -Path $dir | Out-Null
-        Write-Host "  ✓ 创建 $dir" -ForegroundColor Gray
-    }
-}
-Write-Host "  ✓ 目录结构已就绪" -ForegroundColor Green
-
-# ═══════════════════════════════════════════════════════════════
-# 安装 gspowers（如果存在）
-# ═══════════════════════════════════════════════════════════════
-if (-not $SkipGspowers) {
-    Write-Host ""
-    Write-Host "[2/5] 安装 gspowers..." -ForegroundColor Yellow
-
-    $sourceGspowers = "$env:USERPROFILE\.claude\skills\gspowers"
-    $targetGspowers = "$SCRIPT_DIR\skills\gspowers"
-
-    if (Test-Path $sourceGspowers) {
-        if ($DryRun) {
-            Write-Host "  [DryRun] 复制 $sourceGspowers -> $targetGspowers" -ForegroundColor Cyan
-        } else {
-            Copy-Item -Path $sourceGspowers -Destination $targetGspowers -Recurse -Force
-            Write-Host "  ✓ gspowers 已安装（从全局复制）" -ForegroundColor Green
-        }
-    } else {
-        Write-Host "  ⚠ 全局 gspowers 不存在，跳过" -ForegroundColor Yellow
-        Write-Host "    如需安装，请先运行全局安装或手动克隆" -ForegroundColor Gray
-    }
-}
-
-# ═══════════════════════════════════════════════════════════════
-# 安装 gstack（如果存在）
-# ═══════════════════════════════════════════════════════════════
-if (-not $SkipGstack) {
-    Write-Host ""
-    Write-Host "[3/5] 安装 gstack..." -ForegroundColor Yellow
-
-    $sourceGstack = "$env:USERPROFILE\.claude\skills\gstack"
-    $targetGstack = "$SCRIPT_DIR\skills\gstack"
-
-    if (Test-Path $sourceGstack) {
-        if ($DryRun) {
-            Write-Host "  [DryRun] 复制 $sourceGstack -> $targetGstack" -ForegroundColor Cyan
-        } else {
-            Copy-Item -Path $sourceGstack -Destination $targetGstack -Recurse -Force
-            Write-Host "  ✓ gstack 已安装（从全局复制）" -ForegroundColor Green
-        }
-    } else {
-        Write-Host "  ⚠ 全局 gstack 不存在，跳过" -ForegroundColor Yellow
-        Write-Host "    如需安装，请先运行全局安装或手动克隆" -ForegroundColor Gray
-    }
-}
-
-# ═══════════════════════════════════════════════════════════════
-# 安装 Pipeline 扩展
-# ═══════════════════════════════════════════════════════════════
-if (-not $SkipPipeline) {
-    Write-Host ""
-    Write-Host "[4/5] 安装 Pipeline 扩展..." -ForegroundColor Yellow
-
-    $pipelineSource = "$PROJECT_ROOT\.claude\skills\kf-gspowers-pipeline-patch"
-    $pipelineTargetGspowers = "$SCRIPT_DIR\skills\gspowers\references"
-
-    if (Test-Path $pipelineSource) {
-        # 复制 pipeline.md
-        $sourcePipeline = Join-Path $pipelineSource "pipeline.md"
-        if (Test-Path $sourcePipeline) {
-            if ($DryRun) {
-                Write-Host "  [DryRun] 复制 pipeline.md -> $pipelineTargetGspowers" -ForegroundColor Cyan
-            } else {
-                Copy-Item $sourcePipeline $pipelineTargetGspowers -Force
-                Write-Host "  ✓ pipeline.md 已安装" -ForegroundColor Green
-            }
-        }
-
-        # 复制 execute-patch.md
-        $sourceExecutePatch = Join-Path $pipelineSource "execute-patch.md"
-        if (Test-Path $sourceExecutePatch) {
-            if ($DryRun) {
-                Write-Host "  [DryRun] 复制 execute-patch.md -> $pipelineTargetGspowers" -ForegroundColor Cyan
-            } else {
-                Copy-Item $sourceExecutePatch $pipelineTargetGspowers -Force
-                Write-Host "  ✓ execute-patch.md 已安装" -ForegroundColor Green
-            }
-        }
-
-        # 复制安装脚本
-        $sourceInstall = Join-Path $pipelineSource "install-pipeline.ps1"
-        if (Test-Path $sourceInstall -and -not $DryRun) {
-            Copy-Item $sourceInstall $SCRIPT_DIR -Force
-            Write-Host "  ✓ install-pipeline.ps1 已复制" -ForegroundColor Green
-        }
-    } else {
-        Write-Host "  ⚠ Pipeline 源目录不存在，跳过" -ForegroundColor Yellow
-        Write-Host "    请确保 AICoding 目录完整" -ForegroundColor Gray
-    }
-}
-
-# ═══════════════════════════════════════════════════════════════
-# 创建配置
-# ═══════════════════════════════════════════════════════════════
-Write-Host ""
-Write-Host "[5/5] 创建配置文件..." -ForegroundColor Yellow
-
-# settings.json
-$sourceSettings = "$PROJECT_ROOT\templates\settings.json.template"
-$targetSettings = "$SCRIPT_DIR\settings.json"
-
-if ((Test-Path $sourceSettings) -and -not (Test-Path $targetSettings)) {
-    if ($DryRun) {
-        Write-Host "  [DryRun] 创建 settings.json" -ForegroundColor Cyan
-    } else {
-        Copy-Item $sourceSettings $targetSettings
-        Write-Host "  ✓ settings.json 已创建（请编辑填入 Token）" -ForegroundColor Green
-    }
-} elseif (Test-Path $targetSettings) {
-    Write-Host "  ○ settings.json 已存在，跳过" -ForegroundColor Gray
-}
-
-# .claude-flow config
-$claudeFlowDir = "$PROJECT_ROOT\.claude-flow"
-if (!(Test-Path "$claudeFlowDir\config.yaml")) {
-    if ($DryRun) {
-        Write-Host "  [DryRun] 创建 .claude-flow/config.yaml" -ForegroundColor Cyan
-    } else {
-        $configContent = @"
-version: "3.0.0"
-
-memory:
-  backend: hybrid
-  enableHNSW: true
-  persistPath: .claude-flow/data
-  cacheSize: 500
-  learningBridge:
-    enabled: true
-    sonaMode: balanced
-
-swarm:
-  topology: hierarchical-mesh
-  maxAgents: 5
-  autoScale: true
-
-hooks:
-  enabled: true
-  autoExecute: true
-
-mcp:
-  autoStart: true
-  port: 3000
-
-agentScopes:
-  enabled: true
-  defaultScope: project
-"@
-        New-Item -ItemType Directory -Force -Path $claudeFlowDir | Out-Null
-        $configContent | Out-File -FilePath "$claudeFlowDir\config.yaml" -Encoding UTF8
-        Write-Host "  ✓ .claude-flow/config.yaml 已创建" -ForegroundColor Green
+# ─── Step 1: 确保 .gitignore 包含 settings.local.json ────────────────
+if (Test-Path $Gitignore) {
+    $content = Get-Content $Gitignore -Raw -ErrorAction SilentlyContinue
+    if ($content -notmatch "settings\.local\.json") {
+        "`n# 本地覆盖配置（含 API 密钥，不提交）`nsettings.local.json" | Add-Content $Gitignore
+        Write-Host "[✓] .gitignore 已追加 settings.local.json" -ForegroundColor Green
     }
 } else {
-    Write-Host "  ○ .claude-flow/config.yaml 已存在，跳过" -ForegroundColor Gray
+    "# 本地覆盖配置（含 API 密钥，不提交）`nsettings.local.json" | Set-Content $Gitignore
+    Write-Host "[✓] 已创建 .gitignore" -ForegroundColor Green
 }
 
-# ═══════════════════════════════════════════════════════════════
-# 初始化记忆文件
-# ═══════════════════════════════════════════════════════════════
-Write-Host ""
-Write-Host "[6/6] 初始化记忆文件..." -ForegroundColor Yellow
+# ─── Step 2: 生成 settings.local.json 模板 ─────────────────────────────
+if (Test-Path $LocalConfig) {
+    Write-Host "[i] settings.local.json 已存在，跳过生成。" -ForegroundColor Yellow
+    Write-Host "    如需重置，请先删除该文件再运行此脚本。" -ForegroundColor Yellow
+} else {
+    Write-Host "`n=== 首次安装：配置 API 密钥 ===" -ForegroundColor Cyan
+    Write-Host "以下密钥仅保存在本地 settings.local.json，不会提交到 Git。`n" -ForegroundColor Gray
 
-$memoryDir = "$PROJECT_ROOT\memory"
+    $authToken = Read-Host "请输入 ANTHROPIC_AUTH_TOKEN (DeepSeek API Key)"
+    $deepseekKey = Read-Host "请输入 DEEPSEEK_API_KEY (留空则与 ANTHROPIC_AUTH_TOKEN 相同)"
+    if ([string]::IsNullOrWhiteSpace($deepseekKey)) { $deepseekKey = $authToken }
 
-if (!(Test-Path $memoryDir)) {
-    New-Item -ItemType Directory -Force -Path $memoryDir | Out-Null
+    $minimaxKey = Read-Host "请输入 MINIMAX_API_KEY (留空则跳过 MiniMax)"
+    $kimiKey = Read-Host "请输入 KIMI_API_KEY (留空则跳过 Kimi)"
+
+    $config = @{
+        env = @{
+            ANTHROPIC_AUTH_TOKEN       = $authToken
+            ANTHROPIC_BASE_URL         = "https://api.deepseek.com/anthropic"
+            DEEPSEEK_API_KEY           = $deepseekKey
+            MINIMAX_API_KEY            = $minimaxKey
+            KIMI_API_KEY               = $kimiKey
+            CLAUDE_CODE_ALWAYS_THINKING = "0"
+            CLAUDE_CODE_ENABLE_THINKING = "0"
+            CLAUDE_CODE_NO_FLICKER     = "1"
+            CLAUDE_CODE_PROGRESS_BARS  = "1"
+            CLAUDE_CODE_STREAM_DELAY   = "0"
+            CLAUDE_CODE_STREAM_OUTPUT  = "1"
+            CLAUDE_CODE_VERBOSE        = "1"
+            FORCE_COLOR                = "3"
+        }
+        model        = "deepseek-v4-pro"
+        outputStyle  = "stream"
+        viewMode     = "verbose"
+        theme        = "dark"
+        verbose      = $true
+    }
+
+    $json = $config | ConvertTo-Json -Depth 3
+    Set-Content -Path $LocalConfig -Value $json -Encoding UTF8
+    Write-Host "[✓] settings.local.json 已生成" -ForegroundColor Green
 }
 
-$memoryTemplates = @{
-    "MEMORY.md" = @'
-# MEMORY.md — Harness Engineering 记忆索引
-
-> 不让 Agent 犯同样的错误。失败教训、成功模式、重复决策跨会话持久化。
-
-## 记忆文件一览
-
-- [alignment-log.md](alignment-log.md) — kf-alignment 每次对齐的结构化记录
-- [model-routing-stats.md](model-routing-stats.md) — kf-model-router 模型切换统计
-- [hammer-results.md](hammer-results.md) — kf-multi-team-compete 历史评分卡与方案摘要
-- [harness-audit-history.md](harness-audit-history.md) — Harness Engineering 评审历史记录
-- [prd-generation-log.md](prd-generation-log.md) — kf-prd-generator 历史 PRD 生成记录
-- [spec-generation-log.md](spec-generation-log.md) — kf-spec 历史 Spec 生成记录
-
-## 项目级记忆
-
-- [project-context.md](project-context.md) — 项目上下文（角色、偏好、约束等）
-'@
-    "alignment-log.md" = @'
-# Alignment Log — 对齐记录
-
-> kf-alignment 每次动前对齐/动后复盘的结构化记录。
-> 下次同类型对齐启动时，自动加载最近 3 条作为基线，避免重复讨论。
-
----
-
-（待首次对齐填充）
-'@
-    "model-routing-stats.md" = @'
-# Model Routing Stats — 模型路由统计
-
-> kf-model-router 每次模型切换的路由决策记录。
-> 每周汇总各技能 pro/flash 使用占比、Token 节省估算。
-
----
-
-（待首次路由填充）
-'@
-    "hammer-results.md" = @'
-# Hammer Results — 夯 执行摘要存档
-
-> kf-multi-team-compete 每次评分卡和融合方案摘要。
-> 下次 /夯 启动时自动加载历史结果作为参考基线。
-
----
-
-（待首次执行填充）
-'@
-    "harness-audit-history.md" = @'
-# Harness Audit History — 评审历史
-
-> Harness Engineering 五根铁律评审的历次结果归档。
-
----
-
-（待首次审计填充）
-'@
-    "prd-generation-log.md" = @'
-# PRD Generation Log — PRD 生成记录
-
-> kf-prd-generator 每次 PRD 生成的结构化记录。
-
----
-
-（待首次 PRD 生成填充）
-'@
-    "spec-generation-log.md" = @'
-# Spec Generation Log — Spec 生成记录
-
-> kf-spec 每次 Spec 生成的结构化记录。
-
----
-
-（待首次 Spec 生成填充）
-'@
-    "project-context.md" = @'
-# Project Context — 项目上下文
-
-> 项目级记忆：角色、偏好、约束等跨会话持久化信息。
-
----
-
-## 技术栈偏好
-- 待配置
-
-## 核心原则
-- 待配置
-'@
+# ─── Step 3: 验证关键密钥是否存在 ─────────────────────────────────────
+Write-Host "`n=== 密钥检查 ===" -ForegroundColor Cyan
+$keys = @{
+    ANTHROPIC_AUTH_TOKEN = "Claude Code 后端 (DeepSeek) — 必填"
+    DEEPSEEK_API_KEY     = "DeepSeek 模型路由 — 必填"
+    MINIMAX_API_KEY      = "MiniMax 模型路由 — 可选"
+    KIMI_API_KEY         = "Kimi K2.5 模型路由 — 可选"
 }
 
-foreach ($file in $memoryTemplates.GetEnumerator()) {
-    $filePath = Join-Path $memoryDir $file.Key
-    if (!(Test-Path $filePath)) {
-        if ($DryRun) {
-            Write-Host "  [DryRun] 创建 memory/$($file.Key)" -ForegroundColor Cyan
-        } else {
-            $file.Value | Out-File -FilePath $filePath -Encoding UTF8
-            Write-Host "  ✓ memory/$($file.Key) 已创建" -ForegroundColor Green
+foreach ($k in $keys.Keys) {
+    $val = [System.Environment]::GetEnvironmentVariable($k)
+    if ([string]::IsNullOrWhiteSpace($val)) {
+        Write-Host "  [!] $k — 未设置环境变量，检查 settings.local.json..." -ForegroundColor Yellow
+        if (Test-Path $LocalConfig) {
+            $cfg = Get-Content $LocalConfig -Raw | ConvertFrom-Json
+            if ($cfg.env.$k) {
+                Write-Host "  [✓] $k — 已在 settings.local.json 中设置" -ForegroundColor Green
+            } else {
+                Write-Host "  [ ] $k — $($keys[$k]) — 未设置" -ForegroundColor Red
+            }
         }
     } else {
-        Write-Host "  ○ memory/$($file.Key) 已存在，跳过" -ForegroundColor Gray
+        Write-Host "  [✓] $k — 已设置（环境变量）" -ForegroundColor Green
     }
 }
 
-# ═══════════════════════════════════════════════════════════════
-# 完成
-# ═══════════════════════════════════════════════════════════════
-Write-Host ""
-Write-Host "══════════════════════════════════════════════════════════════════" -ForegroundColor Cyan
-Write-Host "✓ 安装完成！" -ForegroundColor Green
-Write-Host "══════════════════════════════════════════════════════════════════" -ForegroundColor Cyan
-Write-Host ""
-Write-Host "安装摘要：" -ForegroundColor Yellow
-Write-Host "  项目目录: $PROJECT_ROOT" -ForegroundColor White
-Write-Host "  技能目录: $SCRIPT_DIR\skills\" -ForegroundColor White
-Write-Host "  配置目录: $SCRIPT_DIR\" -ForegroundColor White
-Write-Host "  记忆目录: $PROJECT_ROOT\.claude-flow\" -ForegroundColor White
-Write-Host ""
-Write-Host "后续步骤：" -ForegroundColor Yellow
-if (-not (Test-Path $targetSettings)) {
-    Write-Host "  1. 编辑 $targetSettings，填入 API Token" -ForegroundColor White
+# ─── Step 4: 全局依赖检查 ─────────────────────────────────────────────
+Write-Host "`n=== 全局依赖检查 ===" -ForegroundColor Cyan
+$deps = @(
+    @{ Name = "lean-ctx";   Check = "lean-ctx --version";      Install = "npm install -g lean-ctx" }
+    @{ Name = "ruflo";      Check = "ruflo --version";         Install = "npm install -g ruflo" }
+    @{ Name = "opencli";    Check = "opencli --version";        Install = "npm install -g @jackwener/opencli" }
+    @{ Name = "context-mode"; Check = "context-mode --version"; Install = "npm install -g context-mode" }
+)
+
+foreach ($dep in $deps) {
+    $ok = $null -ne (Get-Command ($dep.Check.Split()[0]) -ErrorAction SilentlyContinue)
+    if ($ok) {
+        Write-Host "  [✓] $($dep.Name) — 已安装" -ForegroundColor Green
+    } else {
+        Write-Host "  [ ] $($dep.Name) — 未安装，尝试安装..." -ForegroundColor Yellow
+        try {
+            Invoke-Expression $dep.Install
+            Write-Host "  [✓] $($dep.Name) — 安装成功" -ForegroundColor Green
+        } catch {
+            Write-Host "  [✗] $($dep.Name) — 安装失败: $_" -ForegroundColor Red
+        }
+    }
 }
-Write-Host "  2. 重启 Claude Code（或在项目目录启动）" -ForegroundColor White
-Write-Host "  3. 测试: /go（工作流导航）" -ForegroundColor White
-Write-Host "  4. 测试: /夯 [任务]（多团队竞争）" -ForegroundColor White
-Write-Host "  5. 测试: spec coding（Spec 驱动开发）" -ForegroundColor White
-Write-Host "  6. 测试: /prd-generator（PRD 生成）" -ForegroundColor White
-Write-Host "  7. 测试: /review-graph（代码审查）" -ForegroundColor White
-Write-Host "  8. 测试: /web-search [问题]（技术搜索）" -ForegroundColor White
-Write-Host "  9. 测试: /对齐（事前/事后对齐）" -ForegroundColor White
-Write-Host " 10. 测试: 爬虫/抓取 [URL]（Web 爬虫）" -ForegroundColor White
-Write-Host " 11. 测试: Harness 评审（五根铁律审计）" -ForegroundColor White
-Write-Host ""
-Write-Host "手动安装（需要网络）：" -ForegroundColor Yellow
-Write-Host "  superpowers: 在 Claude Code 中执行 /plugin install superpowers@claude-plugins-official" -ForegroundColor Gray
-Write-Host ""
-Write-Host "已知限制：" -ForegroundColor Yellow
-Write-Host "  - ruflo、RTK 仍需全局安装（npm install -g）" -ForegroundColor Gray
-Write-Host "  - superpowers 需在 Claude Code 中手动安装 plugin" -ForegroundColor Gray
-Write-Host ""
-Write-Host "项目关键目录：" -ForegroundColor Yellow
-Write-Host "  - .claude/helpers/  — 门控验证 + 五根铁律审计脚本" -ForegroundColor Gray
-Write-Host "  - .claude/agents/   — Agent 定义文件" -ForegroundColor Gray
-Write-Host "  - memory/           — 跨会话持久化记忆（MEMORY.md 索引）" -ForegroundColor Gray
-Write-Host ""
+
+# ─── 完成 ──────────────────────────────────────────────────────────────
+Write-Host "`n=== 安装完成 ===" -ForegroundColor Cyan
+Write-Host "启动 Claude Code 前，请确保 settings.local.json 中的密钥已填写完整。"
+Write-Host "运行: claude`n"

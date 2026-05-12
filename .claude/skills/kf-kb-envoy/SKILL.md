@@ -1,3 +1,8 @@
+---
+name: kf-kb-envoy
+description: Knowledge Base Envoy — Karpathy LLM Wiki 模式知识库全生命周期管理
+---
+
 # kf-kb-envoy — Knowledge Base Envoy
 
 基于 Karpathy LLM Wiki 模式（知识库/raw/ → 知识库/wiki/ → CLAUDE.md）的知识库全生命周期管理。

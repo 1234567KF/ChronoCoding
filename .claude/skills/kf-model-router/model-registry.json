@@ -9,7 +9,7 @@
       "envKey": "DEEPSEEK_API_KEY",
       "healthEndpoint": "/models",
       "adapter": "deepseek",
-      "adapterPath": "skills/kf-smart-router/providers/",
+      "adapterPath": "skills/kf-model-router/providers/",
       "rateLimit": {
         "capacity": 16,
         "fillRate": 0.26,
@@ -52,7 +52,7 @@
       "envKey": "MINIMAX_API_KEY",
       "healthEndpoint": "/models",
       "adapter": "minimax",
-      "adapterPath": "skills/kf-smart-router/providers/",
+      "adapterPath": "skills/kf-model-router/providers/",
       "rateLimit": {
         "capacity": 24,
         "fillRate": 0.4,
@@ -76,45 +76,32 @@
       ]
     },
     {
-      "id": "openai",
-      "name": "OpenAI",
-      "baseUrl": "https://api.openai.com/v1",
-      "envKey": "OPENAI_API_KEY",
+      "id": "kimi",
+      "name": "Kimi",
+      "baseUrl": "https://api.moonshot.cn/v1",
+      "envKey": "KIMI_API_KEY",
       "healthEndpoint": "/models",
-      "adapter": "openai",
-      "adapterPath": "skills/kf-smart-router/providers/",
+      "adapter": "kimi",
+      "adapterPath": "skills/kf-model-router/providers/",
       "rateLimit": {
-        "capacity": 16,
-        "fillRate": 0.26,
+        "capacity": 20,
+        "fillRate": 0.33,
         "maxQueueTime": 5000,
         "refillInterval": 1000
       },
       "models": [
         {
-          "id": "openai-o3",
-          "family": "reasoning",
-          "description": "OpenAI o3 — highest reasoning capability",
-          "capabilities": ["deep-reasoning", "complex-code", "architecture"],
-          "costPer1KInput": 10.0,
-          "costPer1KOutput": 40.0,
+          "id": "kimi-k2.5",
+          "family": "pro",
+          "description": "Kimi K2.5 — 擅长前端、长文本读写、文档生成",
+          "capabilities": ["code", "frontend", "long-context", "docs", "chat", "review", "simple-qa", "ui-prototype"],
+          "costPer1KInput": 1.0,
+          "costPer1KOutput": 4.0,
           "cacheHitCostPer1KInput": null,
           "supportsCache": false,
-          "priority": 0,
-          "defaultFor": [],
-          "providerModelId": "o3"
-        },
-        {
-          "id": "openai-4o-mini",
-          "family": "fast",
-          "description": "OpenAI 4o-mini — low-cost fast responses",
-          "capabilities": ["code", "chat", "docs", "review", "testing", "simple-qa"],
-          "costPer1KInput": 0.15,
-          "costPer1KOutput": 0.6,
-          "cacheHitCostPer1KInput": null,
-          "supportsCache": false,
-          "priority": 12,
-          "defaultFor": ["simple-qa", "formatting"],
-          "providerModelId": "gpt-4o-mini"
+          "priority": 8,
+          "defaultFor": ["ui-prototype", "docs", "simple-qa", "formatting"],
+          "providerModelId": "kimi-k2.5"
         }
       ]
     }

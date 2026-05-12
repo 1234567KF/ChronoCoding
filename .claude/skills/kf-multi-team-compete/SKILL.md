@@ -890,6 +890,15 @@ Team Lead 将执行计划展示给用户：
      - kf-alignment recording 模式指令（不提问、不阻塞、记录假设）
      - **CRITICAL 歧义上报指令**：遇到 `[ASSUMPTION:CRITICAL]` 时 MUST 格式化为选择题（选项+后果+默认选择），写入「待澄清问题清单」章节
      - **重试与容错指令**：失败时 MUST 记录具体错误原因；失活 5min 会被自动终止重试
+	   - **技能路由表**：共享前缀之后、角色定义之前 MUST 注入阶段技能路由表。使用以下命令生成并注入：
+	     ```
+	     node .claude/helpers/skill-router.cjs --inject --stage <N> --role "<角色>"
+	     ```
+	     或通过 hammer-bridge:
+	     ```
+	     node .claude/helpers/hammer-bridge.cjs skill-routing --stage <N> --role "<角色>"
+	     ```
+	     输出的表格在各阶段 agent 的差异化后缀中，作为「技能路由指引」参考，引导 agent 按需调用对应技能。
 	   - **浅层 Plan 预览**：共享前缀之后、角色定义之前 MUST 注入 10-15 行任务拆解预览。使用以下命令生成并注入：
 	     ```
 	     node .claude/helpers/plan-preview.cjs --inject [--team <红/蓝/绿>]

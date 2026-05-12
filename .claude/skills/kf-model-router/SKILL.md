@@ -1,19 +1,65 @@
 ---
 name: kf-model-router
-description: 模型智能路由 — "省"原则。自动切换模型：计划阶段用 pro（深度思考），执行阶段用 flash（高效落地）。技能启动时自动触发，用户无感。触发词："模型路由"、"切换模型"、"省模式"。
+description: |
+  全自动多模型智能路由引擎 — "省+稳+准"三位一体。多供应商动态调度（DeepSeek Pro/Flash + MiniMax 2.7 + Kimi K2.5），
+  语义任务分类 + 加权评分选优 + 断路器 + 降级链 + 令牌桶限流 + 密钥隔离。零配置，自动触发，用户无感。
+  触发词："模型路由"、"切换模型"、"省模式"、"智能路由"、"模型调度"、"多模型路由"、"smart router"、"安全路由"、"safe router"、"断路器"、"限流"。
+triggers:
+  - 模型路由
+  - 切换模型
+  - 省模式
+  - 智能路由
+  - 模型调度
+  - 多模型路由
+  - smart router
+  - 路由调度
+  - 多模型
+  - 安全路由
+  - safe router
+  - 断路器
+  - 限流
 metadata:
-  principle: 省
-  source: AICoding原则.docx
-integrated-skills:
-  - kf-spec            # Step 0 自动切换到 pro
-  - kf-multi-team-compete  # 裁判用 pro，各队 agent 用 flash
-  - kf-alignment        # 深度对齐自动切换到 pro
-  - kf-prd-generator    # 产出 PRD 后切换回 flash
+  principle: 省 + 稳 + 准
+  source: AICoding原则.docx — 红蓝绿三队融合方案
+  status: stable
+  version: 2.0.0
+  integrated-skills:
+    - kf-spec
+    - kf-multi-team-compete
+    - kf-alignment
+    - kf-prd-generator
+    - kf-code-review-graph
+    - kf-web-search
+    - kf-triple-collaboration
+    - kf-browser-ops
+  capabilities:
+    - dual-model-routing: "DeepSeek Pro/Flash 双模型基础路由"
+    -     - multi-vendor-routing: "多供应商动态路由（DeepSeek/MiniMax/Kimi）"
+    - semantic-classification: "语义任务分类（8 种类型 + 4 级复杂度）"
+    - weighted-scoring: "加权评分选优（4 种策略）"
+    - circuit-breaker: "断路器 + 健康探测 + 自动恢复"
+    - fallback-chain: "降级链（最多 4 级）"
+    - rate-limiter: "令牌桶限流（每供应商独立桶）"
+    - key-isolation: "密钥隔离（各供应商独立环境变量）"
+    - cache-compatible: "DeepSeek KV Cache 保留"
+    - zero-config: "零手动配置，运行时内存调度"
 graph:
   dependencies:
+    - target: kf-multi-team-compete
+      type: dependency
     - target: kf-spec
       type: dependency
+    - target: kf-alignment
+      type: dependency
     - target: kf-prd-generator
+      type: dependency
+    - target: kf-code-review-graph
+      type: dependency
+    - target: kf-web-search
+      type: dependency
+    - target: kf-triple-collaboration
+      type: dependency
+    - target: kf-browser-ops
       type: dependency
     - target: kf-reverse-spec
       type: dependency
@@ -29,29 +75,48 @@ graph:
       type: dependency
     - target: kf-langextract
       type: dependency
-    - target: kf-multi-team-compete
+    - target: kf-skill-design-expert
       type: dependency
-
+    - target: kf-go
+      type: dependency
+    - target: kf-ui-prototype-generator
+      type: dependency
 ---
 
-# kf-model-router — 省原则：模型智能路由
+# kf-model-router — 省+稳+准：全自动多模型智能路由引擎
 
 > **核心原则**：最好的模型和最性价比的模型搭配，结合工具方法稳固 ROI。
 > **管理原则**：想的美，做的实。计划用 pro（深度推理），执行用 flash（高效落地）。
-> **扩展**：支持多供应商模型池（DeepSeek + MiniMax-M1 + OpenAI），自动最优路由。
+> **扩展**：支持多供应商模型池（DeepSeek + MiniMax + Kimi），自动最优路由。
+> **安全信条**：宁可降级不可泄露，每次调用必须有降级方案。
 > **切换方式**：自动切换，用户无感。
 
 ---
 
-## 记忆基线加载（铁律 4）
+## 架构总览
 
-每次启动时 MUST 先读取 `memory/model-routing-stats.md` 中最近 5 条路由决策记录，了解历史切换模式和误切换案例，避免重复错误的路由决策。
+```
+任务描述
+  │
+  ├─ Task Classifier ──→ 语义分析 → 类型 + 复杂度
+  │
+  ├─ Model Registry ───→ 查询可用模型池
+  │
+  ├─ Routing Engine ───→ 加权评分 → 选择最优
+  │     │
+  │     ├─ 快速路径（查表，置信度 > 0.85）
+  │     └─ 加权路径（4 种策略）
+  │
+  ├─ Safety Layer ─────→ 断路器 + 限流 + 健康探测
+  │     │
+  │     └─ 异常 → 走降级链 (最多 4 级)
+  │
+  └─ Dispatcher ──────→ 密钥注入 + 返回 model 参数
+```
 
 ---
 
-## 模型路由规则（自动应用）
-
-### 基础路由（向后兼容）
+## 基础路由（DeepSeek Pro/Flash）
 
 | 阶段 | 自动切换模型 | 原因 |
 |------|------------|------|
@@ -62,63 +127,119 @@ graph:
 | **Bug 排查** | pro（deepseek-v4-pro） | 需要深度上下文理解和推理链 |
 | **简单问答** | 轻量模型（Haiku 级） | 极低成本，快速响应 |
 
-### 扩展路由（多供应商）★
+## 多供应商路由
 
-启用条件：`model-registry.json` 存在 + 至少一个非 DeepSeek 供应商的 API Key 已配置。
+| 任务类型 | 复杂度 | DeepSeek | MiniMax | Kimi | 默认首选 |
+|---------|--------|----------|--------|------|---------|
+| 架构/设计 | 高 | **pro** | M1-thinking | kimi-k2.5 | pro |
+| 编码/实现 | 中 | **flash** | M1-fast | kimi-k2.5 | flash |
+| 代码审查 | 低 | **flash** | M1-fast | kimi-k2.5 | flash |
+| Bug 排查 | 高 | **pro** | M1-thinking | kimi-k2.5 | pro |
+| 文档生成 | 低 | flash | **M1-fast** | kimi-k2.5 | M1-fast |
+| 简单问答 | 低 | flash | M1-fast | **kimi-k2.5** | kimi-k2.5 |
+| 测试编写 | 中 | **flash** | M1-fast | kimi-k2.5 | flash |
+| UI 原型 | 中 | flash | **M1-fast** | kimi-k2.5 | M1-fast |
+| 计划/需求 | 高 | **pro** | M1-thinking | kimi-k2.5 | pro |
 
-| 任务类型 | 复杂度 | DeepSeek | MiniMax-M1 | OpenAI | 默认首选 |
-|---------|--------|----------|------------|--------|---------|
-| 架构/设计 | 高 | **pro** | M1-thinking | o3 | pro |
-| 编码/实现 | 中 | **flash** | M1-fast | 4o-mini | flash |
-| 代码审查 | 低 | **flash** | M1-fast | 4o-mini | flash |
-| Bug 排查 | 高 | **pro** | M1-thinking | o3 | pro |
-| 文档生成 | 低 | flash | **M1-fast** | 4o-mini | M1-fast |
-| 简单问答 | 低 | flash | M1-fast | **4o-mini** | 4o-mini |
-| 测试编写 | 中 | **flash** | M1-fast | 4o-mini | flash |
-| UI 原型 | 中 | flash | **M1-fast** | 4o-mini | M1-fast |
-| 计划/需求 | 高 | **pro** | M1-thinking | o3 | pro |
+## 支持的模型池
 
-**降级链**：首选模型 → 同供应商备选 → 另一供应商同能力模型 → DeepSeek pro/flash。
+| 模型 | 供应商 | 类型 | 适用场景 | 相对成本 | 环境变量 |
+|------|--------|------|---------|---------|---------|
+| deepseek-v4-flash | DeepSeek | chat | 日常编码/审查/文档 | 低 | DEEPSEEK_API_KEY |
+| deepseek-v4-pro | DeepSeek | reasoning | 架构/深度 debug/计划 | 中 | DEEPSEEK_API_KEY |
+| minimax-2.7 | MiniMax | reasoning | 长上下文/强推理 | 低 | MINIMAX_API_KEY |
+| kimi-k2.5 | Kimi | chat | 前端开发、长文本读写、文档生成 | 中 | KIMI_API_KEY |
+
+## 路由策略
+
+| 策略 | 说明 | 命令 |
+|------|------|------|
+| balanced | 平衡性价比和性能（默认） | `node index.cjs route "任务"` |
+| cost_optimized | 性价比优先 | `node index.cjs route "任务" -s cost_optimized` |
+| performance_optimized | 性能优先 | `node index.cjs route "任务" -s performance_optimized` |
+| fallback_only | 仅降级模型 | `node index.cjs route "任务" -s fallback_only` |
 
 ---
 
-## 扩展文件架构
+## 安全机制
+
+### 断路器
+
+| 参数 | 默认值 | 说明 |
+|------|--------|------|
+| failureThreshold | 3（smart）/ 5（safe） | 连续失败次数 → OPEN |
+| successThreshold | 2 | 半开状态连续成功次数 → CLOSED |
+| timeout | 30000ms | OPEN → HALF_OPEN 等待时间 |
+| halfOpenMaxRequests | 1 | 半开状态允许最大试探请求数 |
 
 ```
-.claude/
-├── helpers/
-│   ├── model-router-hook.cjs                  ← 入口 Hook（扩展）
-│   ├── hooks/model-router-hook.cjs            ← 实际实现（扩展：多供应商路由）
-│   ├── model-provider-registry.cjs            ← 新增：模型供应商注册表
-│   ├── smart-dispatcher.cjs                   ← 新增：智能调度器（任务分类+模型分配）
-│   └── model-health.cjs                       ← 新增：健康探测+断路器
-└── skills/
-    └── kf-model-router/
-        ├── SKILL.md                           ← 本文件
-        └── model-registry.json                ← 新增：模型配置数据
+CLOSED (正常) ──连续失败→ OPEN (熔断)
+   ↑                       │
+   │                       ↓
+   恢复 ←──超时──→ HALF-OPEN (尝试恢复)
 ```
 
-### 配置驱动注册新模型
+### 降级链
 
-编辑 `model-registry.json` 即可添加新供应商/模型，无需改代码：
+| 首选模型 | 降级链 |
+|---------|--------|
+| `deepseek-v4-pro` | → `deepseek-v4-flash` → `minimax-2.7` → `kimi-k2.5` → SAFE_MODE |
+| `deepseek-v4-flash` | → `deepseek-v4-pro` → `minimax-2.7` → `kimi-k2.5` → SAFE_MODE |
+| `minimax-2.7` | → `deepseek-v4-flash` → `kimi-k2.5` → SAFE_MODE |
+| `kimi-k2.5` | → `deepseek-v4-flash` → SAFE_MODE |
 
-```json
-{
-  "providers": [{
-    "id": "new-provider",
-    "name": "新供应商",
-    "baseUrl": "https://api.example.com/v1",
-    "envKey": "NEW_PROVIDER_API_KEY",
-    "models": [{
-      "id": "new-model-fast",
-      "family": "fast",
-      "capabilities": ["code", "chat", "docs"],
-      "costPer1KInput": 0.3,
-      "priority": 10,
-      "defaultFor": ["simple-qa"]
-    }]
-  }]
-}
+触发降级条件：断路器 OPEN / 密钥缺失 / 限流令牌不足 / 健康探测不通过 / HTTP 超时/5xx。
+
+### 令牌桶限流
+
+| 供应商 | 容量 | 填充速率 | 安全余量 |
+|--------|------|---------|---------|
+| DeepSeek | 16 tokens | 0.26/s | 80%（20 rpm → 16） |
+| MiniMax | 24 tokens | 0.4/s | 80%（30 rpm → 24） |
+| Kimi | 16 tokens | 0.26/s | 80%（20 rpm → 16） |
+
+多 Agent 共享同一供应商桶，桶满时请求等待（最多 5000ms）后降级。
+
+### 密钥隔离
+
+每个供应商独立环境变量，独立 HTTP 客户端实例，独立令牌桶：
+
+```bash
+export DEEPSEEK_API_KEY=sk-xxx
+export MINIMAX_API_KEY=mm-xxx
+export KIMI_API_KEY=sk-xxx
+```
+
+---
+
+## 文件结构
+
+```
+.claude/skills/kf-model-router/
+├── SKILL.md                   # 本文件
+├── model-registry.json         # 模型注册表（配置驱动）
+├── model-registry.cjs          # 模型注册中心
+├── index.cjs                   # 统一入口 API
+├── task-classifier.cjs         # 语义任务分类器
+├── routing-engine.cjs          # 动态路由引擎（加权评分）
+├── dispatcher.cjs              # 并发调度器
+├── health-checker.cjs          # 健康探测 + 断路器
+├── model-router-hook.cjs       # PreToolUse Hook
+├── providers/                  # 供应商适配器
+│   ├── base-adapter.cjs        # 适配器基类
+│   ├── deepseek.cjs            # DeepSeek 适配器
+│   ├── minimax.cjs             # MiniMax 适配器
+│   └── kimi.cjs              # Kimi (Moonshot) 适配器
+├── safety/                     # 安全基础设施
+│   ├── circuit-breaker.cjs     # 断路器模式
+│   ├── degradation-chain.cjs   # 降级链编排
+│   ├── rate-limiter.cjs        # 令牌桶限流
+│   ├── key-isolator.cjs        # 密钥隔离 + 客户端工厂
+│   ├── health-probe.cjs        # 健康探测
+│   ├── model-health.cjs        # 三态断路器 + 健康探测
+│   └── safe-router.cjs         # 安全路由主入口
+└── test/
+    └── model-router.test.cjs   # 集成测试
 ```
 
 ---
@@ -132,102 +253,112 @@ graph:
 
 ### 方式 2：Hook 自动检测
 
-通过 `settings.json` 的 `PreToolUse` Hook 监听技能调用事件，
-当匹配到声明了 `recommended_model` 的技能时，自动注入模型切换：
-
 ```json
 {
   "matcher": "Skill",
-  "hooks": [{
-    "type": "command",
-    "command": "node .claude/helpers/model-router-hook.cjs auto-route"
-  }]
+  "hooks": [
+    {
+      "type": "command",
+      "command": "node .claude/helpers/model-router-hook.cjs auto-route",
+      "timeout": 5000
+    },
+    {
+      "type": "command",
+      "command": "node .claude/skills/kf-model-router/model-router-hook.cjs",
+      "timeout": 5000
+    }
+  ]
 }
 ```
 
-Hook 脚本逻辑（扩展后）：
-1. 读取被调用技能的 SKILL.md frontmatter
-2. 提取 `recommended_model` 字段或任务类型
-3. 加载模型注册表（`model-registry.json`）
-4. 探活可用模型（健康检测+断路器）
-5. 分类任务 + 分配最佳模型（成本/能力/健康矩阵）
-6. 任务完成后自动切回默认模型（flash）
+### 方式 3：Agent 级模型路由（/夯 内部）
 
-### 方式 3：手动触发（调试/覆盖）
+当 `/夯` 通过 `Agent` 工具 spawn 子 Agent 时，每个 Agent 独立指定模型：
+
+| 角色 | model 参数 | 实际模型 | 原因 |
+|------|-----------|---------|------|
+| 协调者/裁判 | opus（不设置） | `deepseek-v4-pro` | 深度推理：任务拆解、裁判评分、方案融合 |
+| 全栈开发 | sonnet | `deepseek-v4-flash` | 高效执行：需求对齐、架构设计、编码实现 |
+| 集成测试 | sonnet | `deepseek-v4-flash` | 高效执行：测试编写、代码审查 |
+| 前端设计师 | sonnet | `deepseek-v4-flash` | 高效执行：UI 原型、方案汇总 |
+
+### 方式 4：手动触发（调试/覆盖）
 
 ```
-/set-model pro              # 手动切换到 pro（深度推理）
-/set-model flash            # 手动切换到 flash（高效执行）
-/set-model minimax-2.7       # 手动切换到 MiniMax 2.7
-/set-model openai-4o-mini   # 手动切换到 OpenAI 4o-mini
+/set-model pro              # 手动切换到 pro
+/set-model flash            # 手动切换到 flash
+/set-model minimax-2.7      # 手动切换到 MiniMax 2.7
+/set-model kimi-k2.5   # 手动切换到 Kimi K2.5
 模型路由                     # AI 分析当前任务并推荐模型
 省模式                       # 自动进入执行模式（flash）
 ```
 
-### 方式 4：Agent 级模型路由（/夯 内部）
+---
 
-当 `/夯`（kf-multi-team-compete）通过 `Agent` 工具 spawn 子 Agent 时，
-每个 Agent 独立指定模型，互不干扰：
+## 模型路由映射
 
-```javascript
-Agent({
-  description: "红队全栈开发",
-  model: "sonnet",           // ← 映射到 deepseek-v4-flash（兼容）
-  subagent_type: "...",
-  run_in_background: true
-})
+kf-model-router ID → Claude Code Agent model string:
+
+| Router ID | Agent model | 等级 |
+|-----------|-------------|------|
+| deepseek-v4-pro | opus | pro 级推理 |
+| minimax-2.7 | opus | pro 级推理 |
+| deepseek-v4-flash | sonnet | flash 级执行 |
+| kimi-k2.5 | sonnet | 前端/长文本 |
+| kimi-k2.5 | sonnet | 前端/长文本 |
+
+---
+
+## KV Cache 兼容
+
+- DeepSeek 模型 KV Cache 优化策略完全保留
+- 共享前缀机制不变（前 300-500 token 逐字相同）
+- 预热策略：spawn 第一个 agent 前预热
+- 多轮保持：messages 连续追加
+- 不支持缓存的模型（MiniMax、Kimi）跳过预热步骤
+
+---
+
+## CLI 用法
+
+```bash
+# 路由决策
+node .claude/skills/kf-model-router/index.cjs route "写一个用户登录模块"
+
+# 调度决策（含 agent model 映射）
+node .claude/skills/kf-model-router/index.cjs dispatch "重构订单系统架构"
+
+# 查看统计
+node .claude/skills/kf-model-router/index.cjs stats
+
+# 健康检查
+node .claude/skills/kf-model-router/index.cjs health-check
+
+# 查询安全状态
+node .claude/skills/kf-model-router/safety/safe-router.cjs status
+
+# 查看路由日志
+node .claude/skills/kf-model-router/safety/safe-router.cjs log 20
 ```
 
-**路由规则**：
+### 编程接口
 
-| 角色 | Agent 类型 | model 参数 | 实际模型 | 原因 |
-|------|-----------|-----------|---------|------|
-| 协调者 | 本 Skill 自身 | 不设置（继承父级） | `deepseek-v4-pro` | 深度推理：任务拆解、裁判评分、方案融合 |
-| 全栈开发 | agent_spawn | `"sonnet"` | `deepseek-v4-flash` | 高效执行：需求对齐、架构设计、编码实现 |
-| 集成测试 | agent_spawn | `"sonnet"` | `deepseek-v4-flash` | 高效执行：测试编写、代码审查 |
-| 前端设计师 | agent_spawn | `"sonnet"` | `deepseek-v4-flash` | 高效执行：UI 原型、方案汇总 |
+```javascript
+const router = require('./index.cjs');
 
----
+const decision = await router.route({
+  description: "实现一个分布式缓存层",
+});
+console.log(decision.model.id);        // "deepseek-v4-pro"
+console.log(decision.fallbackChain);   // ["deepseek-v4-pro", "minimax-2.7", ...]
+console.log(decision.confidence);      // 0.95
 
-## 各技能模型需求一览
-
-| 技能 | 推荐模型 | 触发时机 |
-|------|---------|---------|
-| `kf-spec` | pro（Step 0-1），flash（Step 2-6） | Step 0 自动切 pro |
-| `kf-multi-team-compete` `/夯` | pro（协调者+裁判+汇总），flash（各队 agent） | 协调者启动时用 pro；spawn agent 时传入 `model: "sonnet"` |
-| `kf-alignment` | pro | 启动时自动切 pro |
-| `kf-prd-generator` | flash | 启动时自动切 flash |
-| `kf-code-review-graph` | flash | 启动时自动切 flash |
-| `kf-web-search` | flash | 启动时自动切 flash |
-| `kf-browser-ops` | flash | 启动时自动切 flash |
-| `kf-triple-collaboration` | pro（协调）+ flash（各方） | 启动时自动分配 |
-| `kf-skill-design-expert` | pro | 启动时自动切 pro |
-| `kf-go` | flash | 启动时自动切 flash |
-| `kf-ui-prototype-generator` | flash | 启动时自动切 flash |
-
----
-
-## 模型供应商配置
-
-| 供应商 | 环境变量 | 探活端点 | 缓存支持 |
-|--------|---------|---------|---------|
-| DeepSeek | `DEEPSEEK_API_KEY` | `/models` | KV Cache |
-| MiniMax | `MINIMAX_API_KEY` | `/models` | 不支持 |
-| OpenAI | `OPENAI_API_KEY` | `/models` | 不支持 |
-
-配置方式：仅设置环境变量即可，无需修改 settings.json。
-
----
-
-## 健康探测 + 断路器
-
-| 功能 | 值 |
-|------|-----|
-| 探活超时 | 3s |
-| 探活间隔 | 60s（缓存） |
-| 连续失败阈值 | 3 次 |
-| 熔断时长 | 120s |
-| 恢复策略 | 熔断到期后单次探测 |
+const agentConfig = await router.dispatch({
+  description: "修复登录页面的样式 bug",
+});
+console.log(agentConfig.model);        // "sonnet"
+console.log(agentConfig.modelId);      // "deepseek-v4-flash"
+```
 
 ---
 
@@ -238,53 +369,31 @@ Agent({
 | deepseek-v4-pro | 100% (¥3/K) | 架构设计、复杂 Bug、需求澄清 |
 | deepseek-v4-flash | ~33% (¥1/K) | 日常编码、代码审查、文档 |
 | minimax-2.7 | ~33% (¥1/K) | 通用任务（推理+编码+审查+文档） |
-| openai-4o-mini | ~5% (¥0.15/K) | 简单问答、格式转换 |
-| openai-o3 | ~333% (¥10/K) | 高精度推理（成本敏感） |
+| kimi-k2.5 | ~33% (¥1/K) | 前端开发、长文本读写、文档生成 | 简单问答、格式转换 |
+| kimi-k2.5 | ~333% (¥10/K) | 高精度推理（成本敏感） |
 
-**建议配比**：pro 15% + flash 60% + 4o-mini 15% + minimax-2.7 10%，综合成本 ~40%。
-自动切换由 kf-model-router Hook 实现，默认开启。
+****建议配比**：pro 30% + flash 50% + kimi 15% + minimax 5%，综合成本 ~50%。
 
 ---
 
-## 集成
+## Harness 反馈闭环
 
-本 Skill 被以下 Skill **自动调用**：
-- `kf-spec`：Step 0 技术选型 → 自动切 pro
-- `kf-multi-team-compete`：裁判/汇总用 pro，agent 用 flash
-- `kf-alignment`：深度对齐 → 自动切 pro
-- `kf-prd-generator`：产出 PRD 后自动切回 flash
-- 其他所有声明 `recommended_model` 的技能
+每次模型切换后 MUST 验证：
 
-## Harness 反馈闭环（铁律 3）
+```bash
+# 路由决策验证
+node .claude/helpers/harness-gate-check.cjs \
+  --skill kf-model-router \
+  --stage routing \
+  --required-sections "任务类型" "推荐模型" "置信度"
 
-每次模型切换后 MUST 执行验证：
-
-| 触发点 | 验证动作 | 失败处理 |
-|--------|---------|---------|
-| 模型切换 | `node .claude/helpers/harness-gate-check.cjs --skill kf-model-router --stage routing --required-sections "触发技能" "切换方向" "切换原因" --forbidden-patterns "未确认" "待定"` | 补充路由决策记录 |
-| 周汇总 | `node .claude/helpers/harness-gate-check.cjs --skill kf-model-router --stage weekly --required-files "memory/model-routing-stats.md" --min-lines "memory/model-routing-stats.md" 20` | 补充缺失统计 |
-
-路由原则：**计划用 pro（15%），执行用 flash（60%），低成本模型（25%）**。
-
-## Harness 反馈统计（铁律 3）
-
-每次模型切换后 MUST 记录路由决策到 `memory/model-routing-stats.md`：
-
-```markdown
-### {timestamp}
-- **触发技能**：{skill name}
-- **切换方向**：{from_model} → {to_model}
-- **任务类型**：{task type}
-- **分配供应商**：{provider name}
-- **切换原因**：{recommended_model 声明 / 任务分类结果 / 多供应商路由}
-- **Token 预估节省**：{如 pro→flash，约省 40-60%；如 pro→4o-mini，约省 95%}
+# 健康状态验证
+node .claude/helpers/harness-gate-check.cjs \
+  --skill kf-model-router \
+  --stage health \
+  --required-fields "status" "circuit_breaker"
 ```
 
-每周汇总统计：
-- 各供应商模型使用占比
-- 各任务类型分布
-- Token 成本节省估算
-- 断路器触发记录
-- 误切换案例（如果用户事后反馈"应该用 pro"）
+路由决策记录到 `memory/model-routing-stats.md`，每周汇总统计各供应商使用占比、成本节省、断路器触发记录。
 
 路由原则：**计划用 pro（15%），执行用 flash（60%），低成本模型（25%）**。

@@ -1,272 +1,128 @@
-#!/bin/bash
-# AICoding 项目本地完整安装脚本
-# 跨平台支持：Linux、macOS、Windows (Git Bash/WSL)
-# 用法: ./install-local.sh [--dry-run] [--skip-gspowers] [--skip-gstack] [--skip-pipeline]
+#!/usr/bin/env bash
+# AI编程智驾 — 本地安装/更新脚本 (Linux/macOS)
+#
+# 生成 settings.local.json 模板，引导填写 API 密钥，安装全局依赖。
+# 安全：生成的 settings.local.json 已加入 .gitignore，不会提交密钥。
 
-set -e
+set -euo pipefail
 
-# 颜色输出
+CLAUDE_DIR="${CLAUDE_DIR:-$PWD}"
+LOCAL_CONFIG="$CLAUDE_DIR/settings.local.json"
+GITIGNORE="$PWD/.gitignore"
+
 RED='\033[0;31m'
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
 CYAN='\033[0;36m'
+GRAY='\033[0;90m'
 NC='\033[0m' # No Color
 
-# 默认参数
-DRY_RUN=false
-SKIP_GSPOWERS=false
-SKIP_GSTACK=false
-SKIP_PIPELINE=false
+echo -e "${CYAN}=== AI编程智驾 — 本地安装 ===${NC}"
 
-# 解析参数
-while [[ $# -gt 0 ]]; do
-    case $1 in
-        --dry-run)
-            DRY_RUN=true
-            shift
-            ;;
-        --skip-gspowers)
-            SKIP_GSPOWERS=true
-            shift
-            ;;
-        --skip-gstack)
-            SKIP_GSTACK=true
-            shift
-            ;;
-        --skip-pipeline)
-            SKIP_PIPELINE=true
-            shift
-            ;;
-        *)
-            echo "未知参数: $1"
-            exit 1
-            ;;
-    esac
-done
-
-# 获取脚本目录和项目根目录
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-PROJECT_ROOT="$(dirname "$SCRIPT_DIR")"
-
-# Windows 路径转换
-if [[ "$OSTYPE" == "msys" || "$OSTYPE" == "win32" ]]; then
-    PROJECT_ROOT="$(cygpath -w "$PROJECT_ROOT" 2>/dev/null || echo "$PROJECT_ROOT")"
-fi
-
-echo ""
-echo -e "${CYAN}╔═══════════════════════════════════════════════════════════╗${NC}"
-echo -e "${CYAN}║  AICoding 项目本地安装 (跨平台)                       ║${NC}"
-echo -e "${CYAN}║  - 12 个 kf- 系列技能（稳省准测的准夯快懂）              ║${NC}"
-echo -e "${CYAN}║  - gspowers SOP 导航（上游）                             ║${NC}"
-echo -e "${CYAN}║  - gstack 产品流程框架（上游）                           ║${NC}"
-echo -e "${CYAN}╚═══════════════════════════════════════════════════════════╝${NC}"
-echo ""
-echo -e "项目目录: ${PROJECT_ROOT}"
-echo ""
-
-# ═══════════════════════════════════════════════════════════════
-# 创建目录结构
-# ═══════════════════════════════════════════════════════════════
-echo -e "${YELLOW}[1/5] 创建目录结构...${NC}"
-
-dirs=(
-    "$SCRIPT_DIR/skills/gspowers/references"
-    "$SCRIPT_DIR/skills/gspowers/references/backups"
-    "$SCRIPT_DIR/skills/gstack"
-    "$SCRIPT_DIR/settings.d"
-)
-
-for dir in "${dirs[@]}"; do
-    if [ ! -d "$dir" ]; then
-        mkdir -p "$dir"
-        echo -e "  ✓ 创建 $dir"
-    fi
-done
-echo -e "  ✓ 目录结构已就绪"
-
-# 获取全局 .claude 路径
-CLAUDE_HOME="${CLAUDE_HOME:-$HOME/.claude}"
-
-# ═══════════════════════════════════════════════════════════════
-# 安装 gspowers
-# ═══════════════════════════════════════════════════════════════
-if [ "$SKIP_GSPOWERS" = false ]; then
-    echo ""
-    echo -e "${YELLOW}[2/5] 安装 gspowers...${NC}"
-
-    SOURCE_GSPOWERS="$CLAUDE_HOME/skills/gspowers"
-    TARGET_GSPOWERS="$SCRIPT_DIR/skills/gspowers"
-
-    if [ -d "$SOURCE_GSPOWERS" ]; then
-        if [ "$DRY_RUN" = true ]; then
-            echo -e "  [DryRun] 复制 $SOURCE_GSPOWERS -> $TARGET_GSPOWERS"
-        else
-            cp -r "$SOURCE_GSPOWERS" "$TARGET_GSPOWERS"
-            echo -e "  ✓ gspowers 已安装（从全局复制）"
-        fi
-    else
-        echo -e "  ⚠ 全局 gspowers 不存在，跳过"
-        echo -e "    如需安装，请先运行全局安装或手动克隆"
-    fi
-fi
-
-# ═══════════════════════════════════════════════════════════════
-# 安装 gstack
-# ═══════════════════════════════════════════════════════════════
-if [ "$SKIP_GSTACK" = false ]; then
-    echo ""
-    echo -e "${YELLOW}[3/5] 安装 gstack...${NC}"
-
-    SOURCE_GSTACK="$CLAUDE_HOME/skills/gstack"
-    TARGET_GSTACK="$SCRIPT_DIR/skills/gstack"
-
-    if [ -d "$SOURCE_GSTACK" ]; then
-        if [ "$DRY_RUN" = true ]; then
-            echo -e "  [DryRun] 复制 $SOURCE_GSTACK -> $TARGET_GSTACK"
-        else
-            cp -r "$SOURCE_GSTACK" "$TARGET_GSTACK"
-            echo -e "  ✓ gstack 已安装（从全局复制）"
-        fi
-    else
-        echo -e "  ⚠ 全局 gstack 不存在，跳过"
-        echo -e "    如需安装，请先运行全局安装或手动克隆"
-    fi
-fi
-
-# ═══════════════════════════════════════════════════════════════
-# 安装 Pipeline 扩展
-# ═══════════════════════════════════════════════════════════════
-if [ "$SKIP_PIPELINE" = false ]; then
-    echo ""
-    echo -e "${YELLOW}[4/5] 安装 Pipeline 扩展...${NC}"
-
-    PIPELINE_SOURCE="$PROJECT_ROOT/.claude/skills/kf-gspowers-pipeline-patch"
-    PIPELINE_TARGET="$SCRIPT_DIR/skills/gspowers/references"
-
-    if [ -d "$PIPELINE_SOURCE" ]; then
-        # 复制 pipeline.md
-        if [ -f "$PIPELINE_SOURCE/pipeline.md" ]; then
-            if [ "$DRY_RUN" = true ]; then
-                echo -e "  [DryRun] 复制 pipeline.md -> $PIPELINE_TARGET"
-            else
-                cp "$PIPELINE_SOURCE/pipeline.md" "$PIPELINE_TARGET/"
-                echo -e "  ✓ pipeline.md 已安装"
-            fi
-        fi
-
-        # 复制 execute-patch.md
-        if [ -f "$PIPELINE_SOURCE/execute-patch.md" ]; then
-            if [ "$DRY_RUN" = true ]; then
-                echo -e "  [DryRun] 复制 execute-patch.md -> $PIPELINE_TARGET"
-            else
-                cp "$PIPELINE_SOURCE/execute-patch.md" "$PIPELINE_TARGET/"
-                echo -e "  ✓ execute-patch.md 已安装"
-            fi
-        fi
-
-        # 复制安装脚本
-        if [ -f "$PIPELINE_SOURCE/install-pipeline.ps1" ] && [ "$DRY_RUN" = false ]; then
-            cp "$PIPELINE_SOURCE/install-pipeline.ps1" "$SCRIPT_DIR/"
-            echo -e "  ✓ install-pipeline.ps1 已复制"
-        fi
-    else
-        echo -e "  ⚠ Pipeline 源目录不存在，跳过"
-        echo -e "    请确保 AICoding 目录完整"
-    fi
-fi
-
-# ═══════════════════════════════════════════════════════════════
-# 创建配置文件
-# ═══════════════════════════════════════════════════════════════
-echo ""
-echo -e "${YELLOW}[5/5] 创建配置文件...${NC}"
-
-# settings.json
-AUTOCODING_TEMPLATES="$PROJECT_ROOT/templates"
-TARGET_SETTINGS="$SCRIPT_DIR/settings.json"
-
-if [ -f "$AUTOCODING_TEMPLATES/settings.json.template" ] && [ ! -f "$TARGET_SETTINGS" ]; then
-    if [ "$DRY_RUN" = true ]; then
-        echo -e "  [DryRun] 创建 settings.json"
-    else
-        cp "$AUTOCODING_TEMPLATES/settings.json.template" "$TARGET_SETTINGS"
-        echo -e "  ✓ settings.json 已创建（请编辑填入 Token）"
-    fi
-elif [ -f "$TARGET_SETTINGS" ]; then
-    echo -e "  ○ settings.json 已存在，跳过"
-fi
-
-# .claude-flow config
-CLAUDE_FLOW_DIR="$PROJECT_ROOT/.claude-flow"
-if [ ! -f "$CLAUDE_FLOW_DIR/config.yaml" ]; then
-    if [ "$DRY_RUN" = true ]; then
-        echo -e "  [DryRun] 创建 .claude-flow/config.yaml"
-    else
-        mkdir -p "$CLAUDE_FLOW_DIR"
-        cat > "$CLAUDE_FLOW_DIR/config.yaml" << 'EOF'
-version: "3.0.0"
-
-memory:
-  backend: hybrid
-  enableHNSW: true
-  persistPath: .claude-flow/data
-  cacheSize: 500
-  learningBridge:
-    enabled: true
-    sonaMode: balanced
-
-swarm:
-  topology: hierarchical-mesh
-  maxAgents: 5
-  autoScale: true
-
-hooks:
-  enabled: true
-  autoExecute: true
-
-mcp:
-  autoStart: true
-  port: 3000
-
-agentScopes:
-  enabled: true
-  defaultScope: project
-EOF
-        echo -e "  ✓ .claude-flow/config.yaml 已创建"
+# ─── Step 1: 确保 .gitignore 包含 settings.local.json ────────────────
+if [ -f "$GITIGNORE" ]; then
+    if ! grep -q 'settings\.local\.json' "$GITIGNORE" 2>/dev/null; then
+        printf '\n# 本地覆盖配置（含 API 密钥，不提交）\nsettings.local.json\n' >> "$GITIGNORE"
+        echo -e "${GREEN}[✓] .gitignore 已追加 settings.local.json${NC}"
     fi
 else
-    echo -e "  ○ .claude-flow/config.yaml 已存在，跳过"
+    printf '# 本地覆盖配置（含 API 密钥，不提交）\nsettings.local.json\n' > "$GITIGNORE"
+    echo -e "${GREEN}[✓] 已创建 .gitignore${NC}"
 fi
 
-# ═══════════════════════════════════════════════════════════════
-# 完成
-# ═══════════════════════════════════════════════════════════════
-echo ""
-echo -e "${CYAN}══════════════════════════════════════════════════════════════════${NC}"
-echo -e "${GREEN}✓ 安装完成！${NC}"
-echo -e "${CYAN}══════════════════════════════════════════════════════════════════${NC}"
-echo ""
-echo -e "${YELLOW}安装摘要：${NC}"
-echo -e "  项目目录: ${PROJECT_ROOT}"
-echo -e "  技能目录: ${SCRIPT_DIR}/skills/"
-echo -e "  配置目录: ${SCRIPT_DIR}/"
-echo -e "  记忆目录: ${PROJECT_ROOT}/.claude-flow/"
-echo ""
-echo -e "${YELLOW}后续步骤：${NC}"
-if [ ! -f "$TARGET_SETTINGS" ]; then
-    echo -e "  1. 编辑 ${TARGET_SETTINGS}，填入 API Token"
+# ─── Step 2: 生成 settings.local.json 模板 ─────────────────────────────
+if [ -f "$LOCAL_CONFIG" ]; then
+    echo -e "${YELLOW}[i] settings.local.json 已存在，跳过生成。${NC}"
+    echo -e "${YELLOW}    如需重置，请先删除该文件再运行此脚本。${NC}"
+else
+    echo -e "\n${CYAN}=== 首次安装：配置 API 密钥 ===${NC}"
+    echo -e "${GRAY}以下密钥仅保存在本地 settings.local.json，不会提交到 Git。\n${NC}"
+
+    read -rp "请输入 ANTHROPIC_AUTH_TOKEN (DeepSeek API Key): " auth_token
+    read -rp "请输入 DEEPSEEK_API_KEY (回车则与 ANTHROPIC_AUTH_TOKEN 相同): " deepseek_key
+    deepseek_key="${deepseek_key:-$auth_token}"
+
+    read -rp "请输入 MINIMAX_API_KEY (回车则跳过 MiniMax): " minimax_key
+    read -rp "请输入 KIMI_API_KEY (回车则跳过 Kimi): " kimi_key
+
+    cat > "$LOCAL_CONFIG" <<LOCALJSONEOF
+{
+  "env": {
+    "ANTHROPIC_AUTH_TOKEN": "$auth_token",
+    "ANTHROPIC_BASE_URL": "https://api.deepseek.com/anthropic",
+    "DEEPSEEK_API_KEY": "$deepseek_key",
+    "MINIMAX_API_KEY": "$minimax_key",
+    "KIMI_API_KEY": "$kimi_key",
+    "CLAUDE_CODE_ALWAYS_THINKING": "0",
+    "CLAUDE_CODE_ENABLE_THINKING": "0",
+    "CLAUDE_CODE_NO_FLICKER": "1",
+    "CLAUDE_CODE_PROGRESS_BARS": "1",
+    "CLAUDE_CODE_STREAM_DELAY": "0",
+    "CLAUDE_CODE_STREAM_OUTPUT": "1",
+    "CLAUDE_CODE_VERBOSE": "1",
+    "FORCE_COLOR": "3"
+  },
+  "model": "deepseek-v4-pro",
+  "outputStyle": "stream",
+  "viewMode": "verbose",
+  "theme": "dark",
+  "verbose": true
+}
+LOCALJSONEOF
+    echo -e "${GREEN}[✓] settings.local.json 已生成${NC}"
 fi
-echo -e "  2. 重启 Claude Code（或在项目目录启动）"
-echo -e "  3. 测试: /gspowers"
-echo -e "  4. 测试: /夯 [任务]"
-echo -e "  5. 测试: spec coding"
-echo -e "  6. 测试: /review-graph"
-echo -e "  7. 测试: /对齐"
-echo ""
-echo -e "${YELLOW}手动安装（需要网络）：${NC}"
-echo -e "  superpowers: 在 Claude Code 中执行 /plugin install superpowers@claude-plugins-official"
-echo ""
-echo -e "${YELLOW}已知限制：${NC}"
-echo -e "  - ruflo、RTK 仍需全局安装（npm install -g）"
-echo -e "  - superpowers 需在 Claude Code 中手动安装 plugin"
-echo ""
+
+# ─── Step 3: 验证关键密钥是否存在 ─────────────────────────────────────
+echo -e "\n${CYAN}=== 密钥检查 ===${NC}"
+
+check_key() {
+    local var="$1"
+    local desc="$2"
+    local val="${!var:-}"
+    if [ -n "$val" ]; then
+        echo -e "  ${GREEN}[✓] $var — 已设置（环境变量）${NC}"
+    elif [ -f "$LOCAL_CONFIG" ]; then
+        # simple grep-based check
+        if grep -q "\"$var\".*\"[^\"]" "$LOCAL_CONFIG" 2>/dev/null; then
+            echo -e "  ${GREEN}[✓] $var — 已在 settings.local.json 中设置${NC}"
+        else
+            echo -e "  ${RED}[ ] $var — $desc — 未设置${NC}"
+        fi
+    else
+        echo -e "  ${RED}[ ] $var — $desc — 未设置${NC}"
+    fi
+}
+
+check_key "ANTHROPIC_AUTH_TOKEN" "Claude Code 后端 (DeepSeek) — 必填"
+check_key "DEEPSEEK_API_KEY"     "DeepSeek 模型路由 — 必填"
+check_key "MINIMAX_API_KEY"      "MiniMax 模型路由 — 可选"
+check_key "KIMI_API_KEY"         "Kimi K2.5 模型路由 — 可选"
+
+# ─── Step 4: 全局依赖检查 ─────────────────────────────────────────────
+echo -e "\n${CYAN}=== 全局依赖检查 ===${NC}"
+
+check_dep() {
+    local name="$1"
+    local check="$2"
+    local install="$3"
+    if eval "$check" 2>/dev/null; then
+        echo -e "  ${GREEN}[✓] $name — 已安装${NC}"
+    else
+        echo -e "  ${YELLOW}[ ] $name — 未安装，尝试安装...${NC}"
+        if eval "$install" 2>/dev/null; then
+            echo -e "  ${GREEN}[✓] $name — 安装成功${NC}"
+        else
+            echo -e "  ${RED}[✗] $name — 安装失败${NC}"
+        fi
+    fi
+}
+
+check_dep "lean-ctx"      "lean-ctx --version"      "npm install -g lean-ctx"
+check_dep "ruflo"         "ruflo --version"         "npm install -g ruflo"
+check_dep "opencli"       "opencli --version"        "npm install -g @jackwener/opencli"
+check_dep "context-mode"  "context-mode --version"  "npm install -g context-mode"
+
+# ─── 完成 ──────────────────────────────────────────────────────────────
+echo -e "\n${CYAN}=== 安装完成 ===${NC}"
+echo -e "启动 Claude Code 前，请确保 settings.local.json 中的密钥已填写完整。"
+echo -e "运行: claude\n"

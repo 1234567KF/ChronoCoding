@@ -44,6 +44,7 @@ temp/
 
 # Local settings (API keys, etc.)
 .claude/settings.local.json
+.claude/model-config.json
 
 # Runtime session cache (auto-generated per session)
 .claude/session-cost.json
@@ -70,7 +71,7 @@ md2docx工具箱/
 .swarm/
 
 # Monitor runtime data (personal token usage records, per-developer private)
-监测者/monitor/data/
+.claude/projects/monitor/monitor/data/
 
 # Claude Flow runtime state (session data, per-developer private)
 .claude-flow/

@@ -22,6 +22,7 @@
  *   fix-record   记录修复协议       --type <类型> --severity <P0|P1> --source "<来源>" --task "<任务>" --error "<错误>" --root-cause "<根因>" --fix "<修复>" [--prevent "<预防>"]
  *   fix-search   搜索修复协议       --type <类型> [--limit N]
  *   prefix       输出共享前缀
+ *   skill-routing 输出阶段技能路由表 --stage <N> --role "<角色>"
  *   token-track  Token 追踪         --add <session-id> [--tokens-in N --tokens-out N]
  *   api-state    输出 Monitor API 兼容状态
  *   watch        Watch 模式         --interval <毫秒>
@@ -41,6 +42,7 @@
  *   bridge.fixRecord({ type, severity, source, task, error, rootCause, fix, prevent }) → path
  *   bridge.fixSearch({ type, limit }) → records
  *   bridge.getPrefix() → string
+ *   bridge.getSkillRoutingTable({ stage, agentRole }) → { ok, table }
  *   bridge.tokenTrack({ sessionId, tokensIn, tokensOut, operation }) → stats
  *   bridge.apiState() → state
  *   bridge.watch({ interval }) → ok
@@ -663,6 +665,22 @@ function getPrefix() {
   return { ok: true, prefix: content };
 }
 
+// ─── Skill Routing Table ───
+function getSkillRoutingTable({ stage, agentRole } = {}) {
+  const routerPath = path.join(__dirname, 'skill-router.cjs');
+  if (!fs.existsSync(routerPath)) {
+    return { ok: false, error: 'skill-router.cjs not found' };
+  }
+
+  try {
+    const { generateRoutingTable } = require(routerPath);
+    const table = generateRoutingTable({ stage: String(stage), agentRole: agentRole || '' });
+    return { ok: true, table };
+  } catch (e) {
+    return { ok: false, error: e.message };
+  }
+}
+
 // ─── Token Track ───
 let _tokenCache = null;
 
@@ -756,6 +774,7 @@ function cli() {
     console.log('  fix-record     记录修复协议');
     console.log('  fix-search     搜索修复协议');
     console.log('  prefix         输出共享前缀');
+    console.log('  skill-routing  输出阶段技能路由表  --stage <N> --role "<角色>"');
     console.log('  token-track    Token 追踪');
     console.log('  api-state      输出 Monitor API 状态');
     console.log('  watch          Watch 模式');
@@ -934,6 +953,21 @@ function cli() {
         }
       }
 
+      case 'skill-routing':
+      case 'routing': {
+        const result = getSkillRoutingTable({
+          stage: getopt('--stage', getopt('-s', '0')),
+          agentRole: getopt('--role', getopt('-r', '')),
+        });
+        if (result.ok) {
+          console.log(result.table);
+          process.exit(0);
+        } else {
+          console.error(JSON.stringify(result, null, 2));
+          process.exit(1);
+        }
+      }
+
       case 'token-track':
       case 'tokens': {
         if (hasopt('--reset')) {
@@ -1003,6 +1037,7 @@ module.exports = {
   fixRecord,
   fixSearch,
   getPrefix,
+  getSkillRoutingTable,
   tokenTrack,
   getTokenStats,
   apiState,
