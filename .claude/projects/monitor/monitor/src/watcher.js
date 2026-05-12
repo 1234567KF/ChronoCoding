@@ -7,7 +7,7 @@
 const fs = require('fs');
 const path = require('path');
 const { getDB } = require('./db');
-const { calcCost, calcBaselineCost, calcContextWindowPct, MODEL_PRICES, MODEL_ALIASES } = require('./pricing');
+const { calcCost, calcBaselineCost, calcContextWindowPct, MODEL_PRICES, MODEL_ALIASES, MODEL_MAX_CONTEXT } = require('./pricing');
 
 function resolveModel(raw) {
   if (!raw) return null;
@@ -102,6 +102,15 @@ function importTraces() {
 
       // 总输入 = 未缓存(token_in) + 缓存命中(cache_hit) — 相加关系
       const totalInput = (entry.tokens_in || 0) + (entry.cache_hit || 0);
+
+      // Anomaly detection: cache_hit > model max context → skip (dirty data)
+      const maxCtx = MODEL_MAX_CONTEXT[model];
+      if (maxCtx && (entry.cache_hit || 0) > maxCtx) {
+        console.warn(`[watcher] SKIP: cache_hit ${entry.cache_hit} > ${model} max_ctx ${maxCtx} (conv=${convId})`);
+        imported++;
+        continue;
+      }
+
       const cost = calcCost(model, entry.tokens_in || 0, entry.tokens_out || 0, entry.cache_hit || 0);
       const baseline = calcBaselineCost(entry.tokens_in || 0, entry.tokens_out || 0, entry.cache_hit || 0);
 

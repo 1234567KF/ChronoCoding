@@ -1,5 +1,5 @@
 const { getDB } = require('../db');
-const { calcCost, calcBaselineCost, calcContextWindowPct, MODEL_ALIASES } = require('../pricing');
+const { calcCost, calcBaselineCost, calcContextWindowPct, MODEL_ALIASES, MODEL_MAX_CONTEXT } = require('../pricing');
 
 function resolveModel(raw) {
   if (!raw) return null;
@@ -48,6 +48,8 @@ function saveRecord({ sessionId, title, model, messages, skillCalls, restoredFro
       // Skip system-level session messages
       const c = (msg.content || '').trim();
       if (c === '会话开始' || c === '会话结束' || c === '会话继续' || c === '会话重启') continue;
+      // Skip agent lifecycle events (subagent start/end) — status signals, not real messages
+      if (/^agent subagent (开始|结束)/.test(c)) continue;
 
       // Dedup check: skip if identical message already exists
       const existing = checkDup.get(convId, msg.role, msg.input_tokens || 0, msg.output_tokens || 0, msg.cache_hit ?? 0, c);
@@ -55,6 +57,14 @@ function saveRecord({ sessionId, title, model, messages, skillCalls, restoredFro
 
       // Per-message model: prefer message-level model, fall back to conversation model
       const msgModel = resolveModel(msg.model) || resolvedModel || model || 'deepseek-v4-pro';
+
+      // Anomaly detection: cache_hit > model max context → skip (dirty data)
+      const maxCtx = MODEL_MAX_CONTEXT[msgModel];
+      if (maxCtx && (msg.cache_hit || 0) > maxCtx) {
+        console.warn(`[collector] SKIP: cache_hit ${msg.cache_hit} > ${msgModel} max_ctx ${maxCtx} (conv=${convId})`);
+        continue;
+      }
+
       const cost = calcCost(msgModel, msg.input_tokens || 0, msg.output_tokens || 0, msg.cache_hit || 0);
       const baseline = calcBaselineCost(msg.input_tokens || 0, msg.output_tokens || 0, msg.cache_hit || 0);
       const ctxPct = calcContextWindowPct(msgModel, msg.input_tokens || 0, msg.cache_hit || 0);
