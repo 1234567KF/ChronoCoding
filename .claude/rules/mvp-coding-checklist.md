@@ -175,15 +175,63 @@
 
 ---
 
+---
+
+## 类型 K：TDD 合规（TDD Compliance）
+
+**抽象**：TDD 是 `/夯` 的默认工作流。编码前必须先有测试文件，编码必须是让测试变绿的过程，禁止先写实现后补测试。
+
+| # | 检查项 | 说明 | P0/P1 |
+|---|--------|------|-------|
+| K1 | 编码前是否有测试文件 | Stage 2 启动前 MUST 确认 `{team}-05-tests/` 目录存在且含测试文件 | P0 |
+| K2 | RED 验证是否通过 | Stage 0.5 测试是否全部预期失败（RED），失败信息有意义 | P0 |
+| K3 | GREEN 实现是否最小 | 是否写了刚好足够让测试通过的代码（禁止超前实现未测试功能） | P0 |
+| K4 | 覆盖率是否达标 | 分支覆盖 ≥ 70%、行覆盖 ≥ 80%、函数覆盖 ≥ 65% | P0 |
+| K5 | 编码顺序是否合规 | 是否先实现后补测试（违规：自动删除代码，重新从 RED 开始） | P0 |
+| K6 | 测试断言是否完整 | 禁止 `it.todo` / 空断言体 / 无意义断言（如 `expect(true).toBe(true)`） | P1 |
+| K7 | QA-编码解耦 | Stage 0.5 测试设计 Agent 和 Stage 2 编码 Agent 是否上下文隔离（测试设计者不看实现代码） | P1 |
+
+**检查要点**：
+- [ ] Stage 2 开始前，确认 `{team}-05-tests/` 存在且至少含一个测试文件
+- [ ] 测试文件编译通过（无语法错误）
+- [ ] 每个测试用例断言完整，无 `it.todo` 或空回调
+- [ ] Stage 2 完成后，全部测试 GREEN（`npx vitest run` 通过）
+- [ ] 分支覆盖率 ≥ 70%（运行 `npx vitest run --coverage` 查看）
+- [ ] 无先写代码后补测试的违规（检查 git commit 时间线：测试文件 commit 应在实现文件 commit 之前）
+- [ ] TDD Cycle 报告完整（每 Cycle 都有 RED/GREEN/REFACTOR 报告）
+
+**违规处理**：
+- K1/K2/K3/K5 违规（P0）→ 自动阻断，退回修复
+- K4 违规（分支 < 50%）→ 硬阻断，退回 Stage 2 补充测试
+- K4 违规（分支 50-69%）→ P1 告警，记录到测试报告，可继续但汇总者须评估
+- K6/K7 违规（P1）→ 告警，记录到审查报告
+
+**TDD 合规验证命令**：
+```bash
+# RED 验证
+node .claude/helpers/tdd-gate-check.cjs --stage 0.5 --team <队名> --check-red
+
+# GREEN 验证
+node .claude/helpers/tdd-gate-check.cjs --stage 2 --team <队名> --check-green
+
+# 覆盖率门控
+node .claude/helpers/coverage-reporter.cjs --check --branches 70 --lines 80
+
+# TDD 合规审计（Stage 4）
+node .claude/helpers/tdd-gate-check.cjs --stage 4 --team <队名> --audit-tdd
+```
+
+---
+
 ## 执行流程
 
 所有 kf- 系列技能在编码阶段必须：
 
 ```
 Step 1: 加载 checklist → ctx_read .claude/rules/coding-checklist.md
-Step 2: 逐项自检 → 对照 A-J 类型检查要点
+Step 2: 逐项自检 → 对照 A-K 类型检查要点
 Step 3: 修复问题 → 标记通过的检查项
 Step 4: 输出 → "✅ checklist 自检完成，通过 X/Y 项"
 ```
 
-**权重**：A/B/D/J 类为 P0（必须检查），C/E/F/G/H/I 类为 P1（按场景检查）。
+**权重**：A/B/D/J/K1-K5 类为 P0（必须检查），C/E/F/G/H/I/K6-K7 类为 P1（按场景检查）。

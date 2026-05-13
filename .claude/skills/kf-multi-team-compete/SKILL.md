@@ -27,7 +27,8 @@ allowed-tools:
   - WebFetch
 metadata:
   pattern: pipeline + inversion + reviewer
-  steps: "6"
+  steps: "7"
+  tdd: default-enabled
   interaction: multi-turn
   recommended_model: pro
   pipeline_engine: gspowers
@@ -125,7 +126,8 @@ graph:
                              最终方案（含执行）
 ```
 
-每队内部不是散兵游勇，而是 **6 阶段流水线**，阶段间有明确门控和产物交接。
+每队内部不是散兵游勇，而是 **7 阶段流水线**（含 Stage 0.5 测试设计先行），阶段间有明确门控和产物交接。
+TDD 是默认工作流——测试先行驱动编码，覆盖率门控量化质量。
 汇总融合后新增 **对抗者质疑 → 汇总者回应** 闭环，确保方案经得起现实推敲。
 **Team Lead 贯穿全流程**：从计划到执行到汇总，持续跟踪进度，主动介入解决阻塞。
 
@@ -137,12 +139,12 @@ graph:
 **上游阶段输出自动成为下游阶段输入。禁止跳过。**
 
 ```
-Pre-Stage     Stage 0        Stage 1        Stage 2        Stage 3        Stage 3.5      Stage 4        Stage 5
- 物料准备  →   需求对齐  →    架构设计   →    编码实现   →    集成测试   →    运行时验证 →    代码审查   →    方案汇总
- (Team Lead)   (前端+后端专家) (前端+后端专家) (前端+后端专家) (QA 专家)       (QA 专家)      (Code Review)  (前端设计师)
-    │              │              │              │              │              │              │              │
-    ▼              ▼              ▼              ▼              ▼              ▼              ▼              ▼
- PRD文档       对齐记录      架构方案       代码产物       测试报告       运行报告       审查报告       团队方案
+Pre-Stage     Stage 0      Stage 0.5       Stage 1        Stage 2          Stage 3        Stage 3.5      Stage 4        Stage 5
+ 物料准备  →   需求对齐  →  测试设计先行 →  架构设计   →   TDD 微循环   →    集成测试   →    运行时验证 →    代码审查   →    方案汇总
+ (Team Lead)   (前端+后端专家) (QA 测试设计)  (前端+后端专家) (前端+后端专家)   (QA 专家)       (QA 专家)      (Code Review)  (前端设计师)
+    │              │              │              │              │              │              │              │              │
+    ▼              ▼              ▼              ▼              ▼              ▼              ▼              ▼              ▼
+ PRD文档       对齐记录      测试文件       架构方案      代码+测试报告   覆盖率报告      运行报告       审查报告       团队方案
 ```
 
 ### Pre-Stage — 需求物料准备（条件触发）
@@ -179,8 +181,68 @@ Pre-Stage     Stage 0        Stage 1        Stage 2        Stage 3        Stage 
   3. 若发现关键歧义（影响架构选型），记录为 `[ASSUMPTION:CRITICAL]`，不影响继续推进
   4. MUST NOT 向用户提问或阻塞流水线
 - **产出**：`{team}-00-alignment.md` — 需求理解、边界确认、技术约束、补充假设清单（如有）
-- **门控**：对齐记录产出后自动进入 Stage 1（不等待用户确认）
+- **门控**：对齐记录产出后自动进入 Stage 0.5（不等待用户确认）
 - **三队约束**：三队共享同一份假设基线，确保方案可比；各自只能补充假设，不能推翻基线
+
+### Stage 0.5 — 测试设计先行（TDD 前置阶段）
+
+> **核心理念**：TDD 三大原则——(1) 测试先行：编码前先写失败测试；(2) 测试约束搜索空间：测试用例提前锁定"要建什么"，减少 AI 幻觉方向；(3) 可执行需求：测试即完整断言，不是骨架。
+
+- **执行者**：QA 测试设计专家 agent（独立 spawn，可与 Stage 1 架构设计并行）
+- **输入**：Stage 0 对齐记录 + PRD.md / Spec（如有）
+- **动作**：
+  1. **推导测试场景** — 从需求文档推导完整测试场景：
+     - 功能流程场景（Happy Path × N）
+     - 规则边界场景（Given-When-Then × N）
+     - ER 关系场景（多实体交互 × N）
+     - 异常场景（空数据/并发/越权/超时 × N）
+  2. **按测试奖杯策略分层**：
+     - 集成测试 50-60%（核心 API + 数据流）
+     - 组件测试 30-40%（UI 渲染 + 交互）
+     - E2E 测试 10-20%（关键用户流程）
+  3. **生成可执行测试文件** — 写入 `{team}-05-tests/` 目录：
+     - `*.integration.test.ts` — API/数据层集成测试，完整断言
+     - `*.component.test.tsx` — UI 组件渲染+交互测试
+     - `playwright-scenarios.md` — E2E 场景清单
+     - **MUST 写完整断言**：禁止 `it.todo` 和空断言
+     - **MUST 可独立运行**：测试文件编译通过，预期全部失败（RED）
+  4. **RED 验证** — 运行测试确认全部预期失败：
+     - 测试编译成功（无语法错误）
+     - 全部测试预期失败（因为实现还不存在）
+     - 失败信息有意义（非"模块未找到"类错误）
+- **产出**：
+  - `{team}-05-tests/` — 可执行测试文件目录
+  - `{team}-05-scenarios.json` — 测试场景矩阵（JSON，含 ID/场景/类型/Given/When/Then）
+  - `{team}-05-red-report.md` — RED 验证报告
+
+#### Stage 0.5 QA Agent Prompt 模板
+
+```markdown
+## 角色
+你是 QA 测试设计专家，负责从需求文档推导测试场景，生成可执行的测试代码。
+你在编码之前工作——测试先行是 TDD 的核心原则。
+
+## 任务
+基于 Stage 0 对齐记录和 PRD/Spec，生成：
+
+### 1. 测试场景矩阵
+| ID | 场景 | 类型 | 角色 | 数据状态 | Given | When | Then |
+
+### 2. 可执行测试文件
+- 集成测试: {module}.integration.test.ts — 完整断言，禁止 it.todo
+- 组件测试: {component}.test.tsx — 渲染+交互断言
+- E2E 场景清单: playwright scenarios
+
+### 质量要求
+- 每场景断言写完整（MUST NOT 使用 it.todo）
+- 覆盖 3 角色 × 3 权限 × 3 数据状态（54 场景矩阵）
+- 覆盖 Happy Path + 错误路径
+- 测试可编译运行（即使预期全部失败 — RED 状态）
+```
+
+- **门控**：测试编译通过 ✅ | 全部预期失败（RED）✅ | 覆盖 3 维度（角色/权限/数据状态）✅ | 无 it.todo ✅
+
+**与 Stage 1 并行说明**：Stage 0.5 可与 Stage 1 架构设计并行执行——测试设计关注"要建什么"，架构设计关注"怎么建"，两者独立但互补。Stage 2 编码 agent 同时接收架构方案和测试文件作为输入。
 
 ### Stage 1 — 架构设计
 
@@ -190,31 +252,92 @@ Pre-Stage     Stage 0        Stage 1        Stage 2        Stage 3        Stage 
 - **产出**：`{team}-01-architecture.md` — 架构图、模块划分、技术选型理由
 - **门控**：架构方案无歧义，关键决策点已标注
 
-### Stage 2 — 编码实现
+### Stage 2 — TDD 微循环（测试驱动编码）
 
-- **执行者**：前端专家 + 后端专家 agent（原全栈开发，协作编码）
-- **输入**：Stage 1 架构方案
-- **动作**：
-  1. 前端专家负责 UI/交互实现，后端专家负责 API/数据层/业务逻辑实现
-  2. **MUST** 编码完成后执行 coding checklist：`ctx_read .claude/rules/mvp-coding-checklist.md`
-  3. 逐项自检 A-J 类型（A/B/D/J 为 P0 必须检查），修复发现的问题
-  4. **--with-tests 模式**：每个函数/组件同步生成测试骨架文件。规则：
-     - 白名单扩展名：`.tsx`, `.jsx`, `.ts`, `.js`, `.py`, `.go`
-     - 纯配置文件/类型定义/常量文件：跳过（不生成测试）
-     - 测试骨架：describe + it.todo 结构，标注 Given/When/Then
-     - 骨架可立即执行（不报语法错误），具体断言留空
-     - 命名约定：`{filename}.test.{ext}` 或 `{filename}_test.{ext}`
-- **产出**：代码文件 + 测试骨架文件（--with-tests 模式）+ `{team}-02-implementation.md`（含 checklist 自检结果）
-- **门控**：代码可编译/运行，无语法错误；checklist P0 项全部通过；--with-tests 模式下测试骨架文件存在且可执行
+> **核心变更**：TDD 是默认工作流。编码 agent 必须先读测试再写代码，微循环（RED→GREEN→REFACTOR）驱动，直到全部测试通过。
+> 移除 `--with-tests` 可选模式——测试文件已在 Stage 0.5 生成，Stage 2 的任务是让测试变绿。
+> 紧急回退：`--no-tdd`（跳过 Stage 0.5 + 退化为传统编码后测试模式，仅紧急使用）。
 
-### Stage 3 — 测试专家循环（Multi-Round Test Cycle）
+- **执行者**：前端专家 + 后端专家 agent（协作编码）
+- **输入**：Stage 1 架构方案 + Stage 0.5 测试文件（`{team}-05-tests/` 目录）
+- **约束**：编码 agent 的 prompt 中 MUST 注入 TDD 硬性规则（见下方）
 
-> **核心变更**：从一次性集成测试改为多轮闭环测试。测试专家准备多角色、多权限、多数据状态的测试场景，执行测试 → 出 issue_list → 开发 fix → 回归测试，上限 3 轮。
+#### TDD 硬性规则（不可违反，注入所有编码 agent prompt）
+
+```markdown
+## TDD 硬性规则（MUST 遵守，不可违反）
+
+1. **测试先行**：写实现代码前，先读取 {team}-05-tests/ 中的测试文件，理解"要建什么"
+2. **RED 验证**：运行测试确认全部预期失败（RED 是预期状态，Stage 0.5 已确保）
+3. **GREEN 实现**：写最小实现代码让测试通过，禁止超前实现（只写刚好够让当前测试通过的量）
+4. **微循环粒度**：每次处理 1-3 个测试用例为一组，GREEN 后进入下一组
+5. **禁止先实现后补测试**：检测到先写代码后写测试的违规 → 自动删除代码，重新从 RED 开始（Superpowers 模式）
+6. **覆盖率保持**：重构时不得降低分支覆盖率（每次 REFACTOR 后运行 coverage 确认）
+7. **报告**：每 Cycle 输出 `{team}-02-tdd-cycle-N.md`（N=1,2,3...），记录 RED/GREEN/REFACTOR 状态
+8. **Coding Checklist**：每 Cycle GREEN 后执行 `ctx_read .claude/rules/mvp-coding-checklist.md`，逐项自检 A-K 类型（K 为新增 TDD 合规检查项）
+```
+
+#### TDD 微循环流程
+
+```
+Stage 2 入口：读取 Stage 0.5 测试文件 + Stage 1 架构方案
+  │
+  ├─ 初始化：读取所有测试文件，理解测试分组
+  │     Gate: 测试文件存在且可编译 ✅
+  │
+  ▼
+┌─────────────────────────────────────┐
+│  TDD 微循环（每组 1-3 个测试用例）     │
+│                                       │
+│  Stage 2a: RED 验证                   │
+│    ├── 运行当前组测试                  │
+│    ├── 确认全部失败（RED 预期状态）     │
+│    ├── 输出 RED 验证报告               │
+│    └── Gate: 测试失败且信息有意义 ✅    │
+│         │                             │
+│         ▼                             │
+│  Stage 2b: GREEN 实现                 │
+│    ├── 写最小实现代码让测试通过         │
+│    ├── 禁止超前实现                    │
+│    ├── 运行编码 checklist A-K 自检     │
+│    └── Gate: 当前组测试全部通过 ✅      │
+│         │                             │
+│         ▼                             │
+│  Stage 2c: 重构优化（推荐，非强制）     │
+│    ├── 保持测试 GREEN 优化代码结构      │
+│    ├── 运行 coverage 确认不降低         │
+│    └── Gate: 测试 GREEN + 覆盖率不降 ✅ │
+│         │                             │
+│         ▼                             │
+│  下一组测试 → 回到 2a                  │
+│         │                             │
+│  全部测试 GREEN → 退出循环             │
+└─────────────────────────────────────┘
+  │
+  ▼
+Gate 2: 全部测试 GREEN + 覆盖率达标 → 进入 Stage 3
+```
+
+**微循环约束**：
+- **Git 提交节点**：每个 GREEN 阶段完成后自动 `git commit`（保存可工作的增量状态）
+- **覆盖率先行**：Stage 2 完成时分支覆盖应 ≥ 70%，不达标不进入 Stage 3
+- **违规处理**：检测到先写代码后写测试 → 删除代码，重新从 RED 开始
+- **回退选项 `--no-tdd`**：紧急情况下跳过 Stage 0.5 + Stage 2 退化为传统编码后测试模式
+
+- **产出**：
+  - 代码文件（TDD 微循环产物）
+  - `{team}-02-tdd-cycle-N.md` — 每 Cycle 的 RED/GREEN/REFACTOR 报告
+  - `{team}-02-implementation.md` — 最终实现报告（含 checklist A-K 自检结果 + 覆盖率数据）
+- **门控**：全部测试 GREEN ✅ | 分支覆盖 ≥ 70% ✅ | checklist K 类 TDD 合规通过 ✅
+
+### Stage 3 — 集成测试 + 覆盖率门控（Multi-Round Test Cycle + Coverage Gate）
+
+> **核心变更**：(1) 多轮闭环测试：测试专家执行测试 → issue_list → 开发 fix → 回归测试，上限 3 轮；(2) 覆盖率量化门控：分支覆盖 ≥ 70% 为硬性门槛，不达标退回 Stage 2 补充。
 >
-> **自动化支持**：使用 `node .claude/helpers/test-cycle-manager.cjs` 管理测试矩阵构建、轮次控制、问题追踪和修复记录。
+> **自动化支持**：使用 `node .claude/helpers/test-cycle-manager.cjs` 管理测试矩阵构建、轮次控制、问题追踪和修复记录。使用 `node .claude/helpers/coverage-reporter.cjs` 采集覆盖率数据并执行门控判断。
 
 - **执行者**：QA 专家 agent
-- **输入**：Stage 2 代码产物 + Stage 2 checklist 自检结果
+- **输入**：Stage 2 代码产物 + Stage 2 TDD 报告 + Stage 0.5 测试场景矩阵
 - **测试场景准备（MUST，不可跳过）**：
 
 #### 3.1 测试矩阵构建
@@ -285,11 +408,51 @@ Round 3: 最终回归
 
 **超时保护**：单轮测试执行不超过 10 分钟，超时则记录未完成场景并进入下一阶段。
 
+#### 覆盖率门控（新增，P0 级门控）
+
+Stage 2 编码完成后，Stage 3 运行测试时必须开启覆盖率收集：
+
+```
+Stage 2 编码完成
+  ↓
+Stage 3 运行测试 + --coverage
+  ↓
+生成覆盖率报告 → 分支覆盖 % 数据
+  ↓
+Gate: 分支覆盖 ≥ 70%?
+  ├── ✅ 是 → 继续 Stage 3.5
+  └── ❌ 否 → 退回 Stage 2 补充测试（反馈未覆盖分支）
+```
+
+**覆盖率门控层级**：
+
+| 层级 | 指标 | 阈值 | 工具 | 阻断 |
+|------|------|------|------|------|
+| L1 | 行覆盖 | ≥ 80% | Vitest/V8 --coverage | P0 阻断 |
+| L2 | 分支覆盖 | ≥ 70% | Vitest coverage.branches | P0 阻断 |
+| L3 | 函数覆盖 | ≥ 65% | Vitest coverage.functions | P1 告警 |
+
+**覆盖率数据处理**：
+```bash
+# 运行测试并收集覆盖率
+npx vitest run --coverage 2>&1 | tee coverage-output.txt
+
+# 门控判断（自动化）
+node .claude/helpers/coverage-reporter.cjs --check \
+  --branches 70 --lines 80 --functions 65
+```
+
+**覆盖不足处理**：
+- 分支覆盖 < 50% → **硬阻断**，退回 Stage 2，反馈未覆盖分支
+- 分支覆盖 50-69% → **P1 告警** + 记录到测试报告，需补充测试但不断流
+- 函数覆盖 < 65% → **P1 告警**，不阻断
+
 - **产出**：
-  - `{team}-03-test-report.md` — 最终测试报告（含多轮汇总）
+  - `{team}-03-test-report.md` — 最终测试报告（含多轮汇总 + 覆盖率数据）
   - `{team}-03-issues-N.json` — 每轮 issue list（N=1,2,3）
   - `{team}-03-screenshots/` — UI 截图目录
-- **门控**：核心 Happy Path 通过；checklist A/B/D/F/G/J 类专项测试通过；无 UNRESOLVED P0（或已达上限带警告通过）
+  - `coverage-output.txt` — Vitest 覆盖率原始输出
+- **门控**：核心 Happy Path 通过；checklist A/B/D/F/G/J/K 类专项测试通过；分支覆盖 ≥ 70%；无 UNRESOLVED P0（或已达上限带警告通过）
 
 ### Stage 3.5 — 运行时验证（Runtime Verification）
 
@@ -357,9 +520,14 @@ Round 3: 最终回归
 - **动作**：
   1. 调用 `kf-code-review-graph` 生成依赖图谱、涟漪效应分析、审查优先级
   2. **MUST** 核对 checklist 执行完整性：开发自检是否真实执行？测试是否覆盖了 checklist 类型？
-  3. 发现遗漏的 checklist 项 → 标记为 error，回退 Stage 2/3 修复
-- **产出**：`{team}-04-review-report.md`（含 checklist 审计结论）
-- **门控**：无 error 级别问题；warning 级别已记录并评估；checklist 审计通过（自检+测试+审查三重确认）
+  3. **TDD 合规性审计**（新增）：
+     - 是否先写测试后写代码？（检查 git commit 时间线）
+     - 覆盖率是否达标？（≥ 70% 分支覆盖）
+     - 测试断言是否有效？（禁止 it.todo / 空断言 / gaming 行为）
+     - QA-编码 Agent 是否上下文隔离？
+  4. 发现遗漏的 checklist 项 → 标记为 error，回退 Stage 2/3 修复
+- **产出**：`{team}-04-review-report.md`（含 checklist 审计结论 + TDD 合规审计）
+- **门控**：无 error 级别问题；warning 级别已记录并评估；checklist 审计通过（自检+测试+审查+TDD 合规四重确认）
 
 ### Stage 5 — 方案汇总
 
@@ -373,11 +541,57 @@ Round 3: 最终回归
 当 swarm 为团队 spawn agent 时，通过 `task_orchestrate` 定义阶段依赖 DAG：
 
 ```
-Stage0 → Stage1 → Stage2 → Stage3 → Stage3.5 → Stage4 → Stage5
+Stage0 → Stage0.5 (与 Stage1 并行) → Stage1 → Stage2 → Stage3 → Stage3.5 → Stage4 → Stage5
 ```
 
 每个 agent 完成当前阶段后自动触发下一阶段。阶段失败则阻塞该团队流水线，
 其他团队流水线不受影响。
+
+### TDD 完整门控链
+
+```
+Stage 0.5 — 测试设计先行
+  └── Gate 0.5: 测试编译成功 + 全部 RED ✅（Stage 0.5 完成时验证）
+       │
+Stage 2a — RED 验证（每 Cycle）
+  └── Gate 2a: 当前组测试预期失败 ✅
+       │
+Stage 2b — GREEN 实现（每 Cycle）
+  └── Gate 2b: 当前组测试全部通过（GREEN）+ checklist K 类通过 ✅
+       │
+Stage 2c — 重构优化（每 Cycle，推荐）
+  └── Gate 2c: 测试保持 GREEN + 覆盖率不降 ✅
+       │
+Stage 3 — 集成测试 + 覆盖率门控
+  └── Gate 3: 所有测试通过 + 分支覆盖 ≥ 70% ✅
+       │
+Stage 3.5 — 运行时验证
+  └── Gate 3.5: P0 错误 = 0 ✅
+       │
+Stage 4 — 代码审查 + TDD 合规审计
+  └── Gate 4: 回归测试 + 审查无 Error + TDD 合规通过 ✅
+```
+
+**违规处理**：
+- 先写代码后写测试 → 自动删除代码，重新从 RED 开始（Superpowers 模式）
+- 测试覆盖率不足 → 退回 Stage 2 补充未覆盖分支
+- 测试全部通过但覆盖率 < 50% → 硬阻断，不进入 Stage 3.5
+
+### TDD 门控验证命令
+
+```bash
+# Stage 0.5 RED 验证
+node .claude/helpers/tdd-gate-check.cjs --stage 0.5 --team <队名> --check-red
+
+# Stage 2 GREEN 验证
+node .claude/helpers/tdd-gate-check.cjs --stage 2 --team <队名> --check-green
+
+# Stage 3 覆盖率门控
+node .claude/helpers/coverage-reporter.cjs --check --branches 70 --lines 80 --functions 65
+
+# Stage 4 TDD 合规审计
+node .claude/helpers/tdd-gate-check.cjs --stage 4 --team <队名> --audit-tdd
+```
 
 ### 阶段间产物传递（Token 优化）
 
@@ -506,12 +720,21 @@ Team Lead 不直接参与红/蓝/绿队的执行，而是：
 - **输出规范**：RESTful/GraphQL API 遵循一致性原则，数据库迁移脚本需可回滚
 - **质量要求**：输入验证、错误处理、性能考虑、安全最佳实践、coding checklist F/G 项
 
+### QA 测试设计专家
+- **职责**：TDD 前置测试设计——从需求推导测试场景，生成可执行测试文件，RED 验证
+- **工作阶段**：Stage 0.5（与 Stage 1 并行）
+- **技术栈**：Vitest/Jest/Playwright
+- **工具集**：`kf-web-search`（按需搜索测试模式）、`kf-exa-code`（按需验证 API 签名）
+- **输出规范**：测试场景矩阵（JSON）+ 完整断言测试文件（禁止 it.todo）+ RED 验证报告
+- **质量要求**：测试可编译运行、覆盖 3 角色×3 权限×3 数据状态、预期全部失败（RED）
+
 ### QA 专家
-- **职责**：测试用例设计、边界覆盖、自动化测试、运行时验证
-- **技术栈**：Jest/Playwright/Pytest
-- **工具集**：`kf-browser-ops`（UI 自动化测试）
-- **输出规范**：测试用例覆盖 Happy Path、边界条件、错误路径；运行时验证报告覆盖构建/启动/端到端
-- **质量要求**：测试可重复执行、不依赖外部状态、coding checklist 类型全覆盖
+- **职责**：TDD 覆盖率保护 + 集成测试 + 边界覆盖、自动化测试、运行时验证
+- **工作阶段**：Stage 2（覆盖率不降验证）+ Stage 3（集成测试+覆盖率门控）+ Stage 3.5（运行时验证）
+- **技术栈**：Jest/Playwright/Pytest/Vitest --coverage
+- **工具集**：`kf-browser-ops`（UI 自动化测试）、`coverage-reporter.cjs`（覆盖率门控）
+- **输出规范**：测试用例覆盖 Happy Path、边界条件、错误路径；覆盖率报告含分支/行/函数覆盖率；运行时验证报告覆盖构建/启动/端到端
+- **质量要求**：测试可重复执行、不依赖外部状态、分支覆盖 ≥ 70%、coding checklist 类型全覆盖
 
 ### 代码评审专家
 - **职责**：代码规范检查、安全审计、性能评估、架构一致性、Checklist 审计
@@ -545,9 +768,10 @@ Team Lead 不直接参与红/蓝/绿队的执行，而是：
 
 | Agent | 流水线阶段 | 联动 | 模型 |
 |-------|-----------|------|------|
-| **前端专家** | Stage 0（对齐）+ Stage 1 架构（UI/前端部分）+ Stage 2 编码（UI/前端实现） | `kf-ui-prototype-generator`、`kf-image-editor`、`kf-web-search`（按需搜索 UI 参考和组件方案）、`kf-exa-code`（按需查前端 API/SDK 用法） | `sonnet`（flash） |
-| **后端专家** | Stage 0（对齐）+ Stage 1 架构（后端/数据部分）+ Stage 2 编码（后端/API/数据层） | `kf-spec`、`kf-alignment`、`kf-web-search`（按需搜索技术方案）、`kf-scrapling`（按需深度数据采集）、`kf-exa-code`（按需查后端 API/SDK 用法）、`kf-opencli`（按需平台数据直取） | `sonnet`（flash） |
-| **QA 专家** | Stage 3（集成测试）+ Stage 3.5（运行时验证） | `kf-browser-ops`、`kf-web-search`（搜索测试方案）、`kf-exa-code`（验证 API 用法正确性） | `sonnet`（flash） |
+| **前端专家** | Stage 0（对齐）+ Stage 1 架构（UI/前端部分）+ Stage 2 TDD 编码（RED/GREEN/REFACTOR — UI/前端实现） | `kf-ui-prototype-generator`、`kf-image-editor`、`kf-web-search`（按需搜索 UI 参考和组件方案）、`kf-exa-code`（按需查前端 API/SDK 用法） | `sonnet`（flash） |
+| **后端专家** | Stage 0（对齐）+ Stage 1 架构（后端/数据部分）+ Stage 2 TDD 编码（RED/GREEN/REFACTOR — 后端/API/数据层） | `kf-spec`、`kf-alignment`、`kf-web-search`（按需搜索技术方案）、`kf-scrapling`（按需深度数据采集）、`kf-exa-code`（按需查后端 API/SDK 用法）、`kf-opencli`（按需平台数据直取） | `sonnet`（flash） |
+| **QA 测试设计专家** | Stage 0.5（测试设计先行 — RED 验证） | `kf-web-search`（按需搜索测试模式）、`kf-exa-code`（按需验证 API 签名） | `sonnet`（flash） |
+| **QA 专家** | Stage 2 TDD（验证覆盖率不降）+ Stage 3（集成测试+覆盖率门控）+ Stage 3.5（运行时验证） | `kf-browser-ops`、`kf-web-search`（搜索测试方案）、`kf-exa-code`（验证 API 用法正确性） | `sonnet`（flash） |
 | **Code Review 专家** | Stage 4（代码审查） | `kf-code-review-graph`、`kf-alignment`、`kf-web-search` | `sonnet`（flash） |
 | **调研专家** | Stage 1 + Stage 2（按需侦查调研，支撑前后端决策） | `kf-web-search`、`kf-scrapling`、`kf-opencli`、`kf-exa-code` | `sonnet`（flash） |
 | **前端设计师** | Stage 2 UI 并行 + Stage 5 方案汇总 | `kf-ui-prototype-generator`、`kf-web-search`（按需搜索 UI 参考）、`kf-scrapling`（按需抓取设计参考）、`kf-opencli`（按需平台设计素材） | `sonnet`（flash） |
@@ -578,7 +802,7 @@ Team Lead 不直接参与红/蓝/绿队的执行，而是：
 
 | 任务类型 | 默认 Agent 配置 | 按需可选角色 | 流水线策略 |
 |----------|---------------|-------------|-----------|
-| **编码开发** | 前端+后端+QA 专家/队 × 3 队 + 裁判 + 汇总 + 对抗者 = 12 | Code Review 专家、调研专家、UX 设计师 | 完整 6 阶段流水线 + 对抗质疑 |
+| **编码开发** | 前端+后端+QA测试设计+QA 专家/队 × 3 队 + 裁判 + 汇总 + 对抗者 = 15 | Code Review 专家、调研专家、UX 设计师 | 完整 7 阶段流水线（含 Stage 0.5 TDD）+ 对抗质疑 |
 | **文档生成** | 前端+后端专家/队 × 3 队 + 裁判 + 汇总 + 对抗者 = 9 | 调研专家 | 精简 3 阶段（对齐→撰写→审查）+ 对抗质疑 |
 | **方案评审** | 调研+前端+后端专家/队 × 3 队 + 裁判 + 汇总 + 对抗者 = 11 | 无 | 3 阶段（数据调研→分析→论证）+ 对抗质疑 |
 
@@ -871,7 +1095,8 @@ Team Lead 将执行计划展示给用户：
 0. 若 Pre-Stage 已产出 PRD.md，将 PRD.md 路径注入三队的 Stage 0 prompt 中作为输入
 0.5. 判断运行模式：
      - 若用户指定 --watch → node .claude/helpers/hammer-bridge.cjs init --task "<任务名>" --total-agents <N> --mode watch
-     - 若用户指定 --with-tests → Stage 2 编码 agent prompt 追加单元测试伴随指令；Stage 3 测试专家验收标准增加测试文件存在性检查
+     - **TDD 是默认工作流**：Stage 0.5 测试设计先行 + Stage 2 TDD 微循环 + Stage 3 覆盖率门控
+     - 若用户指定 --no-tdd → 跳过 Stage 0.5，Stage 2 退化为传统编码后测试模式（仅紧急回退使用）
      - 否则 → node .claude/helpers/hammer-bridge.cjs init --task "<任务名>" --total-agents <N>
      ⚠️ hammer init 后 MUST 立即初始化 hang-state:
        node .claude/helpers/hang-state-manager.cjs --init "<任务名>" --depth C
@@ -971,7 +1196,15 @@ Team Lead 将执行计划展示给用户：
 
      同时：每 60s 执行失活检测:
        node .claude/helpers/hammer-bridge.cjs stall-detect --stall-ms 300000
-4. Pipeline 继续推进：Stage 1→Stage 2→...→Stage 5（反转门控通过后全自动）
+4. 反转门控通过后：
+     a. 并行 spawn 三队的 Stage 0.5 QA 测试设计 agent（run_in_background: true, model: "sonnet"）
+        产出：{team}-05-tests/ + {team}-05-red-report.md
+     b. 并行 spawn 三队的 Stage 1 架构设计 agent（与 Stage 0.5 并行）
+        产出：{team}-01-architecture.md
+     c. Stage 0.5 和 Stage 1 都完成后 → spawn Stage 2 TDD 编码 agent
+        输入：架构方案（Stage 1）+ 测试文件（Stage 0.5）
+        Stage 2 TDD 微循环自动推进：2a RED → 2b GREEN → 2c REFACTOR → 循环
+5. Pipeline 继续推进：Stage 3→Stage 3.5→...→Stage 5（TDD 全 GREEN + 覆盖率达标后全自动）
    每阶段完成时调用:
      node .claude/helpers/hammer-bridge.cjs agent-done --team <队名> --agent <agent名> --output <产物文件> [--tokens-in N --tokens-out N]
      ⚠️ agent-done 后立即同步进度:
@@ -1005,7 +1238,7 @@ Team Lead 将执行计划展示给用户：
 3. 关键代码/架构片段
 4. 方案优势（3-5 点）
 5. 方案风险（3-5 点）
-6. **--with-tests 模式**：测试骨架文件清单 + 执行通过截图
+6. **TDD 产物**：测试文件清单（Stage 0.5 产出）+ TDD Cycle 报告 + 覆盖率数据
 
 ---
 

@@ -20,7 +20,7 @@ hooks:
   before_remove: ""
   timeout_ms: 60000
 agent:
-  max_concurrent_agents: 12
+  max_concurrent_agents: 15
   max_turns: 20
   max_retry_backoff_ms: 300000
   max_retry_attempts: 3
@@ -41,6 +41,16 @@ judge:
     maintainability: 20
     security: 20
     innovation: 10
+tdd:
+  enabled: true
+  stage_05_parallel: true
+  coverage_threshold_branches: 70
+  coverage_threshold_lines: 80
+  coverage_threshold_functions: 65
+  micro_cycle_max_loops: 20
+  red_stage_timeout_ms: 120000
+  green_stage_timeout_ms: 600000
+  hard_block_if_branches_below: 50
 ---
 
 # 夯 — Multi-Team Competition Workflow
@@ -69,3 +79,13 @@ best possible solution following your team's philosophy:
 - If you encounter ambiguity, record it as `[ASSUMPTION:CRITICAL]` with a proposed default
 - Stage outputs must be self-contained — the next stage agent only sees your output file
 - Use lean-ctx compressed reads for upstream artifacts to save tokens
+
+## TDD Rules (Coding Tasks)
+
+- TDD is the **default workflow** — Stage 0.5 generates tests, Stage 2 uses RED→GREEN→REFACTOR cycles
+- **Test-First**: Read tests from `{team}-05-tests/` before writing any implementation code
+- **Minimal Implementation**: Write only enough code to make the current test pass
+- **Coverage Gate**: Branch coverage ≥ 70% required before Stage 3.5
+- **No it.todo**: All test assertions must be complete — no skeletons allowed
+- **Violation Penalty**: Writing code before tests → auto-delete code, restart from RED
+- **Emergency Fallback**: `--no-tdd` flag skips Stage 0.5 and reverts to write-then-test mode
