@@ -174,11 +174,27 @@ Add inline comments:
 
 ### Step 1.5.1 — Load Annotation Spec
 
-Load `references/annotation-spec.md` for the 7-layer structure and per-page-type customization strategy.
+Load `references/annotation-spec.md` for the 7-layer structure and 6-type business annotation templates (enhanced L0-L6).
+
+### Step 1.5.1a — Load Annotation Templates
+
+Load `references/annotation-templates.md` for standard fillable templates covering all 6 required annotation types:
+- **L0**: Business description (CRUD matrix + data permissions + entity relationships)
+- **L1-a**: Search/query field dictionary (4 attributes per field)
+- **L1-b**: List column dictionary (4 attributes per column)
+- **L1-c**: Create form field dictionary (5 attributes per field, incl. boundary values)
+- **L1-d**: Edit form field dictionary (6 attributes incl. diff-from-create)
+- **L6**: Exception handling table + boundary value definition table
+
+Load `references/annotation-example.md` as a reference for expected output quality.
+
+### Step 1.5.1b — 6-Type Annotation Completeness Check
+
+Before generating annotations, MUST verify the PRD covers all 6 types. If any type's data is missing from the PRD, mark with `<!-- ⚠️ [MISSING: {type}] -->` and use sensible defaults.
 
 ### Step 1.5.2 — Generate Annotation Content
 
-Per page-type layer mapping:
+Per page-type layer mapping (see annotation-spec.md for the full 6-type customization strategy):
 
 | Page Type | Core Layers | Optional |
 |-----------|-------------|----------|
@@ -257,7 +273,9 @@ Two-dimensional review:
 
 | File | Content | Load When |
 |------|---------|-----------|
-| `references/annotation-spec.md` | 7-layer annotation specification, per-page-type strategy, quality checklist | Phase 1.5 always |
+| `references/annotation-spec.md` | 7-layer annotation specification, 6-type business annotation templates, per-page-type strategy, quality checklist | Phase 1.5 always |
+| `references/annotation-templates.md` | Standard fillable templates for all 6 annotation types (L0-L6) | Phase 1.5 for template-based generation |
+| `references/annotation-example.md` | Complete annotation example using Enterprise Management scenario | Phase 1.5 as reference for expected output quality |
 | `references/anno-drawer-template.md` | Complete drawer HTML/CSS/JS template (desktop + mobile) | Phase 1.5 for drawer embedding |
 | `references/css-variables.md` | Full `:root {}` CSS variable block | Phase 1.1 always |
 | `references/skeleton-css.md` | Responsive skeleton CSS (reset, layout, components, utilities) | Phase 1.2 always |
